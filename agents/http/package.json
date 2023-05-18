@@ -4,6 +4,7 @@
   "description": "HTTP Agent for Green Ferret.\nThis agent is responsible for handling the HTTP requests and responses and for uploading the received data to InfluxDB.",
   "main": "main.js",
   "scripts": {
+	"watch": "tsc --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Benetton Alessandro, Crespan Lorenzo",
