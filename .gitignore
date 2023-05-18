@@ -3,3 +3,6 @@
 /docker/portainer.env
 /docker/notes.md
 /docker/.env
+node_modules
+.tsbuildinfo
+dist

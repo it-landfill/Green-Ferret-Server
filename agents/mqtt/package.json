@@ -1,0 +1,18 @@
+{
+  "name": "green-ferret-agents-mqtt",
+  "version": "1.0.0",
+  "description": "MQTT Agent for Green Ferret.\nThis agent is responsible for listening to specific topics in the MQTT broker and uploading the data to InfluxDB.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Benetton Alessandro, Crespan Lorenzo",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@influxdata/influxdb-client": "^1.33.2"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  }
+}
