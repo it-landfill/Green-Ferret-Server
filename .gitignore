@@ -1,0 +1,5 @@
+/Green-Ferret-Server.code-workspace
+.DS_Store
+/docker/portainer.env
+/docker/notes.md
+/docker/.env
