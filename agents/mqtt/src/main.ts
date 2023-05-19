@@ -1,5 +1,5 @@
 import mqtt from "mqtt";
-import { InfluxWriter } from "./influxWriter";
+import { InfluxWriter } from "./InfluxWriter";
 
 /**
  * MQTT Agent
