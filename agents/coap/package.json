@@ -4,13 +4,14 @@
   "description": "CoAP Agent for Green Ferret.\nThis agent is responsible for handling the CoAP requests and responses and for uploading the received data to InfluxDB.",
   "main": "main.js",
   "scripts": {
-	"watch": "tsc --watch",
+    "watch": "tsc --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Benetton Alessandro, Crespan Lorenzo",
   "license": "GPL-3.0",
   "dependencies": {
-    "@influxdata/influxdb-client": "^1.33.2"
+    "@influxdata/influxdb-client": "^1.33.2",
+    "coap": "^1.3.0"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",

@@ -11,6 +11,7 @@ import { InfluxWriter } from "./InfluxWriter";
  * - MQTT_USERNAME: MQTT broker username (default: '')
  * - MQTT_PASSWORD: MQTT broker password (default: '')
  * - MQTT_CLIENT_ID: MQTT client ID (default: MQTTAgent)
+ * - INFLUXDB_TOKEN: InfluxDB token
  */
 
 type MQTTConfig = {

@@ -41,26 +41,27 @@ services:
             timeout: 10s
             retries: 3
             start_period: 30s
-    mqtt-agent:
-        image: "aleben/green-ferret_mqtt-agent:1.0"
+    telegraf:
+        image: "telegraf:1.26.2"
+        container_name: telegraf
+        restart: unless-stopped
         depends_on:
             - mqttserver
             - influxdb
-        container_name: mqtt-agent
-        restart: unless-stopped
         networks:
             - iot_net
+        volumes:
+            - $TELEGRAF_ROOT_FOLDER/telegraf.conf:/etc/telegraf/telegraf.conf
         environment:
-            - MQTT_HOST=$MQTT_AGENT_HOST
-            - MQTT_PORT=$MQTT_AGENT_PORT
-            - MQTT_USERNAME=$MQTT_AGENT_USERNAME
-            - MQTT_PASSWORD=$MQTT_AGENT_PASSWORD
-            - MQTT_CLIENT_ID=$MQTT_AGENT_CLIENT_ID
-            - INFLUXDB_HOST=$INFLUXDB_HOST
-            - INFLUXDB_PORT=$INFLUXDB_PORT
-            - INFLUXDB_ORG=$INFLUXDB_ORG
-            - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
-            - INFLUXDB_TOKEN=$MQTT_AGENT_INFLUXDB_TOKEN
+            - TZ=Europe/Rome
+            - INFLUXDB_V2_URL=$INFLUXDB_HOST
+            - INFLUXDB_V2_TOKEN=$TELEGRAF_INFLUXDB_TOKEN
+            - INFLUXDB_V2_ORG=$INFLUXDB_ORG
+            - INFLUXDB_V2_BUCKET=$INFLUXDB_BUCKET
+            - MQTT_CLIENT_ID=telegraf
+            - MQTT_ADDRESS=$MQTT_HOST
+            - MQTT_USER=$TELEGRAF_MQTT_USERNAME
+            - MQTT_PASSWORD=$TELEGRAF_MQTT_PASSWORD
 
 volumes:
     mosquitto_data:
