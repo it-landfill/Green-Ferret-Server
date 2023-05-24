@@ -1,8 +1,8 @@
 /Green-Ferret-Server.code-workspace
 .DS_Store
-/docker/portainer.env
-/docker/notes.md
-/docker/.env
 node_modules
 .tsbuildinfo
 dist
+/docker-stack/.env
+/docker-stack/notes.md
+/docker-stack/portainer.env

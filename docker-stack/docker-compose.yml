@@ -12,8 +12,7 @@ services:
         volumes:
             - mosquitto_data:/mosquitto/data
             - mosquitto_log:/mosquitto/log
-            - $MQTT_ROOT_FOLDER/config:/mosquitto/config
-            - $MQTT_ROOT_FOLDER/credentials.txt:/mosquitto/credentials.txt
+            - mosquitto_config:/mosquitto/config
         environment:
             - TZ=Europe/Rome
     influxdb:
