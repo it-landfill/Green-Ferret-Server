@@ -3,6 +3,5 @@
 node_modules
 .tsbuildinfo
 dist
-/docker-stack/.env
+/docker-stack/config.env
 /docker-stack/notes.md
-/docker-stack/portainer.env
