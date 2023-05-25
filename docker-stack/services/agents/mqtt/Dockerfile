@@ -1,4 +1,4 @@
-FROM node:20.2
+FROM  --platform=$BUILDPLATFORM node:20.2
 
 # Create a working directory
 RUN mkdir /buildDir
@@ -12,7 +12,7 @@ RUN npm install
 RUN npm run build
 
 # Create the production image
-FROM node:20.2-alpine
+FROM  --platform=$BUILDPLATFORM node:20.2-alpine
 
 # Create a working directory
 RUN mkdir /app
@@ -29,5 +29,4 @@ RUN npm install --omit=dev
 # Start the app
 CMD ["node", "dist/main.js"]
 
-# docker build -t aleben/green-ferret_mqtt-agent:latest -t aleben/green-ferret_mqtt-agent:1.0 .
-# docker push aleben/green-ferret_mqtt-agent:latest && docker push aleben/green-ferret_mqtt-agent:1.0
+# docker buildx build --push --platform linux/arm64,linux/arm,linux/arm/v6,linux/amd64 --tag aleben/green-ferret_mqtt-agent:latest --tag aleben/green-ferret_mqtt-agent:1.0 .

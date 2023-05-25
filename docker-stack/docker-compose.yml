@@ -27,7 +27,7 @@ services:
             - TZ=Europe/Rome
         healthcheck:
             test: "mosquitto_pub -h localhost -t ping -n --quiet || [ $? -eq 5 ]"
-            interval: 10s
+            interval: 60m
             timeout: 10s
             retries: 6
     influxdb:
