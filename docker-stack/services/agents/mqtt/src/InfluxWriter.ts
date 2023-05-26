@@ -24,10 +24,10 @@ export module InfluxWriter {
 	};
 
 	type DataType = {
-		[key: string]: BigInt | number | string | boolean
+		[key: string]: BigInt | number | string | boolean;
 	};
 	type TagType = {
-		[key: string]: string
+		[key: string]: string;
 	};
 
 	function generateConfig(): InfluxConfig {
