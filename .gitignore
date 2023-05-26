@@ -4,4 +4,4 @@ node_modules
 .tsbuildinfo
 dist
 /docker-stack/config.env
-/docker-stack/notes.md
+/docs/credentials.md
