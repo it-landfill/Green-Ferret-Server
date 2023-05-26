@@ -85,18 +85,22 @@ function subscribeToTopics(client : mqtt.MqttClient, topics : string[]) {
  * @returns InfluxWriter.DataType. Parsed message body
  */
 function parseBody(body : Buffer | string): InfluxWriter.DataType {
-	const keyTranslation:InfluxWriter.TagType = {
-		"tem": "temperature",
-		"hum": "humidity",
-		"lat": "latitude",
-		"lon": "longitude",
-		"pre": "pressure",
-		"aqi": "air_quality_index",
-		"tvo": "total_volatile_organic_compounds",
-		"eco": "equivalent_co2",
+	const keyTranslation: InfluxWriter.TagType = {
+		tem: "temperature",
+		hum: "humidity",
+		lat: "latitude",
+		lon: "longitude",
+		pre: "pressure",
+		aqi: "air_quality_index",
+		tvo: "total_volatile_organic_compounds",
+		eco: "equivalent_co2"
 	};
 	// Parse the body. If it's a Buffer, convert it to a string first
-	const parsed = JSON.parse((typeof body == "string") ? body : body.toString());
+	const parsed = JSON.parse(
+		typeof body == "string"
+			? body
+			: body.toString()
+	);
 
 	let data: InfluxWriter.DataType = {};
 	for (const key in parsed) {
