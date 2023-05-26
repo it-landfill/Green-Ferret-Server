@@ -1,5 +1,5 @@
 version: '3.8'
-name: olive-turtle
+name: green-ferret
 services:
     mqtt-init:
         image: "alpine:latest"
