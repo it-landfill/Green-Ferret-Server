@@ -23,3 +23,6 @@
 - aqi -> air_quality_index
 - tvo -> tvoc
 - eco -> eco2
+
+# Drop data
+influx delete --bucket Green-Ferret --start '1970-01-01T00:00:00Z' --stop $(date +"%Y-%m-%dT%H:%M:%SZ") --predicate '_measurement="AJERJE"
