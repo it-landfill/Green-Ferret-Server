@@ -1,6 +1,7 @@
 # Data scheme
 
 ## Available data
+
 - board id
 - latitude
 - longitude
@@ -8,4 +9,3 @@
 - humidity
 - pressure
 - iaq vari
-

@@ -1,16 +1,6 @@
 version: '3.8'
 name: green-ferret
 services:
-    mqtt-init:
-        image: "alpine:latest"
-        volumes:
-            - mosquitto_config:/mosquitto/config
-        command:
-            - /bin/sh
-            - -c
-            - |
-                [ -f /mosquitto/config/mosquitto.conf ] || echo -e "$MQTT_CONFIG" > /mosquitto/config/mosquitto.conf
-                [ -f /mosquitto/config/credentials.txt ] || echo -e "$MQTT_CREDENTIALS" > /mosquitto/config/credentials.txt
     mqttserver:
         image: "eclipse-mosquitto:2.0.15"
         container_name: mqttserver
@@ -30,6 +20,13 @@ services:
             interval: 60m
             timeout: 10s
             retries: 6
+        command:
+            - /bin/sh
+            - -c
+            - |
+                echo -e "$MQTT_CONFIG" > /mosquitto/config/mosquitto.conf
+                [ -f /mosquitto/config/credentials.txt ] || echo -e "$MQTT_CREDENTIALS" > /mosquitto/config/credentials.txt
+                /usr/sbin/mosquitto -c "/mosquitto/config/mosquitto.conf"
     influxdb:
         image: "influxdb:2.7.1"
         container_name: influxdb
@@ -56,7 +53,7 @@ services:
             retries: 3
             start_period: 30s
     mqtt-agent:
-        image: "aleben/green-ferret_mqtt-agent:1.0"
+        image: "aleben/green-ferret_mqtt-agent:1.0.1"
         depends_on:
             - mqttserver
             - influxdb

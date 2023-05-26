@@ -1,4 +1,4 @@
-const coap = require('coap')
+const coap = require("coap");
 
 /**
  * CoAP Agent
