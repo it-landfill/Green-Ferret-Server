@@ -1,5 +1,5 @@
 version: '3.8'
-name: olive-turtle
+name: green-ferret
 services:
     mqtt-init:
         image: "alpine:latest"
@@ -9,8 +9,8 @@ services:
             - /bin/sh
             - -c
             - |
-                [ -f /mosquitto/config/mosquitto.conf ] || echo "Creating config at /mosquitto/config/mosquitto.conf" && echo -e "$MQTT_CONFIG" > /mosquitto/config/mosquitto.conf
-                [ -f /mosquitto/config/credentials.txt ] || echo "Creating config at /mosquitto/config/credentials.txt" && echo -e "$MQTT_CREDENTIALS" > /mosquitto/config/credentials.txt
+                [ -f /mosquitto/config/mosquitto.conf ] || echo -e "$MQTT_CONFIG" > /mosquitto/config/mosquitto.conf
+                [ -f /mosquitto/config/credentials.txt ] || echo -e "$MQTT_CREDENTIALS" > /mosquitto/config/credentials.txt
     mqttserver:
         image: "eclipse-mosquitto:2.0.15"
         container_name: mqttserver
