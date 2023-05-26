@@ -22,6 +22,10 @@ type MQTTConfig = {
 	clientId: string;
 };
 
+/**
+ * Generate MQTTConfig from environment variables
+ * @returns MQTTConfig object with values from environment variables
+ */
 function generateConfig(): MQTTConfig {
 	const host = process.env.MQTT_HOST || "localhost";
 	const port = process.env.MQTT_PORT || "1883";
