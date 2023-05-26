@@ -2,10 +2,10 @@ import {InfluxDB, Point, ClientOptions} from "@influxdata/influxdb-client";
 
 /**
  * This is a wrapper for the InfluxDB client.
- * 
+ *
  * It is used to write data to the InfluxDB database used for Green-Ferret project.
  * Note that this has some hardcoded values for the project.
- * 
+ *
  * Environment variables:
  * - INFLUXDB_HOST: InfluxDB host (default: localhost)
  * - INFLUXDB_PORT: InfluxDB port (default: 8086)
@@ -23,8 +23,12 @@ export module InfluxWriter {
 		bucket: string;
 	};
 
-	type DataType = {[key: string]: BigInt | number | string | boolean};
-	type TagType = {[key: string]: string};
+	type DataType = {
+		[key: string]: BigInt | number | string | boolean
+	};
+	type TagType = {
+		[key: string]: string
+	};
 
 	function generateConfig(): InfluxConfig {
 		const host = process.env.INFLUXDB_HOST || "localhost";
@@ -57,10 +61,7 @@ export module InfluxWriter {
 		client = new InfluxDB(options);
 	}
 
-	
-
-
-/**
+	/**
 	 * Write data to the InfluxDB database
 	 * @param data Object with the data to write
 	 * @param tags (Optional) Object with the tags to add to the data (e.g. {sensor: "sensor1"}
@@ -68,7 +69,7 @@ export module InfluxWriter {
 	 * @param bucket (Optional) Bucket to write to. If not set, the default value from the config will be used
 	 * @param org (Optional) Organization to write to. If not set, the default value from the config will be used
 	 */
-	export function writeData(data : DataType, tags : TagType = {}, measurement: string, bucket?: string, org?: string) {
+	export function writeData(data : DataType, tags : TagType = {}, measurement : string, bucket? : string, org? : string) {
 		const writeClient = client.getWriteApi(org || config.org, bucket || config.bucket, "ms");
 
 		const point = new Point(measurement);
