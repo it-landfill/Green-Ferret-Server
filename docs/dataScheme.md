@@ -9,11 +9,12 @@
 - humidity
 - pressure
 - air quality
-    - aqi
-    - tvoc
-    - eco2
+  - aqi
+  - tvoc
+  - eco2
 
 ### mqtt json label conversion
+
 - lat -> latitude
 - lon -> longitude
 - tem -> temperature
