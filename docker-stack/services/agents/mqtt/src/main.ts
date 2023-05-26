@@ -47,6 +47,11 @@ function generateConfig(): MQTTConfig {
 	return {host, port, username, password, clientId};
 }
 
+/**
+ * Initialize MQTT client
+ * @param config MQTTConfig object
+ * @returns MQTT client
+ */
 function initializeClient(config : MQTTConfig): mqtt.MqttClient {
 	const address = `mqtt://${config.host}:${config.port}`;
 	const options: mqtt.IClientOptions = {
@@ -57,6 +62,11 @@ function initializeClient(config : MQTTConfig): mqtt.MqttClient {
 	return mqtt.connect(address, options);
 }
 
+/**
+ * Subscribe to topics
+ * @param client MQTT client
+ * @param topics Array of topics to subscribe to
+ */
 function subscribeToTopics(client : mqtt.MqttClient, topics : string[]) {
 	topics.forEach((topic) => {
 		client.subscribe(topic, function (err) {
@@ -69,6 +79,42 @@ function subscribeToTopics(client : mqtt.MqttClient, topics : string[]) {
 	});
 }
 
+/**
+ * Parse the body of the message replacing known keys with their full name
+ * @param body Message body
+ * @returns InfluxWriter.DataType. Parsed message body
+ */
+function parseBody(body : Buffer | string): InfluxWriter.DataType {
+	const keyTranslation:InfluxWriter.TagType = {
+		"tem": "temperature",
+		"hum": "humidity",
+		"lat": "latitude",
+		"lon": "longitude",
+		"pre": "pressure",
+		"aqi": "air_quality_index",
+		"tvo": "total_volatile_organic_compounds",
+		"eco": "equivalent_co2",
+	};
+	// Parse the body. If it's a Buffer, convert it to a string first
+	const parsed = JSON.parse((typeof body == "string") ? body : body.toString());
+
+	let data: InfluxWriter.DataType = {};
+	for (const key in parsed) {
+		if (key in keyTranslation) {
+			data[keyTranslation[key]] = parsed[key];
+		} else {
+			data[key] = parsed[key];
+		}
+	}
+
+	return data;
+}
+
+/**
+ * Handle incoming messages
+ * @param topic Topic the message was received on
+ * @param message Message payload
+ */
 function messageHandler(topic : string, message : Buffer) {
 	// message is Buffer
 	const msg = message.toString();
@@ -81,12 +127,17 @@ function messageHandler(topic : string, message : Buffer) {
 
 	const root = split[0];
 	const sensorId = split[1];
-	InfluxWriter.writeData(JSON.parse(msg), {
+
+	// Write the data to InfluxDB
+	InfluxWriter.writeData(parseBody(msg), {
 		source: "mqtt-agent",
 		sensorId: sensorId
 	}, root);
 }
 
+/**
+ * Main function
+ */
 function main() {
 	// Initialize InfluxDB writer
 	if (!process.env.INFLUXDB_TOKEN) {
@@ -94,18 +145,23 @@ function main() {
 		process.exit(1);
 	}
 
+	// Initialize InfluxDB writer
 	InfluxWriter.initializeClient(process.env.INFLUXDB_TOKEN);
 
+	// Initialize MQTT client and config
 	const config = generateConfig();
 	const client = initializeClient(config);
 
+	// Subscribe to topics when the client connects
 	client.on("connect", function () {
 		console.log("Connected to MQTT broker");
 		subscribeToTopics(client, ["mobile-sensors/#"]);
 	});
 
+	// Handle incoming messages
 	client.on("message", messageHandler);
 
+	// Handle interrupt signal
 	process.on("SIGINT", function () {
 		console.log("Caught interrupt signal");
 		client.end();

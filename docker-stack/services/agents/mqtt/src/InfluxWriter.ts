@@ -23,10 +23,10 @@ export module InfluxWriter {
 		bucket: string;
 	};
 
-	type DataType = {
+	export type DataType = {
 		[key: string]: BigInt | number | string | boolean;
 	};
-	type TagType = {
+	export type TagType = {
 		[key: string]: string;
 	};
 

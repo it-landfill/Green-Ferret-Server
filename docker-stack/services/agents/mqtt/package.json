@@ -1,6 +1,6 @@
 {
     "name": "green-ferret-agents-mqtt",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "MQTT Agent for Green Ferret.\nThis agent is responsible for listening to specific topics in the MQTT broker and uploading the data to InfluxDB.",
     "main": "main.js",
     "scripts": {
