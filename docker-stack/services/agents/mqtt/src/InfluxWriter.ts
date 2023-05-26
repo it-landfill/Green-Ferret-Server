@@ -57,17 +57,21 @@ export module InfluxWriter {
 		client = new InfluxDB(options);
 	}
 
-	/**
+	
+
+
+/**
 	 * Write data to the InfluxDB database
 	 * @param data Object with the data to write
 	 * @param tags (Optional) Object with the tags to add to the data (e.g. {sensor: "sensor1"}
-	 * @param org (Optional) Organization to write to. If not set, the default value from the config will be used
+	 * @param measurement Measurement name
 	 * @param bucket (Optional) Bucket to write to. If not set, the default value from the config will be used
+	 * @param org (Optional) Organization to write to. If not set, the default value from the config will be used
 	 */
-	export function writeData(data : DataType, tags : TagType = {}, org?: string, bucket?: string) {
+	export function writeData(data : DataType, tags : TagType = {}, measurement: string, bucket?: string, org?: string) {
 		const writeClient = client.getWriteApi(org || config.org, bucket || config.bucket, "ms");
 
-		const point = new Point("sensor_data");
+		const point = new Point(measurement);
 
 		for (const tag in tags) {
 			point.tag(tag, tags[tag]);

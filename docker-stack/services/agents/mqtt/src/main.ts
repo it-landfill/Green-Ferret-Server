@@ -1,10 +1,10 @@
 import mqtt from "mqtt";
-import { InfluxWriter } from "./InfluxWriter";
+import {InfluxWriter} from "./InfluxWriter";
 
 /**
  * MQTT Agent
  * This agent subscribes to the MQTT broker and forwards the messages to the
- * 
+ *
  * Environment variables:
  * - MQTT_HOST: MQTT broker host (default: localhost)
  * - MQTT_PORT: MQTT broker port (default: 1883)
@@ -69,10 +69,18 @@ function messageHandler(topic : string, message : Buffer) {
 	// message is Buffer
 	const msg = message.toString();
 	console.debug(`Received message on topic ${topic}: ${msg}`);
-	if (topic.startsWith("sensors/")) {
-		const sensorId = topic.split("/")[1];
-		InfluxWriter.writeData(JSON.parse(msg), {"source": "mqtt", "sensorId": sensorId});
+	const split = topic.split("/");
+	if (split.length != 2) {
+		console.error(`Invalid topic ${topic}`);
+		return;
 	}
+
+	const root = split[0];
+	const sensorId = split[1];
+	InfluxWriter.writeData(JSON.parse(msg), {
+		source: "mqtt-agent",
+		sensorId: sensorId
+	}, root);
 }
 
 function main() {
@@ -82,19 +90,19 @@ function main() {
 		process.exit(1);
 	}
 
-	InfluxWriter.initializeClient(process.env.INFLUXDB_TOKEN)
+	InfluxWriter.initializeClient(process.env.INFLUXDB_TOKEN);
 
 	const config = generateConfig();
 	const client = initializeClient(config);
 
 	client.on("connect", function () {
 		console.log("Connected to MQTT broker");
-		subscribeToTopics(client, ["sensors/#"]);
+		subscribeToTopics(client, ["mobile-sensors/#"]);
 	});
 
 	client.on("message", messageHandler);
 
-	process.on('SIGINT', function() {
+	process.on("SIGINT", function () {
 		console.log("Caught interrupt signal");
 		client.end();
 	});
