@@ -1,6 +1,5 @@
 import {InfluxDB, Point, ClientOptions} from "@influxdata/influxdb-client";
 
-
 /**
  * This is a wrapper for the InfluxDB client.
  *
@@ -111,7 +110,7 @@ export module InfluxWriter {
 	 * @param body Message body
 	 * @returns DataType. Parsed message body
 	 */
-	export function parseBody(body : Buffer | string): DataType {
+	export function parseBody(body : Buffer | string | object): DataType {
 		const keyTranslation: TagType = {
 			tem: "temperature",
 			hum: "humidity",
@@ -123,11 +122,17 @@ export module InfluxWriter {
 			eco: "equivalent_co2"
 		};
 		// Parse the body. If it's a Buffer, convert it to a string first
-		const parsed = JSON.parse(
-			typeof body == "string"
-				? body
-				: body.toString()
-		);
+		let parsed: { [key: string]: any };
+
+		if (body instanceof Buffer || typeof body == "string") {
+			parsed = JSON.parse(
+				typeof body == "string"
+					? body
+					: body.toString()
+			);
+		} else {
+			parsed = body;
+		}
 
 		let data: DataType = {};
 		for (const key in parsed) {
