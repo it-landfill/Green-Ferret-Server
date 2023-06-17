@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 
 import {InfluxWriter} from "./InfluxWriter";
 
-
 /**
  * HTTP Agent
  * This agent receives telemetry data from the devices via HTTP requests
@@ -12,7 +11,6 @@ import {InfluxWriter} from "./InfluxWriter";
  * - HTTP_PORT: HTTP broker port (default: 8080)
  * - INFLUXDB_TOKEN: InfluxDB token
  */
-
 
 // Get HTTP_PORT from environment variables or use default value
 const port = process.env.HTTP_PORT || "8080";
@@ -58,7 +56,7 @@ app.post("/telemetry/:group/:id", (req, res) => {
 		console.warn("Received bad request. Url malformed. Expected /telemetry/:group/:id but got /telemetry/" + group + "/" + id);
 		return;
 	}
-	
+
 	const body = req.body;
 
 	console.debug(`Received telemetry data from ${group}/${id}`);
@@ -77,4 +75,4 @@ app.post("/telemetry/:group/:id", (req, res) => {
 InfluxWriter.initializeClient(influx_token);
 
 // Start Express app
-app.listen(port, () => console.log(`Hello world app listening on port ${port}!`));
+app.listen(port, () => console.log(`HTTP Agent listening on port ${port}!`));
