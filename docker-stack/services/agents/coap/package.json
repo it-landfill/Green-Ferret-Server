@@ -5,6 +5,7 @@
     "main": "main.js",
     "scripts": {
         "watch": "tsc --watch",
+        "build": "tsc",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Benetton Alessandro, Crespan Lorenzo",
