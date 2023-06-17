@@ -1,5 +1,6 @@
 import {InfluxDB, Point, ClientOptions} from "@influxdata/influxdb-client";
 
+
 /**
  * This is a wrapper for the InfluxDB client.
  *

@@ -104,4 +104,39 @@ export module InfluxWriter {
 		writeClient.writePoint(point);
 		writeClient.flush();
 	}
+
+	/**
+	 * Parse the body of the message replacing known keys with their full name
+	 * @param body Message body
+	 * @returns DataType. Parsed message body
+	 */
+	export function parseBody(body : Buffer | string): DataType {
+		const keyTranslation: TagType = {
+			tem: "temperature",
+			hum: "humidity",
+			lat: "latitude",
+			lon: "longitude",
+			pre: "pressure",
+			aqi: "air_quality_index",
+			tvo: "total_volatile_organic_compounds",
+			eco: "equivalent_co2"
+		};
+		// Parse the body. If it's a Buffer, convert it to a string first
+		const parsed = JSON.parse(
+			typeof body == "string"
+				? body
+				: body.toString()
+		);
+
+		let data: DataType = {};
+		for (const key in parsed) {
+			if (key in keyTranslation) {
+				data[keyTranslation[key]] = parsed[key];
+			} else {
+				data[key] = parsed[key];
+			}
+		}
+
+		return data;
+	}
 }
