@@ -1,4 +1,4 @@
-import {useState} from "react";
+import React from "react";
 import "./App.css";
 import "./tailwind-output.css";
 import { MapContainer, TileLayer } from "react-leaflet";
@@ -10,16 +10,11 @@ function App() {
     return (
       <MapContainer style={{
         height: "100%"
-      }} center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
+      }} center={[44.4949, 11.3426]} zoom={13} scrollWheelZoom={false}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       </MapContainer>
     );
   }
-
-  const [value, setValue] = useState({ 
-    startDate: null,
-    endDate: null 
-  }); 
 
   return (
     <div className="App">
