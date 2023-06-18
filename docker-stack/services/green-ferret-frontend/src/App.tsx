@@ -3,14 +3,29 @@ import "./App.css";
 import "./tailwind-output.css";
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import {HeatmapLayerFactory} from "@vgrid/react-leaflet-heatmap-layer";
+
+const HeatmapLayer = HeatmapLayerFactory<[number, number, number]>()
 
 function App() {
 
   function generateMap() {
+    
     return (
       <MapContainer style={{
         height: "100%"
       }} center={[44.4949, 11.3426]} zoom={13} scrollWheelZoom={false}>
+        <HeatmapLayer
+            fitBoundsOnLoad
+            fitBoundsOnUpdate
+            points={[[44.4949, 11.3426, 10.2], [44.4946, 11.3426, 15.2],]}
+            longitudeExtractor={m => m[1]}
+            latitudeExtractor={m => m[0]}
+            intensityExtractor={m => m[2]}
+            radius={30}
+            gradient={{ 0.2: 'blue', 0.7: 'yellow', 1.0: 'red' }}
+            opacity={0.75}
+        />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       </MapContainer>
     );
