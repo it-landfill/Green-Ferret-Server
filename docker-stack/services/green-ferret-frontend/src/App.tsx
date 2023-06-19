@@ -6,6 +6,8 @@ import "leaflet/dist/leaflet.css";
 import {HeatmapLayerFactory} from "@vgrid/react-leaflet-heatmap-layer";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+import { InfluxAccess } from "./InfluxAccess";
+
 const HeatmapLayer = HeatmapLayerFactory<[number, number, number]>()
 
 function App() {
@@ -23,6 +25,12 @@ function App() {
     [44.4949, 11.3424, 0.6],
     [44.4949, 11.3425, 0.7],
     [44.4949, 11.3426, 0.8]];
+
+  function getDataServer() {
+    InfluxAccess.getData(new Date ("2021-06-01T00:00:00Z"), new Date ("2021-06-01T00:00:00Z")).then((data) => {
+      console.log(data);
+    });
+  };
 
   // Use effect for the data points index cycle (if the state is true, the index will cycle through the data points array)
   React.useEffect(() => {
@@ -199,7 +207,7 @@ function App() {
                 </div>
               </div>
               <div className="flex flex-col gap-2 m-4">
-                <button className="w-full h-10 p-2 bg-blue-500 rounded-lg text-white font-bold">Applica filtro</button>
+                <button className="w-full h-10 p-2 bg-blue-500 rounded-lg text-white font-bold" onClick={() => getDataServer()}>Applica</button>
               </div>
               <div className="flex flex-col gap-2 m-4">
                 <h2 className="text-2xl font-bold text-left text-blue-500">Controlli Start/Stop</h2>
