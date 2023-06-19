@@ -87,6 +87,17 @@ function App() {
     },
   ];
 
+  // State checkboxes for the line chart
+  const [lineChartState, setLineChartState] = React.useState({
+    pv: true,
+    uv: true,
+  });
+
+  // Use effect for the line chart state (if the state changes, the line chart will be updated)
+  React.useEffect(() => {
+    renderLineChart();
+  }, [lineChartState]);
+
   function renderLineChart() {
     return(
       <ResponsiveContainer width="100%" height="100%">
@@ -101,13 +112,14 @@ function App() {
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
-          <YAxis dataKey="pv" yAxisId="pv" stroke="#8884d8" orientation="left"/>
-          <YAxis dataKey="uv" yAxisId="uv" stroke="#82ca9d" orientation="left"/>
+          
+          {lineChartState.pv && <YAxis dataKey="pv" yAxisId="pv" stroke="#8884d8" orientation="left"/>}
+          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="uv" stroke="#82ca9d" orientation="left"/>}
           
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="pv" yAxisId="pv" stroke="#8884d8" activeDot={{ r: 6 }}/>
-          <Line type="monotone" dataKey="uv" yAxisId="uv" stroke="#82ca9d" activeDot={{ r: 6 }}/>
+          {lineChartState.pv && <Line type="monotone" dataKey="pv" yAxisId="pv" stroke="#8884d8" activeDot={{ r: 6 }}/>}
+          {lineChartState.uv && <Line type="monotone" dataKey="uv" yAxisId="uv" stroke="#82ca9d" activeDot={{ r: 6 }}/>}
         </LineChart>
       </ResponsiveContainer>
     );
@@ -138,7 +150,6 @@ function App() {
     );
   };
 
-
   return (
     <div className="App">
       <div className="flex flex-col h-screen p-2 gap-2">
@@ -148,7 +159,7 @@ function App() {
           <div className="w-4/5 h-full bg-red-200 rounded-lg overflow-hidden">
             <MapContainer style={{
               height: "100%"
-            }} center={[44.4949, 11.3426]} zoom={13} scrollWheelZoom={false}>
+            }} center={[44.4949, 11.3426]} zoom={13} scrollWheelZoom={true}>
               <HeatmapLayer
                   fitBoundsOnLoad
                   fitBoundsOnUpdate
@@ -209,22 +220,28 @@ function App() {
           <div className="w-1/5 h-full rounded-lg">
             <div className="flex flex-col h-full gap-2">
               <div className="flex flex-col gap-2 m-4">
-                <h2 className="text-2xl font-bold text-left text-blue-500">Filtro heatmap</h2>
+                <h2 className="text-2xl font-bold text-left text-blue-500">Checkbox chart</h2>
                 <div className="flex items-center">
-                    <input checked id="default-radio-1" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" />
-                    <label htmlFor="default-radio-1" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la heatmap 1</label>
+                  { lineChartState.pv ? 
+                    (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setLineChartState({ ...lineChartState, pv: !lineChartState.pv })}/>)
+                    : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setLineChartState({ ...lineChartState, pv: !lineChartState.pv })}/>)}
+                  <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
                 </div>
                 <div className="flex items-center">
-                  <input checked id="default-radio-2" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" />
-                    <label htmlFor="default-radio-2" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la heatmap 2</label>
+                  { lineChartState.uv ? 
+                    (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })}/>)
+                    : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })}/>)}
+                  <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 2</label>
                 </div>
+
+                
               </div> 
             </div>
           </div>
         </div>
 
       </div>
-      
+
       <div className="flex flex-col h-screen p-2 gap-2">
         <h1 className="text-4xl font-bold text-left text-blue-500">Green Ferrett - Heatmap</h1>
         <div className="grid grid-cols-2 h-screen p-2 gap-2">
