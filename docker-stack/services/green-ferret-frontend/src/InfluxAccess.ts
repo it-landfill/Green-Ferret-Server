@@ -4,7 +4,7 @@ import {FluxTableMetaData, InfluxDB} from "@influxdata/influxdb-client";
  * InfluxDB access
  *
  * Environment variables:
- * - INFLUXDB_TOKEN: InfluxDB token
+ * - REACT_APP_INFLUXDB_TOKEN: InfluxDB token
  */
 
 export module InfluxAccess {
@@ -44,7 +44,7 @@ export module InfluxAccess {
 		if (_client === undefined) {
 			_client = new InfluxDB({
 				url,
-				token: token || process.env.INFLUXDB_TOKEN
+				token: token || process.env.REACT_APP_INFLUXDB_TOKEN
 			});
 		}
 		return _client;

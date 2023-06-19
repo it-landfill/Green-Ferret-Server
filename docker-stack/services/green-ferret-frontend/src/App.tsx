@@ -27,7 +27,7 @@ function App() {
     [44.4949, 11.3426, 0.8]];
 
   function getDataServer() {
-    InfluxAccess.getData(new Date ("2021-06-01T00:00:00Z"), new Date ("2021-06-01T00:00:00Z")).then((data) => {
+    InfluxAccess.getData(new Date ("2021-06-18T00:00:00Z"), new Date ("2021-06-19T00:00:00Z")).then((data) => {
       console.log(data);
     });
   };
