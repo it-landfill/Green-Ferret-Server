@@ -6,7 +6,7 @@ import "leaflet/dist/leaflet.css";
 import {HeatmapLayerFactory} from "@vgrid/react-leaflet-heatmap-layer";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-import { InfluxAccess } from "./InfluxAccess";
+// import { InfluxAccess } from "./InfluxAccess";
 
 const HeatmapLayer = HeatmapLayerFactory<[number, number, number]>()
 
@@ -52,6 +52,17 @@ function App() {
           "eco2": 680.7796610169491,
           "tvoc": 192.8135593220339,
           "aqi": 2.2711864406779663
+      },
+      {
+          "latitude": 45.64551275915254,
+          "longitude": 12.269811447457624,
+          "time": "2023-06-19T15:10:00.000Z",
+          "temperature": 32.28915243711864,
+          "pressure": null,
+          "humidity": 45.367037498135595,
+          "eco2": 681.7796610169491,
+          "tvoc": 122.8135593220339,
+          "aqi": 1.2711864406779663
       },
       {
           "latitude": 45.646023960677965,
@@ -218,11 +229,31 @@ function App() {
             }} center={[45.64651, 12.251473]} zoom={13} scrollWheelZoom={true}>
             { dataPoints != null ?
               <HeatmapLayer
-                  fitBoundsOnLoad
-                  fitBoundsOnUpdate
                   points = 
-                    {[...dataPoints[dataPointsIndex].map((d : any) =>
-                      {
+                    {[...
+                      // Based on the heatmap selected, filter the data points with null values
+                      dataPoints[dataPointsIndex].filter((d : any) => {
+                        switch (heatmapType) {
+                          case HeatmapType.TEMPERATURE:
+                            return d.temperature != null;
+                            break;
+                          case HeatmapType.PRESSURE:
+                            return d.pressure != null;
+                            break;
+                          case HeatmapType.HUMIDITY:
+                            return d.humidity != null;
+                            break;
+                          case HeatmapType.ECO2:
+                            return d.co2 != null;
+                            break;
+                          case HeatmapType.TVOC:
+                            return d.tvoc != null;
+                            break;
+                          case HeatmapType.AQI:
+                            return d.aqi != null;
+                            break;
+                        }
+                      }).map((d : any) => {
                         // Based on the heatmap selected, the intensity will be different
                         switch (heatmapType) {
                           case HeatmapType.TEMPERATURE:
@@ -251,7 +282,7 @@ function App() {
                   intensityExtractor={m => m[2]}
                   radius={30}
                   gradient={{ 0.2: 'blue', 0.7: 'yellow', 1.0: 'orange' }}
-                  opacity={0.75}
+                  opacity={0.8}
               /> : null }
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             </MapContainer> 
