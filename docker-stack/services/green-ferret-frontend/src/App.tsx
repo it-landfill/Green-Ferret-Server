@@ -233,48 +233,10 @@ function App() {
                     {[...
                       // Based on the heatmap selected, filter the data points with null values
                       dataPoints[dataPointsIndex].filter((d : any) => {
-                        switch (heatmapType) {
-                          case HeatmapType.TEMPERATURE:
-                            return d.temperature != null;
-                            break;
-                          case HeatmapType.PRESSURE:
-                            return d.pressure != null;
-                            break;
-                          case HeatmapType.HUMIDITY:
-                            return d.humidity != null;
-                            break;
-                          case HeatmapType.ECO2:
-                            return d.co2 != null;
-                            break;
-                          case HeatmapType.TVOC:
-                            return d.tvoc != null;
-                            break;
-                          case HeatmapType.AQI:
-                            return d.aqi != null;
-                            break;
-                        }
+                        return d[heatmapType] != null;
                       }).map((d : any) => {
                         // Based on the heatmap selected, the intensity will be different
-                        switch (heatmapType) {
-                          case HeatmapType.TEMPERATURE:
-                            return ([d.latitude, d.longitude, d.temperature]);
-                            break;
-                          case HeatmapType.PRESSURE:
-                            return ([d.latitude, d.longitude, d.pressure]);
-                            break;
-                          case HeatmapType.HUMIDITY:
-                            return ([d.latitude, d.longitude, d.humidity]);
-                            break;
-                          case HeatmapType.ECO2:
-                            return ([d.latitude, d.longitude, d.co2]);
-                            break;
-                          case HeatmapType.TVOC:
-                            return ([d.latitude, d.longitude, d.tvoc]);
-                            break;
-                          case HeatmapType.AQI:
-                            return ([d.latitude, d.longitude, d.aqi]);
-                            break;
-                        }
+                        return ([d.latitude, d.longitude, d[heatmapType]]);
                       })
                     ]}
                   longitudeExtractor={m => m[1]}
