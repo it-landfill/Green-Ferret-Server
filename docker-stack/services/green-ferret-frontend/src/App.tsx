@@ -6,7 +6,7 @@ import "leaflet/dist/leaflet.css";
 import {HeatmapLayerFactory} from "@vgrid/react-leaflet-heatmap-layer";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-import { InfluxAccess } from "./InfluxAccess";
+// import { InfluxAccess } from "./InfluxAccess";
 
 const HeatmapLayer = HeatmapLayerFactory<[number, number, number]>()
 
@@ -20,16 +20,80 @@ function App() {
   let dataPointsIndexCycle: number = 0;
 
   // Array with data points for the heatmap (can change over time) 
-  var dataPoints : [number, number, number][] = [
-    [44.4949, 11.3423, 0.5],
-    [44.4949, 11.3424, 0.6],
-    [44.4949, 11.3425, 0.7],
-    [44.4949, 11.3426, 0.8]];
+  const [dataPoints, setDataPoints] = React.useState<any>(null);
+
+  // Enum for the heatmap type
+  enum HeatmapType {
+    TEMPERATURE = "temperature",
+    PRESSURE = "pressure",
+    HUMIDITY = "humidity",
+    ECO2 = "eco2",
+    TVOC = "tvoc",
+    AQI = "aqi", 
+  }
+
+  // State of the heatmap type
+  const [heatmapType, setHeatmapType] = React.useState<HeatmapType>(HeatmapType.TEMPERATURE);
+
 
   function getDataServer() {
-    InfluxAccess.getData(new Date ("2023-06-19T17:00:00"), new Date (), "1s").then((data) => {
-      console.log(data);
-    });
+    console.log("dataPoints: " + dataPoints);
+    // InfluxAccess.getData(new Date ("2023-06-19T17:00:00"), new Date (), "1s").then((data) => {
+    //   console.log(data);
+    // });
+    let data = [
+      {
+          "latitude": 45.64651275915254,
+          "longitude": 12.249811447457624,
+          "time": "2023-06-19T15:10:00.000Z",
+          "temperature": 31.28915243711864,
+          "pressure": null,
+          "humidity": 46.367037498135595,
+          "eco2": 680.7796610169491,
+          "tvoc": 192.8135593220339,
+          "aqi": 2.2711864406779663
+      },
+      {
+          "latitude": 45.64551275915254,
+          "longitude": 12.269811447457624,
+          "time": "2023-06-19T15:10:00.000Z",
+          "temperature": 32.28915243711864,
+          "pressure": null,
+          "humidity": 45.367037498135595,
+          "eco2": 681.7796610169491,
+          "tvoc": 122.8135593220339,
+          "aqi": 1.2711864406779663
+      },
+      {
+          "latitude": 45.646023960677965,
+          "longitude": 12.251473862542372,
+          "time": "2023-06-19T15:20:00.000Z",
+          "temperature": 31.408135560508462,
+          "pressure": 101378.86485000001,
+          "humidity": 46.942415075762725,
+          "eco2": 668.457627118644,
+          "tvoc": 183.54237288135593,
+          "aqi": 2.2542372881355934
+      }
+    ];
+    // Aggregate inside different arrays data with the same time
+    let dataAggregated: any = [];
+    let dataAggregatedIndex: number = 0;
+    let dataAggregatedTime: string = data[0].time;
+    dataAggregated[dataAggregatedIndex] = [];
+    dataAggregated[dataAggregatedIndex].push(data[0]);
+    for (let i = 1; i < data.length; i++) {
+      if (data[i].time === dataAggregatedTime) {
+        dataAggregated[dataAggregatedIndex].push(data[i]);
+      } else {
+        dataAggregatedIndex += 1;
+        dataAggregatedTime = data[i].time;
+        dataAggregated[dataAggregatedIndex] = [];
+        dataAggregated[dataAggregatedIndex].push(data[i]);
+      }
+    }
+    console.log(dataAggregated);
+    setDataPoints(dataAggregated);
   };
 
   // Use effect for the data points index cycle (if the state is true, the index will cycle through the data points array)
@@ -37,18 +101,13 @@ function App() {
     if (dataPointsIndexCycleState) {
       indexCycleFunction = setInterval(() => {
         // cycle through the data points index
-        if (dataPointsIndexCycle !== dataPoints.length - 1) dataPointsIndexCycle += 1
+        if (dataPointsIndexCycle !== dataPoints.length - 1) dataPointsIndexCycle += 1;
         else dataPointsIndexCycle = 0;
         setDataPointsIndex(dataPointsIndexCycle);
       }, 1500);
     } else clearInterval(indexCycleFunction);
     return () => clearInterval(indexCycleFunction);
   }, [dataPointsIndexCycleState]);
-
-  // Use effect for the data points index (if the index changes, the data points will be updated)
-  React.useEffect(() => {
-    console.log("dataPoints: " + dataPoints[dataPointsIndex]);
-  }, [dataPointsIndex]);
 
   const data = [
     {
@@ -167,32 +226,56 @@ function App() {
           <div className="w-4/5 h-full bg-red-200 rounded-lg overflow-hidden">
             <MapContainer style={{
               height: "100%"
-            }} center={[44.4949, 11.3426]} zoom={13} scrollWheelZoom={true}>
+            }} center={[45.64651, 12.251473]} zoom={13} scrollWheelZoom={true}>
+            { dataPoints != null ?
               <HeatmapLayer
-                  fitBoundsOnLoad
-                  fitBoundsOnUpdate
-                  points = {[dataPoints[dataPointsIndex]]}
+                  points = 
+                    {[...
+                      // Based on the heatmap selected, filter the data points with null values
+                      dataPoints[dataPointsIndex].filter((d : any) => {
+                        return d[heatmapType] != null;
+                      }).map((d : any) => {
+                        // Based on the heatmap selected, the intensity will be different
+                        return ([d.latitude, d.longitude, d[heatmapType]]);
+                      })
+                    ]}
                   longitudeExtractor={m => m[1]}
                   latitudeExtractor={m => m[0]}
                   intensityExtractor={m => m[2]}
                   radius={30}
-                  gradient={{ 0.2: 'blue', 0.7: 'yellow', 1.0: 'red' }}
-                  opacity={0.75}
-              />
+                  gradient={{ 0.2: 'blue', 0.7: 'yellow', 1.0: 'orange' }}
+                  opacity={0.8}
+              /> : null }
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            </MapContainer>
+            </MapContainer> 
           </div>
           <div className="w-1/5 h-full rounded-lg">
             <div className="flex flex-col h-full gap-2">
               <div className="flex flex-col gap-2 m-4">
                 <h2 className="text-2xl font-bold text-left text-blue-500">Filtro heatmap</h2>
                 <div className="flex items-center">
-                    <input checked id="default-radio-1" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" />
-                    <label htmlFor="default-radio-1" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la heatmap 1</label>
+                    <input id="default-radio-1" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.TEMPERATURE)} checked={heatmapType == HeatmapType.TEMPERATURE}/>
+                    <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza temperatura </label>
                 </div>
                 <div className="flex items-center">
-                  <input checked id="default-radio-2" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" />
-                    <label htmlFor="default-radio-2" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la heatmap 2</label>
+                  <input id="default-radio-2" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.PRESSURE)} checked={heatmapType == HeatmapType.PRESSURE}/>
+                    <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza pressione</label>
+                </div>
+                <div className="flex items-center">
+                  <input id="default-radio-3" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.HUMIDITY)} checked={heatmapType == HeatmapType.HUMIDITY}/>
+                    <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza umidità</label>
+                </div>
+                <div className="flex items-center">
+                  <input id="default-radio-4" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.ECO2)} checked={heatmapType == HeatmapType.ECO2}/>
+                    <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza CO2</label>
+                </div>
+                <div className="flex items-center">
+                  <input id="default-radio-5" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.TVOC)} checked={heatmapType == HeatmapType.TVOC}/>
+                    <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza TVOC</label>
+                </div>
+                <div className="flex items-center">
+                  <input id="default-radio-6" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.AQI)} checked={heatmapType == HeatmapType.AQI}/>
+                    <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza qualità dell'aria</label>
                 </div>
               </div>
               <div className="flex flex-col gap-4 m-4">
@@ -242,7 +325,6 @@ function App() {
                   <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 2</label>
                 </div>
 
-                
               </div> 
             </div>
           </div>
