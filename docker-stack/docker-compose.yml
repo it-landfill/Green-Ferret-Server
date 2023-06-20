@@ -98,6 +98,8 @@ services:
         restart: unless-stopped
         networks:
             - iot_net
+        ports:
+            - "5000:5000"
         environment:
             - HTTP_PORT=$HTTP_AGENT_PORT
             - INFLUXDB_HOST=$INFLUXDB_HOST
@@ -105,6 +107,12 @@ services:
             - INFLUXDB_ORG=$INFLUXDB_ORG
             - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
             - INFLUXDB_TOKEN=$HTTP_AGENT_INFLUXDB_TOKEN
+        healthcheck:
+            test: ["CMD", "wget", "--spider", "http://localhost:5000"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 30s
     coap-agent:
         image: "aleben/green-ferret_coap-agent:1.0"
         depends_on:
@@ -113,6 +121,8 @@ services:
         restart: unless-stopped
         networks:
             - iot_net
+        ports:
+            - "5683:5683"
         environment:
             - COAP_PORT=$COAP_AGENT_PORT
             - INFLUXDB_HOST=$INFLUXDB_HOST
