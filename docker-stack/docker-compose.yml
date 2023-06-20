@@ -90,6 +90,36 @@ services:
             - INFLUXDB_ORG=$INFLUXDB_ORG
             - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
             - INFLUXDB_TOKEN=$MQTT_AGENT_INFLUXDB_TOKEN
+    http-agent:
+        image: "aleben/green-ferret_http-agent:1.0"
+        depends_on:
+            - influxdb
+        container_name: http-agent
+        restart: unless-stopped
+        networks:
+            - iot_net
+        environment:
+            - HTTP_PORT=$HTTP_AGENT_PORT
+            - INFLUXDB_HOST=$INFLUXDB_HOST
+            - INFLUXDB_PORT=$INFLUXDB_PORT
+            - INFLUXDB_ORG=$INFLUXDB_ORG
+            - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
+            - INFLUXDB_TOKEN=$HTTP_AGENT_INFLUXDB_TOKEN
+    coap-agent:
+        image: "aleben/green-ferret_coap-agent:1.0"
+        depends_on:
+            - influxdb
+        container_name: coap-agent
+        restart: unless-stopped
+        networks:
+            - iot_net
+        environment:
+            - COAP_PORT=$COAP_AGENT_PORT
+            - INFLUXDB_HOST=$INFLUXDB_HOST
+            - INFLUXDB_PORT=$INFLUXDB_PORT
+            - INFLUXDB_ORG=$INFLUXDB_ORG
+            - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
+            - INFLUXDB_TOKEN=$COAP_AGENT_INFLUXDB_TOKEN
 
 volumes:
     mosquitto_data:

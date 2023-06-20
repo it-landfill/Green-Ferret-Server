@@ -3,7 +3,7 @@ import {InfluxWriter} from "./InfluxWriter";
 
 /**
  * MQTT Agent
- * This agent subscribes to the MQTT broker and forwards the messages to the
+ * This agent subscribes to the MQTT broker and forwards the messages to InfluxDB
  *
  * Environment variables:
  * - MQTT_HOST: MQTT broker host (default: localhost)
@@ -80,41 +80,6 @@ function subscribeToTopics(client : mqtt.MqttClient, topics : string[]) {
 }
 
 /**
- * Parse the body of the message replacing known keys with their full name
- * @param body Message body
- * @returns InfluxWriter.DataType. Parsed message body
- */
-function parseBody(body : Buffer | string): InfluxWriter.DataType {
-	const keyTranslation: InfluxWriter.TagType = {
-		tem: "temperature",
-		hum: "humidity",
-		lat: "latitude",
-		lon: "longitude",
-		pre: "pressure",
-		aqi: "air_quality_index",
-		tvo: "total_volatile_organic_compounds",
-		eco: "equivalent_co2"
-	};
-	// Parse the body. If it's a Buffer, convert it to a string first
-	const parsed = JSON.parse(
-		typeof body == "string"
-			? body
-			: body.toString()
-	);
-
-	let data: InfluxWriter.DataType = {};
-	for (const key in parsed) {
-		if (key in keyTranslation) {
-			data[keyTranslation[key]] = parsed[key];
-		} else {
-			data[key] = parsed[key];
-		}
-	}
-
-	return data;
-}
-
-/**
  * Handle incoming messages
  * @param topic Topic the message was received on
  * @param message Message payload
@@ -133,7 +98,7 @@ function messageHandler(topic : string, message : Buffer) {
 	const sensorId = split[1];
 
 	// Write the data to InfluxDB
-	InfluxWriter.writeData(parseBody(msg), {
+	InfluxWriter.writeData(InfluxWriter.parseBody(msg), {
 		source: "mqtt-agent",
 		sensorId: sensorId
 	}, root);
