@@ -56,6 +56,7 @@ export module InfluxAccess {
 	 * @param end End date (exclusive)
 	 * @param aggregateEvery Aggregate every (default: 10m)
 	 * @returns Promise with array of measurements
+	 * FIXME: Query does not consider device ID in aggregation
 	 */
 	export async function getData(start: Date, end: Date, aggregateEvery: string = "10m"): Promise<Measurement[]>{
 		const client = getClient("http://pi3aleben:8086");
