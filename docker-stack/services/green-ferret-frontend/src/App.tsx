@@ -7,6 +7,7 @@ import {HeatmapLayerFactory} from "@vgrid/react-leaflet-heatmap-layer";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 import { InfluxAccess } from "./InfluxAccess";
+import { parse } from "path";
 
 const HeatmapLayer = HeatmapLayerFactory<[number, number, number]>()
 
@@ -37,64 +38,39 @@ function App() {
 
 
   async function getDataServer() {
-    console.log("dataPoints: " + dataPoints);
-    /*let data = [
-      {
-          "latitude": 45.64651275915254,
-          "longitude": 12.249811447457624,
-          "time": "2023-06-19T15:10:00.000Z",
-          "temperature": 31.28915243711864,
-          "pressure": null,
-          "humidity": 46.367037498135595,
-          "eco2": 680.7796610169491,
-          "tvoc": 192.8135593220339,
-          "aqi": 2.2711864406779663
-      },
-      {
-          "latitude": 45.64551275915254,
-          "longitude": 12.269811447457624,
-          "time": "2023-06-19T15:10:00.000Z",
-          "temperature": 32.28915243711864,
-          "pressure": null,
-          "humidity": 45.367037498135595,
-          "eco2": 681.7796610169491,
-          "tvoc": 122.8135593220339,
-          "aqi": 1.2711864406779663
-      },
-      {
-          "latitude": 45.646023960677965,
-          "longitude": 12.251473862542372,
-          "time": "2023-06-19T15:20:00.000Z",
-          "temperature": 31.408135560508462,
-          "pressure": 101378.86485000001,
-          "humidity": 46.942415075762725,
-          "eco2": 668.457627118644,
-          "tvoc": 183.54237288135593,
-          "aqi": 2.2542372881355934
-      }
-    ];*/
-    const data = await InfluxAccess.getData(new Date ("2023-06-22T00:00:00"), new Date ("2023-06-22T23:59:59"));
+    // Get data from time slot form 
+    const dateStart = (document.getElementById("dateStart") as HTMLInputElement).value;
+    const timeStart = (document.getElementById("timeStart") as HTMLInputElement).value;
+    const timeSpan = (document.getElementById("timeSpan") as HTMLInputElement).value;
+
+    const parsedSpan: number = parseInt(timeSpan);
+    const parsedStartDate = new Date(dateStart+"T"+timeStart);
+    parsedStartDate.setMinutes(parsedStartDate.getMinutes()-parsedSpan);
+    const parsedEndDate = new Date(dateStart+"T"+timeStart);
+    parsedEndDate.setMinutes(parsedEndDate.getMinutes()+parsedSpan);
+
+    const data = await InfluxAccess.getData(parsedStartDate, parsedEndDate);
 	
-	// Number of frames for the animation
-	const nFrames = 20;
+    // Number of frames for the animation
+    const nFrames = 20;
 
-	// Time span of each frame (in milliseconds)
-	const timeFrame = data[data.length-1].time.getTime() - data[0].time.getTime()
-	const frameSpan = timeFrame/nFrames;
+    // Time span of each frame (in milliseconds)
+    const timeFrame = data[data.length-1].time.getTime() - data[0].time.getTime()
+    const frameSpan = timeFrame/nFrames;
 
-	// Aggregate inside different arrays data with the same time
-	let dataAggregated: InfluxAccess.Measurement[][] = [];
+    // Aggregate inside different arrays data with the same time
+    let dataAggregated: InfluxAccess.Measurement[][] = [];
 
-    let startDate: number = data[0].time.getTime();
-	dataAggregated[0] = [data[0]];
+      let startDate: number = data[0].time.getTime();
+    dataAggregated[0] = [data[0]];
 
-	for (let i = 1; i < data.length; i++) {
-		//(time-minTime):(maxTime-minTime)=x:maxFrames -> x = (time-minTime)*maxFrames/(maxTime-minTime)
-		const index = Math.trunc((data[i].time.getTime() - startDate)*nFrames/timeFrame);
+    for (let i = 1; i < data.length; i++) {
+      //(time-minTime):(maxTime-minTime)=x:maxFrames -> x = (time-minTime)*maxFrames/(maxTime-minTime)
+      const index = Math.trunc((data[i].time.getTime() - startDate)*nFrames/timeFrame);
 
-		if (dataAggregated[index] == null) dataAggregated[index] = []
-		
-		dataAggregated[index].push(data[i]);
+      if (dataAggregated[index] == null) dataAggregated[index] = []
+      
+      dataAggregated[index].push(data[i]);
 	}
 
 	// Merge last element with previous cell
@@ -291,12 +267,12 @@ function App() {
               <div className="flex flex-col gap-4 m-4">
                 <div className="flex flex-col gap-2">
                   <h3 className="text-xl font-bold text-left text-blue-500">Data ed ora</h3>
-                  <input type="date" className="w-full h-10 p-2 bg-white rounded-lg" />
-                  <input type="time" className="w-full h-10 p-2 bg-white rounded-lg" />
+                  <input id="dateStart" type="date" className="w-full h-10 p-2 bg-white rounded-lg" />
+                  <input id="timeStart" type="time" className="w-full h-10 p-2 bg-white rounded-lg" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <h3 className="text-lg font-bold text-left text-blue-500">Limite temporale</h3>
-                  <input type="number" className="w-full h-10 p-2 bg-white rounded-lg" placeholder="Durata in minuti" />
+                  <input id="timeSpan" type="number" className="w-full h-10 p-2 bg-white rounded-lg" placeholder="Durata in minuti" />
                 </div>
               </div>
               <div className="flex flex-col gap-2 m-4">
