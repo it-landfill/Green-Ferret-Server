@@ -54,11 +54,9 @@ export module InfluxAccess {
 	 * Get data from InfluxDB
 	 * @param start Start date (inclusive)
 	 * @param end End date (exclusive)
-	 * @param aggregateEvery Aggregate every (default: 10m)
 	 * @returns Promise with array of measurements
-	 * FIXME: Query does not consider device ID in aggregation
 	 */
-	export async function getData(start: Date, end: Date, aggregateEvery: string = "10m"): Promise<Measurement[]>{
+	export async function getData(start: Date, end: Date): Promise<Measurement[]>{
 		const client = getClient("http://pi3aleben:8086");
 
 		let queryClient = client.getQueryApi("IT-Landfill");
@@ -71,7 +69,6 @@ export module InfluxAccess {
 				r._measurement == "mobile-sensors" and
 				(r._field == "latitude" or r._field == "longitude" or r["_field"] == "air_quality_index" or r["_field"] == "equivalent_co2" or r["_field"] == "humidity" or r["_field"] == "pressure" or r["_field"] == "temperature" or r["_field"] == "total_volatile_organic_compounds")
 			)
-			|> aggregateWindow(every: ${aggregateEvery}, fn: mean, createEmpty: false)
 			|> schema.fieldsAsCols()
 			|> group()
 			|> sort(columns: ["_time"])

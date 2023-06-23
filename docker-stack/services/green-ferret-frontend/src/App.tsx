@@ -6,7 +6,7 @@ import "leaflet/dist/leaflet.css";
 import {HeatmapLayerFactory} from "@vgrid/react-leaflet-heatmap-layer";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-// import { InfluxAccess } from "./InfluxAccess";
+import { InfluxAccess } from "./InfluxAccess";
 
 const HeatmapLayer = HeatmapLayerFactory<[number, number, number]>()
 
@@ -20,7 +20,7 @@ function App() {
   let dataPointsIndexCycle: number = 0;
 
   // Array with data points for the heatmap (can change over time) 
-  const [dataPoints, setDataPoints] = React.useState<any>(null);
+  const [dataPoints, setDataPoints] = React.useState<InfluxAccess.Measurement[][]>([]);
 
   // Enum for the heatmap type
   enum HeatmapType {
@@ -36,12 +36,9 @@ function App() {
   const [heatmapType, setHeatmapType] = React.useState<HeatmapType>(HeatmapType.TEMPERATURE);
 
 
-  function getDataServer() {
+  async function getDataServer() {
     console.log("dataPoints: " + dataPoints);
-    // InfluxAccess.getData(new Date ("2023-06-19T17:00:00"), new Date (), "1s").then((data) => {
-    //   console.log(data);
-    // });
-    let data = [
+    /*let data = [
       {
           "latitude": 45.64651275915254,
           "longitude": 12.249811447457624,
@@ -75,24 +72,37 @@ function App() {
           "tvoc": 183.54237288135593,
           "aqi": 2.2542372881355934
       }
-    ];
-    // Aggregate inside different arrays data with the same time
-    let dataAggregated: any = [];
-    let dataAggregatedIndex: number = 0;
-    let dataAggregatedTime: string = data[0].time;
-    dataAggregated[dataAggregatedIndex] = [];
-    dataAggregated[dataAggregatedIndex].push(data[0]);
-    for (let i = 1; i < data.length; i++) {
-      if (data[i].time === dataAggregatedTime) {
-        dataAggregated[dataAggregatedIndex].push(data[i]);
-      } else {
-        dataAggregatedIndex += 1;
-        dataAggregatedTime = data[i].time;
-        dataAggregated[dataAggregatedIndex] = [];
-        dataAggregated[dataAggregatedIndex].push(data[i]);
-      }
-    }
-    console.log(dataAggregated);
+    ];*/
+    const data = await InfluxAccess.getData(new Date ("2023-06-22T00:00:00"), new Date ("2023-06-22T23:59:59"));
+	
+	// Number of frames for the animation
+	const nFrames = 20;
+
+	// Time span of each frame (in milliseconds)
+	const timeFrame = data[data.length-1].time.getTime() - data[0].time.getTime()
+	const frameSpan = timeFrame/nFrames;
+
+	// Aggregate inside different arrays data with the same time
+	let dataAggregated: InfluxAccess.Measurement[][] = [];
+
+    let startDate: number = data[0].time.getTime();
+	dataAggregated[0] = [data[0]];
+
+	for (let i = 1; i < data.length; i++) {
+		//(time-minTime):(maxTime-minTime)=x:maxFrames -> x = (time-minTime)*maxFrames/(maxTime-minTime)
+		const index = Math.trunc((data[i].time.getTime() - startDate)*nFrames/timeFrame);
+
+		if (dataAggregated[index] == null) dataAggregated[index] = []
+		
+		dataAggregated[index].push(data[i]);
+	}
+
+	// Merge last element with previous cell
+	const last = dataAggregated.pop();
+	if (last && last.length > 0) {
+		dataAggregated[dataAggregated.length-1].push(last[0]);
+	}
+
     setDataPoints(dataAggregated);
   };
 
@@ -227,14 +237,14 @@ function App() {
             <MapContainer style={{
               height: "100%"
             }} center={[45.64651, 12.251473]} zoom={13} scrollWheelZoom={true}>
-            { dataPoints != null ?
+            { dataPoints != null && dataPoints.length > 0 ?
               <HeatmapLayer
                   points = 
                     {[...
                       // Based on the heatmap selected, filter the data points with null values
-                      dataPoints[dataPointsIndex].filter((d : any) => {
+                      dataPoints[dataPointsIndex].filter((d : InfluxAccess.Measurement) => {
                         return d[heatmapType] != null;
-                      }).map((d : any) => {
+                      }).map((d : InfluxAccess.Measurement): [number, number, number] => {
                         // Based on the heatmap selected, the intensity will be different
                         return ([d.latitude, d.longitude, d[heatmapType]]);
                       })
@@ -254,27 +264,27 @@ function App() {
               <div className="flex flex-col gap-2 m-4">
                 <h2 className="text-2xl font-bold text-left text-blue-500">Filtro heatmap</h2>
                 <div className="flex items-center">
-                    <input id="default-radio-1" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.TEMPERATURE)} checked={heatmapType == HeatmapType.TEMPERATURE}/>
+                    <input id="default-radio-1" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.TEMPERATURE)} checked={heatmapType === HeatmapType.TEMPERATURE}/>
                     <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza temperatura </label>
                 </div>
                 <div className="flex items-center">
-                  <input id="default-radio-2" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.PRESSURE)} checked={heatmapType == HeatmapType.PRESSURE}/>
+                  <input id="default-radio-2" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.PRESSURE)} checked={heatmapType === HeatmapType.PRESSURE}/>
                     <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza pressione</label>
                 </div>
                 <div className="flex items-center">
-                  <input id="default-radio-3" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.HUMIDITY)} checked={heatmapType == HeatmapType.HUMIDITY}/>
+                  <input id="default-radio-3" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.HUMIDITY)} checked={heatmapType === HeatmapType.HUMIDITY}/>
                     <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza umidità</label>
                 </div>
                 <div className="flex items-center">
-                  <input id="default-radio-4" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.ECO2)} checked={heatmapType == HeatmapType.ECO2}/>
+                  <input id="default-radio-4" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.ECO2)} checked={heatmapType === HeatmapType.ECO2}/>
                     <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza CO2</label>
                 </div>
                 <div className="flex items-center">
-                  <input id="default-radio-5" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.TVOC)} checked={heatmapType == HeatmapType.TVOC}/>
+                  <input id="default-radio-5" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.TVOC)} checked={heatmapType === HeatmapType.TVOC}/>
                     <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza TVOC</label>
                 </div>
                 <div className="flex items-center">
-                  <input id="default-radio-6" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.AQI)} checked={heatmapType == HeatmapType.AQI}/>
+                  <input id="default-radio-6" type="radio" value="" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setHeatmapType(HeatmapType.AQI)} checked={heatmapType === HeatmapType.AQI}/>
                     <label className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza qualità dell'aria</label>
                 </div>
               </div>
