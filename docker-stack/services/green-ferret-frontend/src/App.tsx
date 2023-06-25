@@ -164,10 +164,14 @@ function App() {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis dataKey="name" tick={{ fontSize: 12 }} dy={10} />
 
-          {lineChartState.pv && <YAxis dataKey="pv" yAxisId="pv" stroke="#8884d8" orientation="left" />}
-          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="uv" stroke="#82ca9d" orientation="left" />}
+          {lineChartState.pv && <YAxis dataKey="pv" yAxisId="pv" stroke="#8884d8" orientation="left" tick={{ fontSize: 12 }} />}
+          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="uv" stroke="#82ca9d" orientation="left" tick={{ fontSize: 12 }} />}
+          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="1" stroke="#82ca9d" orientation="left" tick={{ fontSize: 12 }} />}
+          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="2" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
+          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="3" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
+          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="4" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
 
           <Tooltip />
           <Legend />
@@ -203,12 +207,16 @@ function App() {
     );
   };
 
+  // State checkboxes for the bar chart
+  const [barChartState, setBarChartState] = React.useState(true);
+
   return (
     <div className="App">
-      <div className="flex flex-col h-fit p-4 gap-2">
+      {/* First section */}
+      <div className="flex flex-col h-screen p-4 gap-4">
         <h1 className="text-4xl font-bold text-left text-green-600">Green Ferrett</h1>
-        <div className="flex flex-row items-center justify-center gap-2">
-          <div className="w-4/5 aspect-video rounded-lg border-2 border-green-600 overflow-hidden">
+        <div className="flex flex-row h-full items-center justify-center gap-2">
+          <div className="w-4/5 h-full rounded-lg border-2 border-green-600 overflow-hidden">
             <MapContainer style={{
               height: "100%",
             }} center={[45.64651, 12.251473]} zoom={13} scrollWheelZoom={true}>
@@ -234,7 +242,7 @@ function App() {
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             </MapContainer>
           </div>
-          <div className="w-1/5 rounded-lg">
+          <div className="w-1/5">
             <div className="flex flex-col h-full gap-2">
               {/* Time selection */}
               <div className="flex flex-col gap-2 m-4">
@@ -293,63 +301,147 @@ function App() {
             </div>
           </div>
         </div>
-
-        <div className="flex h-1/2 items-center justify-center gap-2 m-4">
-          <div className="w-4/5 h-full rounded-lg">
-            {renderLineChart()}
-          </div>
-          <div className="w-1/5 h-full rounded-lg">
-            <div className="flex flex-col h-full gap-2">
-              <div className="flex flex-col gap-2 m-4">
-                <h2 className="text-2xl font-bold text-left text-blue-500">Checkbox chart</h2>
-                <div className="flex items-center">
-                  {lineChartState.pv ?
-                    (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setLineChartState({ ...lineChartState, pv: !lineChartState.pv })} />)
-                    : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setLineChartState({ ...lineChartState, pv: !lineChartState.pv })} />)}
-                  <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+      </div>
+      {/* Second section */}
+      <div className="flex flex-col p-4 gap-4 text-green-600">
+        <h1 className="text-4xl font-bold text-left">Green Ferrett</h1>
+        {/* Button switch chart visualization */}
+        <label className="flex mx-auto items-center gap-4 cursor-pointer text-xl font-bold">
+          {
+            barChartState ?
+              <span>Visualizzazione compatta</span>
+              : <span className="text-slate-400">Visualizzazione compatta</span>
+          }
+          <span className="relative">
+            <input id="Toggle1" type="checkbox" className="hidden peer" onClick={() => setBarChartState(!barChartState)} />
+            <div className="w-12 h-6 rounded-full shadow-inner bg-green-600"></div>
+            <div className="absolute inset-y-0 left-0 w-4 h-4 m-1 rounded-full shadow peer-checked:right-0 peer-checked:left-auto bg-white"></div>
+          </span>
+          {
+            !barChartState ?
+              <span>Visualizzazione estesa</span>
+              : <span className="text-slate-400">Visualizzazione estesa</span>
+          }
+        </label>
+        {/* Chart */}
+        {
+          barChartState ?
+            <div className="flex flex-row h-full items-center justify-center gap-2">
+              {/* Line chart */}
+              <div className="w-5/6 m-4 aspect-[6/3]">
+                {renderLineChart()}
+              </div>
+              <div className="w-1/6 h-full">
+                {/* Checkbox chart */}
+                <div className="flex flex-col h-full gap-2 m-4">
+                  <h2 className="text-2xl font-bold text-left text-green-600">Filtro grafico</h2>
+                  <div className="flex items-center">
+                    {lineChartState.pv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, pv: !lineChartState.pv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, pv: !lineChartState.pv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
+                  <div className="flex items-center">
+                    {lineChartState.uv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
+                  <div className="flex items-center">
+                    {lineChartState.uv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
+                  <div className="flex items-center">
+                    {lineChartState.uv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
+                  <div className="flex items-center">
+                    {lineChartState.uv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
+                  <div className="flex items-center">
+                    {lineChartState.uv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  {lineChartState.uv ?
-                    (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
-                    : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
-                  <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 2</label>
-                </div>
-
               </div>
             </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div className="flex flex-col p-4 gap-2">
-        <h1 className="text-4xl font-bold text-left text-blue-500">Green Ferrett - Heatmap</h1>
-        <div className="grid grid-cols-2 h-screen p-2 gap-2">
-          <div className="items-center justify-center gap-2 m-4">
-            <div className="h-3/4 rounded-lg">
-              {renderLineChartSync(["uv", "sync"])}
-              <p className="text-md font-bold text-left text-blue-500 m-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl sit amet nunc. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl sit amet nunc.</p>
+            :
+            <div className="flex flex-row h-full items-center justify-center gap-2">
+              <div className="w-5/6 h-full">
+                <div className="grid grid-cols-2 h-screen p-2 gap-2">
+                  <div className="m-4 aspect-[6/3]">
+                    {renderLineChartSync(["uv", "sync"])}
+                  </div>
+                  <div className="m-4 aspect-[6/3]">
+                    {renderLineChartSync(["pv", "sync"])}
+                  </div>
+                  <div className="m-4 aspect-[6/3]">
+                    {renderLineChartSync(["amt", "sync"])}
+                  </div>
+                  <div className="m-4 aspect-[6/3]">
+                    {renderLineChartSync(["pv", "sync"])}
+                  </div>
+                  <div className="m-4 aspect-[6/3]">
+                    {renderLineChartSync(["pv", "sync"])}
+                  </div>
+                  <div className="m-4 aspect-[6/3]">
+                    {renderLineChartSync(["pv", "sync"])}
+                  </div>
+                </div>
+              </div>
+              <div className="w-1/6 h-full">
+                {/* Checkbox chart */}
+                <div className="flex flex-col h-full gap-2 m-4">
+                  <h2 className="text-2xl font-bold text-left text-green-600">Filtro grafico</h2>
+                  <div className="flex items-center">
+                    {lineChartState.pv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, pv: !lineChartState.pv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, pv: !lineChartState.pv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
+                  <div className="flex items-center">
+                    {lineChartState.uv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
+                  <div className="flex items-center">
+                    {lineChartState.uv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
+                  <div className="flex items-center">
+                    {lineChartState.uv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
+                  <div className="flex items-center">
+                    {lineChartState.uv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
+                  <div className="flex items-center">
+                    {lineChartState.uv ?
+                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
+                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="items-center justify-center gap-2 m-4">
-            <div className="h-3/4 rounded-lg">
-              {renderLineChartSync(["pv", "sync"])}
-              <p className="text-md font-bold text-left text-blue-500 m-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl sit amet nunc. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl sit amet nunc.</p>
-            </div>
-          </div>
-          <div className="items-center justify-center gap-2 m-4">
-            <div className="h-3/4 rounded-lg">
-              {renderLineChartSync(["amt", "sync"])}
-              <p className="text-md font-bold text-left text-blue-500 m-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl sit amet nunc. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl sit amet nunc.</p>
-            </div>
-          </div>
-          <div className="items-center justify-center gap-2 m-4">
-            <div className="h-3/4 rounded-lg">
-              {renderLineChartSync(["pv", "sync"])}
-              <p className="text-md font-bold text-left text-blue-500 m-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl sit amet nunc. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nisl sit amet nunc.</p>
-            </div>
-          </div>
-        </div>
+        }
       </div>
     </div>
   );
