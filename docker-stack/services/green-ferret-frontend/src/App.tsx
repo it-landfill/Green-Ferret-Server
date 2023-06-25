@@ -13,17 +13,16 @@ const HeatmapLayer = HeatmapLayerFactory<[number, number, number]>()
 
 function App() {
 
-  // Index of the data points array 
+  // Index of the data points array.
   const [dataPointsIndex, setDataPointsIndex] = React.useState(0);
-  // State of the data points index cycle
-  const [dataPointsIndexCycleState, setDataPointsIndexCycleState] = React.useState(false);
-  let indexCycleFunction: any = null;
   let dataPointsIndexCycle: number = 0;
-
-  // Array with data points for the heatmap (can change over time) 
+  // State of the data points index cycle (if true, the index will cycle through the data points array).
+  const [dataPointsIndexCycleState, setDataPointsIndexCycleState] = React.useState(false);
+  // Variable for the setInterval function (to be able to clear it).
+  let indexCycleFunction: any = null;
+  // Array with data points (each element is a dictionary with the data of a specific source).
   const [dataPoints, setDataPoints] = React.useState<InfluxAccess.Measurement[][]>([]);
-
-  // Enum for the heatmap type
+  // Enum for the selected heatmap type.
   enum HeatmapType {
     TEMPERATURE = "temperature",
     PRESSURE = "pressure",
@@ -32,72 +31,69 @@ function App() {
     TVOC = "tvoc",
     AQI = "aqi",
   }
-
-  // State of the heatmap type
+  // State of the heatmap type.
   const [heatmapType, setHeatmapType] = React.useState<HeatmapType>(HeatmapType.TEMPERATURE);
 
-
+  /**
+   *  Function to get the data from the server and aggregate it in the dataPoints array.
+   */
   async function getDataServer() {
-    // Get data from time slot form 
+    // Get data from time slot form data.
     const dateStart = (document.getElementById("dateStart") as HTMLInputElement).value;
     const timeStart = (document.getElementById("timeStart") as HTMLInputElement).value;
     const timeSpan = (document.getElementById("timeSpan") as HTMLInputElement).value;
-
+    // Parse the data to get the start and end date.
     const parsedSpan: number = parseInt(timeSpan);
     const parsedStartDate = new Date(dateStart + "T" + timeStart);
     parsedStartDate.setMinutes(parsedStartDate.getMinutes() - parsedSpan);
     const parsedEndDate = new Date(dateStart + "T" + timeStart);
     parsedEndDate.setMinutes(parsedEndDate.getMinutes() + parsedSpan);
-
+    // Get data from the server.
     const data = await InfluxAccess.getData(parsedStartDate, parsedEndDate);
-
-    // Number of frames for the animation
+    // Number of frames to aggregate the data.
     const nFrames = 20;
-
-    // Time span of each frame (in milliseconds)
-    const timeFrame = data[data.length - 1].time.getTime() - data[0].time.getTime()
-    const frameSpan = timeFrame / nFrames;
-
-    // Aggregate inside different arrays data with the same time
+    // Time span of each frame (in milliseconds).
+    const timeFrame = data[data.length - 1].time.getTime() - data[0].time.getTime();
+    // Aggregate inside different arrays data with the same time frame.
     let dataAggregated: InfluxAccess.Measurement[][] = [];
-
+    // The first element of the array is the first data point of the data array.
     let startDate: number = data[0].time.getTime();
     dataAggregated[0] = [data[0]];
-
     for (let i = 1; i < data.length; i++) {
-      //(time-minTime):(maxTime-minTime)=x:maxFrames -> x = (time-minTime)*maxFrames/(maxTime-minTime)
+      // Calculate the index of the data point in the dataAggregated array.
+      // (time-minTime) : (maxTime-minTime) = x : maxFrames -> x = (time-minTime) * maxFrames / (maxTime-minTime)
       const index = Math.trunc((data[i].time.getTime() - startDate) * nFrames / timeFrame);
-
+      // If the index is not in the array, create a new cell.
       if (dataAggregated[index] == null) dataAggregated[index] = []
-
       dataAggregated[index].push(data[i]);
     }
-
-    // Merge last element with previous cell
+    // Merge last element with previous cell.
     const last = dataAggregated.pop();
-    if (last && last.length > 0) {
-      dataAggregated[dataAggregated.length - 1].push(last[0]);
-    }
-
+    if (last && last.length > 0) dataAggregated[dataAggregated.length - 1].push(last[0]);
+    // Update the data points array.
     setDataPoints(dataAggregated);
   };
 
-  // Use effect for the data points index cycle (if the state is true, the index will cycle through the data points array)
+  // Use effect for the data points index cycle (if the state is true, the index will cycle through the data points array).
   React.useEffect(() => {
     if (dataPointsIndexCycleState) {
-      indexCycleFunction = setInterval(() => {
-        // cycle through the data points index
-        if (dataPointsIndexCycle !== dataPoints.length - 1) dataPointsIndexCycle += 1;
-        else dataPointsIndexCycle = 0;
-        setDataPointsIndex(dataPointsIndexCycle);
-      }, 1500);
+      // Cycle through the data points index every second.
+      indexCycleFunction =
+        setInterval(() => {
+          if (dataPointsIndexCycle !== dataPoints.length - 1) dataPointsIndexCycle += 1;
+          else dataPointsIndexCycle = 0;
+          setDataPointsIndex(dataPointsIndexCycle);
+        }, 1000);
     } else clearInterval(indexCycleFunction);
+    // Clear the interval when the component is unmounted.
     return () => clearInterval(indexCycleFunction);
   }, [dataPointsIndexCycleState]);
 
-  const [data, setData] = React.useState<InfluxAccess.Measurement[]>([]);
+  /**********************************************************************************************************/
 
-  // State checkboxes for the line chart
+  // State of the data points for the line chart.
+  const [dataPointsLineChart, setDataPointsLineChart] = React.useState<InfluxAccess.Measurement[]>([]);
+  // State checkboxes for the line chart (true if the checkbox is checked).
   const [lineChartState, setLineChartState] = React.useState({
     temperature: true,
     pressure: true,
@@ -106,21 +102,39 @@ function App() {
     tvoc: true,
     aqi: true,
   });
+  // State checkboxes for the bar chart
+  const [barChartState, setBarChartState] = React.useState(true);
 
+  /**
+   * Change the data points structure to be able to use it in the line chart (each data point is a dictionary).
+   * 
+   * @param dataPoints Array of data points.
+   */
   function flattenDataPoints(dataPoints: InfluxAccess.Measurement[][]) {
+    // Flatten the data points array.
     let flattenedDataPoints: InfluxAccess.Measurement[] = [];
+    // For each data point, add it to the flattened array.
     dataPoints.forEach((dataPoint) => {
       dataPoint.forEach((measurement) => {
         flattenedDataPoints.push(measurement);
       });
     });
-    // console.log(flattenedDataPoints);
-    setData(flattenedDataPoints);
+    // Update the data points state.
+    setDataPointsLineChart(flattenedDataPoints);
   }
 
+  /**
+   * Change the data points structure to be able to use it in the line chart (each data point is a dictionary 
+   * with the mean of the data points of the same time frame).
+   * 
+   * @param dataPoints Array of data points.
+   */
   function meanDataPoints(dataPoints: InfluxAccess.Measurement[][]) {
+    // Flatten the data points array.
     let meanDataPoints: InfluxAccess.Measurement[] = [];
+    // For each data point, add it to the flattened array.
     dataPoints.forEach((dataPoint) => {
+      // Calculate the mean of the data points.
       let meanMeasurement: InfluxAccess.Measurement = {
         latitude: 0,
         longitude: 0,
@@ -148,13 +162,12 @@ function App() {
       meanMeasurement.aqi /= dataPoint.length;
       meanDataPoints.push(meanMeasurement);
     });
-    // console.log(meanDataPoints);
-    setData(meanDataPoints);
+    // Update the data points state.
+    setDataPointsLineChart(meanDataPoints);
   }
 
-
   // Use effect for the line chart state (if the state changes, the line chart will be updated)
-  React.useEffect(() => { 
+  React.useEffect(() => {
     // flattenDataPoints(dataPoints);
     meanDataPoints(dataPoints);
     renderLineChart();
@@ -164,7 +177,7 @@ function App() {
     return (
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
-          data={data}
+          data={dataPointsLineChart}
           margin={{
             top: 5,
             right: 30,
@@ -199,7 +212,7 @@ function App() {
     return (
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
-          data={data}
+          data={dataPointsLineChart}
           syncId={id[1]}
           margin={{
             top: 5,
@@ -209,7 +222,7 @@ function App() {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis dataKey="time" />
           <YAxis dataKey={id[0]} yAxisId={id[0]} orientation="left" />
 
           <Tooltip />
@@ -220,8 +233,7 @@ function App() {
     );
   };
 
-  // State checkboxes for the bar chart
-  const [barChartState, setBarChartState] = React.useState(true);
+
 
   return (
     <div className="App">
