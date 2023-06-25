@@ -95,59 +95,68 @@ function App() {
     return () => clearInterval(indexCycleFunction);
   }, [dataPointsIndexCycleState]);
 
-  const data = [
-    {
-      name: 'Page A',
-      uv: 4000,
-      pv: 2400,
-      amt: 2400,
-    },
-    {
-      name: 'Page B',
-      uv: 3000,
-      pv: 1398,
-      amt: 2210,
-    },
-    {
-      name: 'Page C',
-      uv: 2000,
-      pv: 9800,
-      amt: 2290,
-    },
-    {
-      name: 'Page D',
-      uv: 2780,
-      pv: 3908,
-      amt: 2000,
-    },
-    {
-      name: 'Page E',
-      uv: 1890,
-      pv: 4800,
-      amt: 2181,
-    },
-    {
-      name: 'Page F',
-      uv: 2390,
-      pv: 3800,
-      amt: 2500,
-    },
-    {
-      name: 'Page G',
-      uv: 3490,
-      pv: 4300,
-      amt: 2100,
-    },
-  ];
+  const [data, setData] = React.useState<InfluxAccess.Measurement[]>([]);
 
   // State checkboxes for the line chart
   const [lineChartState, setLineChartState] = React.useState({
-    pv: true,
-    uv: true,
+    temperature: true,
+    pressure: true,
+    humidity: true,
+    eco: true,
+    tvoc: true,
+    aqi: true,
   });
 
+  function flattenDataPoints(dataPoints: InfluxAccess.Measurement[][]) {
+    let flattenedDataPoints: InfluxAccess.Measurement[] = [];
+    dataPoints.forEach((dataPoint) => {
+      dataPoint.forEach((measurement) => {
+        flattenedDataPoints.push(measurement);
+      });
+    });
+    // console.log(flattenedDataPoints);
+    setData(flattenedDataPoints);
+  }
+
+  function meanDataPoints(dataPoints: InfluxAccess.Measurement[][]) {
+    let meanDataPoints: InfluxAccess.Measurement[] = [];
+    dataPoints.forEach((dataPoint) => {
+      let meanMeasurement: InfluxAccess.Measurement = {
+        latitude: 0,
+        longitude: 0,
+        time: dataPoint[0].time,
+        temperature: 0,
+        pressure: 0,
+        humidity: 0,
+        eco2: 0,
+        tvoc: 0,
+        aqi: 0,
+      };
+      dataPoint.forEach((measurement) => {
+        meanMeasurement.temperature += measurement.temperature;
+        meanMeasurement.pressure += measurement.pressure;
+        meanMeasurement.humidity += measurement.humidity;
+        meanMeasurement.eco2 += measurement.eco2;
+        meanMeasurement.tvoc += measurement.tvoc;
+        meanMeasurement.aqi += measurement.aqi;
+      });
+      meanMeasurement.temperature /= dataPoint.length;
+      meanMeasurement.pressure /= dataPoint.length;
+      meanMeasurement.humidity /= dataPoint.length;
+      meanMeasurement.eco2 /= dataPoint.length;
+      meanMeasurement.tvoc /= dataPoint.length;
+      meanMeasurement.aqi /= dataPoint.length;
+      meanDataPoints.push(meanMeasurement);
+    });
+    // console.log(meanDataPoints);
+    setData(meanDataPoints);
+  }
+
+
   // Use effect for the line chart state (if the state changes, the line chart will be updated)
-  React.useEffect(() => {
+  React.useEffect(() => { 
+    // flattenDataPoints(dataPoints);
+    meanDataPoints(dataPoints);
     renderLineChart();
   }, [lineChartState]);
 
@@ -164,19 +173,23 @@ function App() {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" tick={{ fontSize: 12 }} dy={10} />
+          <XAxis dataKey="time" tick={{ fontSize: 12 }} dy={10} />
 
-          {lineChartState.pv && <YAxis dataKey="pv" yAxisId="pv" stroke="#8884d8" orientation="left" tick={{ fontSize: 12 }} />}
-          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="uv" stroke="#82ca9d" orientation="left" tick={{ fontSize: 12 }} />}
-          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="1" stroke="#82ca9d" orientation="left" tick={{ fontSize: 12 }} />}
-          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="2" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
-          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="3" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
-          {lineChartState.uv && <YAxis dataKey="uv" yAxisId="4" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
+          {lineChartState.temperature && <YAxis dataKey="temperature" yAxisId="temperature" stroke="#8884d8" orientation="left" tick={{ fontSize: 12 }} />}
+          {lineChartState.pressure && <YAxis dataKey="pressure" yAxisId="pressure" stroke="#82ca9d" orientation="left" tick={{ fontSize: 12 }} />}
+          {lineChartState.humidity && <YAxis dataKey="humidity" yAxisId="humidity" stroke="#82ca9d" orientation="left" tick={{ fontSize: 12 }} />}
+          {lineChartState.eco && <YAxis dataKey="eco" yAxisId="eco" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
+          {lineChartState.tvoc && <YAxis dataKey="tvoc" yAxisId="tvoc" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
+          {lineChartState.aqi && <YAxis dataKey="aqi" yAxisId="aqi" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
 
           <Tooltip />
           <Legend />
-          {lineChartState.pv && <Line type="monotone" dataKey="pv" yAxisId="pv" stroke="#8884d8" activeDot={{ r: 6 }} />}
-          {lineChartState.uv && <Line type="monotone" dataKey="uv" yAxisId="uv" stroke="#82ca9d" activeDot={{ r: 6 }} />}
+          {lineChartState.temperature && <Line type="monotone" dataKey="temperature" yAxisId="temperature" stroke="#8884d8" activeDot={{ r: 6 }} />}
+          {lineChartState.pressure && <Line type="monotone" dataKey="pressure" yAxisId="pressure" stroke="#82ca9d" activeDot={{ r: 6 }} />}
+          {lineChartState.humidity && <Line type="monotone" dataKey="humidity" yAxisId="humidity" stroke="#82ca9d" activeDot={{ r: 6 }} />}
+          {lineChartState.eco && <Line type="monotone" dataKey="eco" yAxisId="eco" stroke="#82ca9d" activeDot={{ r: 6 }} />}
+          {lineChartState.tvoc && <Line type="monotone" dataKey="tvoc" yAxisId="tvoc" stroke="#82ca9d" activeDot={{ r: 6 }} />}
+          {lineChartState.aqi && <Line type="monotone" dataKey="aqi" yAxisId="aqi" stroke="#82ca9d" activeDot={{ r: 6 }} />}
         </LineChart>
       </ResponsiveContainer>
     );
@@ -336,40 +349,40 @@ function App() {
                 <div className="flex flex-col h-full gap-2 m-4">
                   <h2 className="text-2xl font-bold text-left text-green-600">Filtro grafico</h2>
                   <div className="flex items-center">
-                    {lineChartState.pv ?
-                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, pv: !lineChartState.pv })} />)
-                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, pv: !lineChartState.pv })} />)}
-                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                    {lineChartState.temperature ?
+                      (<input checked id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, temperature: !lineChartState.temperature })} />)
+                      : (<input id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, temperature: !lineChartState.temperature })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza temperatura</label>
                   </div>
                   <div className="flex items-center">
-                    {lineChartState.uv ?
-                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
-                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
-                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                    {lineChartState.pressure ?
+                      (<input checked id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, pressure: !lineChartState.pressure })} />)
+                      : (<input id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, pressure: !lineChartState.pressure })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza pressione</label>
                   </div>
                   <div className="flex items-center">
-                    {lineChartState.uv ?
-                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
-                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
-                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                    {lineChartState.humidity ?
+                      (<input checked id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, humidity: !lineChartState.humidity })} />)
+                      : (<input id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, humidity: !lineChartState.humidity })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza umidità</label>
                   </div>
                   <div className="flex items-center">
-                    {lineChartState.uv ?
-                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
-                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
-                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                    {lineChartState.eco ?
+                      (<input checked id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, eco: !lineChartState.eco })} />)
+                      : (<input id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, eco: !lineChartState.eco })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza CO2</label>
                   </div>
                   <div className="flex items-center">
-                    {lineChartState.uv ?
-                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
-                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
-                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                    {lineChartState.tvoc ?
+                      (<input checked id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, tvoc: !lineChartState.tvoc })} />)
+                      : (<input id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, tvoc: !lineChartState.tvoc })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza TVOC</label>
                   </div>
                   <div className="flex items-center">
-                    {lineChartState.uv ?
-                      (<input checked id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)
-                      : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
-                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
+                    {lineChartState.aqi ?
+                      (<input checked id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300 accent-green-600" onChange={() => setLineChartState({ ...lineChartState, aqi: !lineChartState.aqi })} />)
+                      : (<input id="default-checkbox" type="checkbox" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, aqi: !lineChartState.aqi })} />)}
+                    <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza qualità dell'aria</label>
                   </div>
                 </div>
               </div>
@@ -399,7 +412,7 @@ function App() {
                 </div>
               </div>
               <div className="w-1/6 h-full">
-                {/* Checkbox chart */}
+                {/* Checkbox chart 
                 <div className="flex flex-col h-full gap-2 m-4">
                   <h2 className="text-2xl font-bold text-left text-green-600">Filtro grafico</h2>
                   <div className="flex items-center">
@@ -438,7 +451,7 @@ function App() {
                       : (<input id="default-checkbox" type="checkbox" value="" className="w-4 h-4 bg-gray-100 border-gray-300" onChange={() => setLineChartState({ ...lineChartState, uv: !lineChartState.uv })} />)}
                     <label htmlFor="default-checkbox" className="ml-3 text-md font-medium text-gray-900 dark:text-gray-600">Visualizza la linea 1</label>
                   </div>
-                </div>
+                </div>*/}
               </div>
             </div>
         }
