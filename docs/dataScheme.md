@@ -26,4 +26,4 @@
 
 # Drop data
 
-influx delete --bucket Green-Ferret --start '1970-01-01T00:00:00Z' --stop \$(date +"%Y-%m-%dT%H:%M:%SZ") --predicate '\_measurement="AJERJE"
+influx delete --bucket Green-Ferret --start '1970-01-01T00:00:00Z' --stop '2023-12-10T00:00:00Z' --predicate 'source="http-agent"'
