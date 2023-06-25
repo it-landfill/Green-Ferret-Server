@@ -162,6 +162,7 @@ function App() {
       meanMeasurement.aqi /= dataPoint.length;
       meanDataPoints.push(meanMeasurement);
     });
+
     // Update the data points state.
     setDataPointsLineChart(meanDataPoints);
   }
@@ -191,7 +192,7 @@ function App() {
           {lineChartState.temperature && <YAxis dataKey="temperature" yAxisId="temperature" stroke="#8884d8" orientation="left" tick={{ fontSize: 12 }} />}
           {lineChartState.pressure && <YAxis dataKey="pressure" yAxisId="pressure" stroke="#82ca9d" orientation="left" tick={{ fontSize: 12 }} />}
           {lineChartState.humidity && <YAxis dataKey="humidity" yAxisId="humidity" stroke="#CA829D" orientation="left" tick={{ fontSize: 12 }} />}
-          {lineChartState.eco && <YAxis dataKey="eco" yAxisId="eco" stroke="#9D82CA" orientation="right" tick={{ fontSize: 12 }} />}
+          {lineChartState.eco && <YAxis dataKey="eco2" yAxisId="eco" stroke="#9D82CA" orientation="right" tick={{ fontSize: 12 }} />}
           {lineChartState.tvoc && <YAxis dataKey="tvoc" yAxisId="tvoc" stroke="#CA9D82" orientation="right" tick={{ fontSize: 12 }} />}
           {lineChartState.aqi && <YAxis dataKey="aqi" yAxisId="aqi" stroke="#6342FC" orientation="right" tick={{ fontSize: 12 }} />}
 
@@ -200,7 +201,7 @@ function App() {
           {lineChartState.temperature && <Line type="monotone" dataKey="temperature" yAxisId="temperature" stroke="#8884d8" activeDot={{ r: 6 }} />}
           {lineChartState.pressure && <Line type="monotone" dataKey="pressure" yAxisId="pressure" stroke="#82ca9d" activeDot={{ r: 6 }} />}
           {lineChartState.humidity && <Line type="monotone" dataKey="humidity" yAxisId="humidity" stroke="#CA829D" activeDot={{ r: 6 }} />}
-          {lineChartState.eco && <Line type="monotone" dataKey="eco" yAxisId="eco" stroke="#9D82CA" activeDot={{ r: 6 }} />}
+          {lineChartState.eco && <Line type="monotone" dataKey="eco2" yAxisId="eco" stroke="#9D82CA" activeDot={{ r: 6 }} />}
           {lineChartState.tvoc && <Line type="monotone" dataKey="tvoc" yAxisId="tvoc" stroke="#CA9D82" activeDot={{ r: 6 }} />}
           {lineChartState.aqi && <Line type="monotone" dataKey="aqi" yAxisId="aqi" stroke="#6342FC" activeDot={{ r: 6 }} />}
         </LineChart>
@@ -413,7 +414,7 @@ function App() {
                     {renderLineChartSync(["humidity", "sync"])}
                   </div>
                   <div className="m-4 aspect-[6/3]">
-                    {renderLineChartSync(["eco", "sync"])}
+                    {renderLineChartSync(["eco2", "sync"])}
                   </div>
                   <div className="m-4 aspect-[6/3]">
                     {renderLineChartSync(["tvoc", "sync"])}
