@@ -177,19 +177,19 @@ function App() {
 
           {lineChartState.temperature && <YAxis dataKey="temperature" yAxisId="temperature" stroke="#8884d8" orientation="left" tick={{ fontSize: 12 }} />}
           {lineChartState.pressure && <YAxis dataKey="pressure" yAxisId="pressure" stroke="#82ca9d" orientation="left" tick={{ fontSize: 12 }} />}
-          {lineChartState.humidity && <YAxis dataKey="humidity" yAxisId="humidity" stroke="#82ca9d" orientation="left" tick={{ fontSize: 12 }} />}
-          {lineChartState.eco && <YAxis dataKey="eco" yAxisId="eco" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
-          {lineChartState.tvoc && <YAxis dataKey="tvoc" yAxisId="tvoc" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
-          {lineChartState.aqi && <YAxis dataKey="aqi" yAxisId="aqi" stroke="#82ca9d" orientation="right" tick={{ fontSize: 12 }} />}
+          {lineChartState.humidity && <YAxis dataKey="humidity" yAxisId="humidity" stroke="#CA829D" orientation="left" tick={{ fontSize: 12 }} />}
+          {lineChartState.eco && <YAxis dataKey="eco" yAxisId="eco" stroke="#9D82CA" orientation="right" tick={{ fontSize: 12 }} />}
+          {lineChartState.tvoc && <YAxis dataKey="tvoc" yAxisId="tvoc" stroke="#CA9D82" orientation="right" tick={{ fontSize: 12 }} />}
+          {lineChartState.aqi && <YAxis dataKey="aqi" yAxisId="aqi" stroke="#6342FC" orientation="right" tick={{ fontSize: 12 }} />}
 
           <Tooltip />
           <Legend />
           {lineChartState.temperature && <Line type="monotone" dataKey="temperature" yAxisId="temperature" stroke="#8884d8" activeDot={{ r: 6 }} />}
           {lineChartState.pressure && <Line type="monotone" dataKey="pressure" yAxisId="pressure" stroke="#82ca9d" activeDot={{ r: 6 }} />}
-          {lineChartState.humidity && <Line type="monotone" dataKey="humidity" yAxisId="humidity" stroke="#82ca9d" activeDot={{ r: 6 }} />}
-          {lineChartState.eco && <Line type="monotone" dataKey="eco" yAxisId="eco" stroke="#82ca9d" activeDot={{ r: 6 }} />}
-          {lineChartState.tvoc && <Line type="monotone" dataKey="tvoc" yAxisId="tvoc" stroke="#82ca9d" activeDot={{ r: 6 }} />}
-          {lineChartState.aqi && <Line type="monotone" dataKey="aqi" yAxisId="aqi" stroke="#82ca9d" activeDot={{ r: 6 }} />}
+          {lineChartState.humidity && <Line type="monotone" dataKey="humidity" yAxisId="humidity" stroke="#CA829D" activeDot={{ r: 6 }} />}
+          {lineChartState.eco && <Line type="monotone" dataKey="eco" yAxisId="eco" stroke="#9D82CA" activeDot={{ r: 6 }} />}
+          {lineChartState.tvoc && <Line type="monotone" dataKey="tvoc" yAxisId="tvoc" stroke="#CA9D82" activeDot={{ r: 6 }} />}
+          {lineChartState.aqi && <Line type="monotone" dataKey="aqi" yAxisId="aqi" stroke="#6342FC" activeDot={{ r: 6 }} />}
         </LineChart>
       </ResponsiveContainer>
     );
@@ -392,22 +392,22 @@ function App() {
               <div className="w-5/6 h-full">
                 <div className="grid grid-cols-2 h-screen p-2 gap-2">
                   <div className="m-4 aspect-[6/3]">
-                    {renderLineChartSync(["uv", "sync"])}
+                    {renderLineChartSync(["temperature", "sync"])}
                   </div>
                   <div className="m-4 aspect-[6/3]">
-                    {renderLineChartSync(["pv", "sync"])}
+                    {renderLineChartSync(["pressure", "sync"])}
                   </div>
                   <div className="m-4 aspect-[6/3]">
-                    {renderLineChartSync(["amt", "sync"])}
+                    {renderLineChartSync(["humidity", "sync"])}
                   </div>
                   <div className="m-4 aspect-[6/3]">
-                    {renderLineChartSync(["pv", "sync"])}
+                    {renderLineChartSync(["eco", "sync"])}
                   </div>
                   <div className="m-4 aspect-[6/3]">
-                    {renderLineChartSync(["pv", "sync"])}
+                    {renderLineChartSync(["tvoc", "sync"])}
                   </div>
                   <div className="m-4 aspect-[6/3]">
-                    {renderLineChartSync(["pv", "sync"])}
+                    {renderLineChartSync(["aqi", "sync"])}
                   </div>
                 </div>
               </div>
