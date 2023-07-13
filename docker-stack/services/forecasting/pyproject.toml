@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "greenferret-prophet"
+name = "greenferret-forcasting"
 version = "0.1.0"
 description = ""
 authors = ["lorenzocrespan <lorenzo.crespan@gmail.com>"]
 readme = "README.md"
-packages = [{include = "greenferret_prophet"}]
+packages = [{include = "greenferret_forcasting"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
