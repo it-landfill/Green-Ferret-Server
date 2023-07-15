@@ -1,23 +1,11 @@
-import statsmodels.api as sm
-from statsmodels.tsa.arima.model import ARIMA
-from statsmodels.tsa.stattools import adfuller
-from statsmodels.graphics import tsaplots
+# Import the custom modules to query the InfluxDB database and to build the query.
+from influxdb_utils import influxdb_utils
+from influxdb_utils import influxdb_query_builder
+
+# Import the pandas library to create a DataFrame and the ARIMA model.
 import pandas as pd
-from influxdb_client import InfluxDBClient, Point, WriteOptions
-from influxdb_client.client.write_api import SYNCHRONOUS
-import time
-from datetime import datetime
-
-token = "mGXC9hh6IQXuFn6xvF41OZWesNIvfMFhVkJEm2fRXMzaDE7V56qUUS2obpmFLgI2QAkQOxHz02h0_D-y4VxqIQ=="
-bucket = "GreenFerret"
-org = "ITLandfill"
-client = InfluxDBClient(url="http://localhost:8086", token=token, org=org)
-
-# Function to set up the InfluxDB client and return the write and query APIs.
-def setup_influxdb_client():
-    query_api = client.query_api()
-    write_api = client.write_api(write_options=SYNCHRONOUS)
-    return write_api, query_api
+from statsmodels.tsa.arima.model import ARIMA
+import statsmodels.stats.api as sms
 
 # Function to query the InfluxDB database and return a DataFrame.
 def query_influxdb(query_api):
@@ -25,15 +13,9 @@ def query_influxdb(query_api):
     # Example query:
     #   From the bucket named "GreenFerret", select the "airSensors" measurement about "humidity" and 
     #   mean all the value from different sensors in the same period with a 5 minutes interval.
-    query = 'from(bucket: "GreenFerret")' \
-            '|> range(start:2023-07-13T00:00:00Z, stop:2023-07-13T19:00:00Z)' \
-            '|> filter(fn: (r) => r["_measurement"] == "airSensors")' \
-            '|> filter(fn: (r) => r["_field"] == "humidity")' \
-            '|> drop(columns: ["sensor_id"])' \
-            '|> aggregateWindow(every: 5m, fn: mean, createEmpty: false)' \
-            '|> yield(name: "mean")'
+    query = influxdb_query_builder.query_builder()
     # Execute the query and return the result.
-    result = client.query_api().query(org=org, query=query)
+    result = influxdb_utils.send_query(query_api, query)
     raw = []
     # Iterate over the result tables and records.
     for table in result:
@@ -47,101 +29,49 @@ def query_influxdb(query_api):
     df['ds'] = pd.to_datetime(df['ds']).dt.tz_localize(None)
     df['y'] = df['y'].to_numpy()
     df.set_index('ds', inplace=False)
-    ##########
-    nrows = (len(df.values))
-    print(nrows)
-    splitPoint = int(nrows * 0.80)
-    print(splitPoint)
-    train = df['y'][:splitPoint]
-    test = df['y'][splitPoint:]
-    print(train)
-    print(test)
-    # Reset the index of test 
+    return df
+
+def split_dataset(data, split_point = 0.80):
+    # Split the dataset into train and test sets.
+    splitPoint = int(len(data.values) * split_point)
+    train = df[:splitPoint]
+    test = df[splitPoint:]
+    # Reset the index of test (it is important to do this step, otherwise 
+    # the index of the test will produce an error when ARIMA is fitted).
     test.reset_index(drop=True, inplace=True)
-    print(test)
-    ###########
-    result = adfuller(train)
-    print('ADF Statistic: %f' % result[0])
-    print('p-value: %f' % result[1])
-    #Step 4: Find the differencing parameter (d)
+    return train, test
 
-    trainNew = train.diff().dropna()
-
-    result = adfuller(trainNew)
-    print('ADF Statistic: %f' % result[0])
-    print('p-value: %f' % result[1])
-
-    #######
-
-    history = [x for x in train]
+# Fit the model by instantiating a new ARIMA object and calling the fit() method.
+def fit_arima_model(train, test):
+    history = [x for x in train['y']]
     predictions = list()
+    predictions_confidence = list()
         
     for t in range(len(test)):
+        # TODO: Evaluate where to put the fit method (inside the loop or outside).
+        # TODO: Evaluate different sets of parameters.
         model = ARIMA(history, order=(1,1,1))
         model_fit = model.fit()
         output = model_fit.forecast()
         yest = output[0]
         predictions.append(yest)
-        obs = test[t] 
+        obs = test['y'][t]
         history.append(obs)
+        predictions_confidence.append(sms.DescrStatsW(predictions).tconfint_mean())
         print('predicted=%f, expected=%f' % (yest, obs))
-
-    return df
-
-# Fit the model by instantiating a new Prophet object and passing in the historical DataFrame.
-def fit_prophet_model(df):
-    model = sm.tsa.arima.ARIMA(df, order=(1,0,2))
-    # If there's some type of error, see: https://github.com/facebook/prophet/issues/1568#issuecomment-660328884
-    result = model.fit()
-    forecast = result.get_forecast(steps=10)
-    print(forecast)
+    # Generate a dataframe with the predictions as "yhat" and the time as "ds".
+    forecast = pd.DataFrame([predictions, test['ds']], index=['yhat', 'ds']).T
+    confidence_forecast = pd.DataFrame(predictions_confidence, columns=['yhat_lower', 'yhat_upper'])
+    forecast = pd.concat([forecast, confidence_forecast], axis=1)
+    # Order the columns of the dataframe.
+    forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
     return forecast
 
-# Function to convert the forecast Dataframe to Line Protocol, which is the format used by InfluxDB.
-def convert_forecast_to_list(forecast):
-    forecast['measurement'] = "views"
-    cp = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper','measurement']].copy()
-    lines = [str(cp["measurement"][d]) 
-         + ",type=forecast" 
-         + " " 
-         + "yhat=" + str(cp["yhat"][d]) + ","
-         + "yhat_lower=" + str(cp["yhat_lower"][d]) + ","
-         + "yhat_upper=" + str(cp["yhat_upper"][d])
-         + " " + str(int(time.mktime(cp['ds'][d].timetuple()))) + "000000000" for d in range(len(cp))
-    ]
-    return lines
-
-# Function to write the forecast to InfluxDB.
-def write_forecast_to_influxdb(write_api, lines):
-    # The default instance of WriteApi uses batching and writes to the InfluxDB 
-    # server only when the buffer is full.
-    # It is possible to change this behavior by setting the write_options parameter 
-    # of the WriteApi constructor.
-    #
-    # write_api = client.write_api(
-    #       write_options = WriteOptions(
-    #           batch_size = 10, 
-    #           flush_interval = 10_000, 
-    #           jitter_interval = 2_000, 
-    #           retry_interval = 5_000
-    #       )
-    # )
-    write_api.write(bucket, org, lines)
-
-# Function to close the InfluxDB client.
-def close_influxdb_client(client):
-    client.close()
-
 if __name__ == "__main__":
-    # Set up the InfluxDB client
-    write_api, query_api = setup_influxdb_client()
-    # Query the InfluxDB database
-    df = query_influxdb(query_api)
-    # Fit the Prophet model
-    # forecast = fit_prophet_model(df)
-    # Convert the forecast dataframe into a list of tuples
-    # lines = convert_forecast_to_list(forecast)
-    # Write the forecast to InfluxDB
-    # write_forecast_to_influxdb(write_api, lines)
-    # Close the InfluxDB client
-    close_influxdb_client(client)
+    write_api, query_api = influxdb_utils.setup_influxdb_client()   # Set up the InfluxDB client
+    df = query_influxdb(query_api)                                  # Query the InfluxDB database
+    train, test = split_dataset(df)                                 # Split the dataset into train and test sets
+    forecast = fit_arima_model(train, test)                         # Fit the Arima model and make predictions
+    lines = influxdb_utils.convert_forecast_to_list(forecast)       # Convert the forecast dataframe into a list of lines
+    # influxdb_utils.write_forecast_to_influxdb(write_api, lines)   # Write the forecast predictions to InfluxDB
+    influxdb_utils.close_influxdb_client()                          # Close the InfluxDB client
