@@ -1,7 +1,7 @@
-import {Context, NextFunction} from "grammy";
-import {ContextWithConfig, AccessElement, AuthorizationStatus} from "./types";
-import {BotCommand} from "grammy/types";
-import {Menu} from "@grammyjs/menu";
+import { Context, NextFunction } from "grammy";
+import { ContextWithConfig, AccessElement, AuthorizationStatus } from "./types";
+import { BotCommand } from "grammy/types";
+import { Menu } from "@grammyjs/menu";
 
 let authorizedIDs: AccessElement[] = [{
 	id: 49768658,
@@ -72,7 +72,7 @@ authMenu.register(groupMenu);
  * @param ctx Context
  * @param next Next function
  */
-export async function checkAuthentication(ctx : ContextWithConfig, next : NextFunction) {
+export async function checkAuthentication(ctx: ContextWithConfig, next: NextFunction) {
 	console.log("Checking authentication");
 
 	// Set the default config value
@@ -90,8 +90,8 @@ export async function checkAuthentication(ctx : ContextWithConfig, next : NextFu
 	// Get the chat ID
 	let chatID = 0
 	// Chat ID can be in the message or in the callback query depending on the update type
-	if (ctx.update.message !== undefined) chatID = ctx.update.message.chat.id;
-	else if (ctx.update.callback_query !== undefined && ctx.update.callback_query.message !== undefined) chatID = ctx.update.callback_query.message.chat.id;
+	if (ctx.update.message) chatID = ctx.update.message.chat.id;
+	else if (ctx.update.callback_query?.message) chatID = ctx.update.callback_query.message.chat.id;
 	else {
 		ctx.reply("Something went wrong. Please try again.");
 		return;
@@ -112,12 +112,40 @@ export async function checkAuthentication(ctx : ContextWithConfig, next : NextFu
 		};
 	}
 
+	// If the grouè chat is not authorized, also check for sender authorization
+	if (ctx.config.authorizationStatus != AuthorizationStatus.Authorized && (ctx.update.message?.chat.type === "group" || ctx.update.callback_query?.message?.chat.type === "group")) {
+		// Get the chat ID
+		let senderID = 0
+		// Chat ID can be in the message or in the callback query depending on the update type
+		if (ctx.update.message !== undefined) senderID = ctx.update.message.from.id;
+		else if (ctx.update.callback_query?.message?.from) senderID = ctx.update.callback_query.message.from.id;
+		else {
+			ctx.reply("Something went wrong. Please try again.");
+			return;
+		}
+
+		// Check if the chat is already authorized
+		if (authorizedIDs.find((u) => u.id === senderID) !== undefined) {
+			ctx.config = {
+				authorizationStatus: AuthorizationStatus.Authorized
+			};
+		} else if (pendingIDs.find((u) => u.id === senderID) !== undefined) {
+			ctx.config = {
+				authorizationStatus: AuthorizationStatus.Pending
+			};
+		} else {
+			ctx.config = {
+				authorizationStatus: AuthorizationStatus.Unauthorized
+			};
+		}
+	}
+
 	// Call the next middleware
 	await next();
 }
 
 // Handle authorization requests
-export async function requestAuthorization(ctx : ContextWithConfig) {
+export async function requestAuthorization(ctx: ContextWithConfig) {
 	console.log("Authorization request received");
 
 	// If the message is undefined, something went wrong
@@ -194,14 +222,14 @@ export async function requestAuthorization(ctx : ContextWithConfig) {
 	}
 }
 
-async function authorizeSelected(ctx : ContextWithConfig, element : AccessElement) {
+async function authorizeSelected(ctx: ContextWithConfig, element: AccessElement) {
 	console.log("Authorizing " + JSON.stringify(element));
 
 	// Remove the element from the pending list
 	pendingIDs = pendingIDs.filter((elem) => elem.id !== element.id);
 
 	// Add the element to the authorized list
-	authorizedIDs.push({...element, date: new Date()});
+	authorizedIDs.push({ ...element, date: new Date() });
 
 	switch (ctx.message?.chat.type || ctx.update.callback_query?.message?.chat.type) {
 		case "private":
@@ -214,11 +242,11 @@ async function authorizeSelected(ctx : ContextWithConfig, element : AccessElemen
 			console.log("Something went wrong");
 			ctx.api.sendMessage(element.id, "You have been authorized to use this bot.");
 	}
-	
+
 	ctx.editMessageText("You have succesfully authorized " + element.id + ".");
 }
 
-export async function authorize(ctx : ContextWithConfig) {
+export async function authorize(ctx: ContextWithConfig) {
 	console.log("Authorization grant received");
 
 	// If the message is undefined, something went wrong
@@ -232,5 +260,5 @@ export async function authorize(ctx : ContextWithConfig) {
 		return;
 	}
 
-	ctx.reply("Plesae select the user or group you want to authorize.", {reply_markup: authMenu});
+	ctx.reply("Plesae select the user or group you want to authorize.", { reply_markup: authMenu });
 }
