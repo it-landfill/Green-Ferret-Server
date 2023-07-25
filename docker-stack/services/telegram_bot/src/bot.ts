@@ -2,7 +2,7 @@ import {Bot} from "grammy";
 import {Menu, MenuRange} from "@grammyjs/menu";
 
 import {AuthorizationStatus, Config, ContextWithConfig} from "./types";
-import {AuthCommands, checkAuthentication, requestAuthorization} from "./authentication";
+import {authCommands, authMenu, authorize, checkAuthentication, requestAuthorization} from "./authentication";
 import { BotCommand } from "grammy/types";
 
 const config: Config = {
@@ -15,16 +15,17 @@ const baseCommands: BotCommand[] = [
 		description: "Start the bot"
 	},
 	{
-		command: "help",
-		description: "Show help screen"
+		command: "get_info",
+		description: "Get info on the current chat"
 	}
 ]
 
 // Create an instance of the `Bot` class and pass your bot token to it.
 const bot = new Bot<ContextWithConfig>(config.authToken);
 bot.use(checkAuthentication);
+bot.use(authMenu);
 
-bot.api.setMyCommands(baseCommands.concat(AuthCommands));
+bot.api.setMyCommands(baseCommands.concat(authCommands));
 
 // Handle the /start command.
 bot.command("start", (ctx) => {
@@ -54,8 +55,26 @@ bot.command("start", (ctx) => {
 	}
 });
 
+bot.command("get_info", (ctx) => {
+	// If the message is undefined, something went wrong
+	if (ctx.update.message === undefined) {
+		ctx.reply("Something went wrong. Please try again.");
+		return;
+	}
+
+	// Get the chat ID
+	let message = ctx.update.message;
+
+	if (message.chat.type === "private") {
+		ctx.reply(`Your ID is ${message.chat.id}`);
+	} else {
+		ctx.reply(`This chat ID is ${message.chat.id}`);
+	}
+})
+
 // Handle authorization requests
 bot.command("request_authorization", requestAuthorization);
+bot.command("authorize", authorize);
 
 // let menu = new Menu("dynamic"); bot.use(menu); menu.dynamic(() => { 	const range = new MenuRange(); 	authorizedUserIDs.forEach((i) => {
 // range.text(i.toString(), (ctx) => ctx.reply(`You chose ${i}`)).row(); 	}); 	console.log(range); 	return range; }); bot.command("authorize", (ctx)

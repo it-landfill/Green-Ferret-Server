@@ -1,7 +1,7 @@
 import {Context} from "grammy";
 
 export interface AccessElement {
-	id: Number;
+	id: number;
 	name: string | undefined;
 	date: Date;
 }
