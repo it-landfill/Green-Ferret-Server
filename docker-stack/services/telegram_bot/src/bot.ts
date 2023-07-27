@@ -2,10 +2,11 @@ import {Bot} from "grammy";
 import {Menu, MenuRange} from "@grammyjs/menu";
 
 import {AuthorizationStatus, Config, ContextWithConfig} from "./types";
-import {authCommands, authMenu, authorize, checkAuthentication, requestAuthorization} from "./authentication";
+import {authCommands, authMenu, manageAuthorizations, checkAuthentication, requestAuthorization} from "./authentication";
 import { BotCommand } from "grammy/types";
 
 const config: Config = {
+	//FIXME: This should be read from a file or DB
 	authToken: "6345939871:AAG2Tkzv9NDHKMAJebAlunBjhJIwkf-69r8"
 }
 
@@ -40,7 +41,7 @@ bot.command("start", (ctx) => {
 
 	// Reply with a custom message based on auth status
 	switch (ctx.config.authorizationStatus) {
-		case AuthorizationStatus.Authorized:
+		case AuthorizationStatus.Authorized:					
 			ctx.reply("Welcome to Green Ferret Bot. You are already authorized.");
 			break;
 		case AuthorizationStatus.Pending:
@@ -74,7 +75,7 @@ bot.command("get_info", (ctx) => {
 
 // Handle authorization requests
 bot.command("request_authorization", requestAuthorization);
-bot.command("authorize", authorize);
+bot.command("manage_authorizations", manageAuthorizations);
 
 // let menu = new Menu("dynamic"); bot.use(menu); menu.dynamic(() => { 	const range = new MenuRange(); 	authorizedUserIDs.forEach((i) => {
 // range.text(i.toString(), (ctx) => ctx.reply(`You chose ${i}`)).row(); 	}); 	console.log(range); 	return range; }); bot.command("authorize", (ctx)
