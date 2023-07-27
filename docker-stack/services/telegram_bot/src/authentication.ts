@@ -3,6 +3,8 @@ import { ContextWithConfig, AccessElement, AuthorizationStatus } from "./types";
 import { BotCommand } from "grammy/types";
 import { Menu } from "@grammyjs/menu";
 
+//TODO: Add authorization persistence
+//TODO: Implement menu obsolescence
 let authorizedIDs: AccessElement[] = [{
 	id: 49768658,
 	name: "aleben",
@@ -18,12 +20,71 @@ export const authCommands: BotCommand[] = [
 		command: "request_authorization",
 		description: "Request authorization to use the bot"
 	}, {
-		command: "authorize",
-		description: "Authorize a user or a group"
+		command: "manage_authorizations",
+		description: "Grant, list, or revoke authorization to a user or a group"
 	}
 ];
 
-const userMenu = new Menu<ContextWithConfig>("userMenu").dynamic((ctx, range) => {
+
+// ---- MENU DESIGN ----
+
+/**
+ * Main menu
+ */
+export const authMenu = new Menu<ContextWithConfig>("authMenu")
+	.submenu("List Authorizations", "listMenu").row()
+	.submenu("Grant Authorization", "grantMenu").row()
+	.submenu("Revoke Authorization", "revokeMenu").row()
+	.text("Cancel", (ctx) => {
+		ctx.menu.close();
+		ctx.editMessageText("Authorization process cancel")
+	});
+
+/**
+ * List auth menu
+ */
+const listMenu = new Menu<ContextWithConfig>("listMenu")
+	.text("List users", (ctx) => {
+		let message = "Authorized users:\n";
+		authorizedIDs
+			.filter((elem) => elem.id > 0)
+			.sort((a, b) => a.date.getTime() - b.date.getTime())
+			.forEach((elem) => {
+				message += `${elem.id} (${elem.name}) - ${elem.date.getFullYear()}/${elem.date.getMonth()}/${elem.date.getDate()}\n`;
+			});
+
+		ctx.reply(message);
+	}).row()
+	.text("List groups", (ctx) => {
+		let message = "Authorized groups:\n";
+		authorizedIDs
+			.filter((elem) => elem.id < 0)
+			.sort((a, b) => a.date.getTime() - b.date.getTime())
+			.forEach((elem) => {
+				message += `${elem.id} (${elem.name}) - ${elem.date.getFullYear()}/${elem.date.getMonth()}/${elem.date.getDate()}\n`;
+			});
+		ctx.reply(message);
+	}).row()
+	.back("Go Back").text("Cancel", (ctx) => {
+		ctx.menu.close();
+		ctx.editMessageText("Authorization process cancel")
+	});
+authMenu.register(listMenu);
+
+/**
+ * Auth grant menu
+ */
+const grantMenu = new Menu<ContextWithConfig>("grantMenu")
+	.submenu("Authorize User", "grantUserMenu").row()
+	.submenu("Authorize Group", "grantGroupMenu").row()
+	.back("Go Back")
+	.text("Cancel", (ctx) => {
+		ctx.menu.close();
+		ctx.editMessageText("Authorization process cancel")
+	});;
+authMenu.register(grantMenu);
+
+const grantUserMenu = new Menu<ContextWithConfig>("grantUserMenu").dynamic((ctx, range) => {
 	pendingIDs.filter((elem) => elem.id > 0).forEach((elem) => {
 		if (elem.name) {
 			range.text("@" + elem.name + " (" + elem.id + ")", (ctx) => {
@@ -43,13 +104,20 @@ const userMenu = new Menu<ContextWithConfig>("userMenu").dynamic((ctx, range) =>
 	ctx.menu.close();
 	ctx.editMessageText("Authorization process cancelled.");
 });
+grantMenu.register(grantUserMenu);
 
-const groupMenu = new Menu<ContextWithConfig>("groupMenu").dynamic((ctx, range) => {
+const grantGroupMenu = new Menu<ContextWithConfig>("grantGroupMenu").dynamic((ctx, range) => {
 	pendingIDs.filter((elem) => elem.id < 0).forEach((elem) => {
 		if (elem.name) {
-			range.text(elem.name + " (" + elem.id + ")", (ctx) => authorizeSelected(ctx, elem));
+			range.text(elem.name + " (" + elem.id + ")", (ctx) => {
+				ctx.menu.close();
+				authorizeSelected(ctx, elem)
+			});
 		} else {
-			range.text(elem.id.toString(), (ctx) => authorizeSelected(ctx, elem));
+			range.text(elem.id.toString(), (ctx) => {
+				ctx.menu.close();
+				authorizeSelected(ctx, elem);
+			});
 		}
 
 		range.row();
@@ -57,18 +125,70 @@ const groupMenu = new Menu<ContextWithConfig>("groupMenu").dynamic((ctx, range) 
 }).back("Go Back").text("Cancel", (ctx) => {
 	ctx.menu.close();
 	ctx.editMessageText("Authorization process cancel")
-});;
-
-export const authMenu = new Menu<ContextWithConfig>("authMenu").submenu("Authorize User", "userMenu").row().submenu("Authorize Group", "groupMenu").row().text("Cancel", (ctx) => {
-	ctx.menu.close();
-	ctx.editMessageText("Authorization process cancel")
-});;
-
-authMenu.register(userMenu);
-authMenu.register(groupMenu);
+});
+grantMenu.register(grantGroupMenu);
 
 /**
- * Check if the user is authorized and save the result in the context
+ * Auth revoke menu
+ */
+const revokeMenu = new Menu<ContextWithConfig>("revokeMenu")
+	.submenu("Revoke User", "revokeUserMenu").row()
+	.submenu("Revoke Group", "revokeGroupMenu").row()
+	.back("Go Back")
+	.text("Cancel", (ctx) => {
+		ctx.menu.close();
+		ctx.editMessageText("Authorization process cancel")
+	});;
+authMenu.register(revokeMenu);
+
+const revokeUserMenu = new Menu<ContextWithConfig>("revokeUserMenu").dynamic((ctx, range) => {
+	authorizedIDs.filter((elem) => elem.id > 0).forEach((elem) => {
+		if (elem.name) {
+			range.text("@" + elem.name + " (" + elem.id + ")", (ctx) => {
+				ctx.menu.close();
+				revokeSelected(ctx, elem)
+			});
+		} else {
+			range.text(elem.id.toString(), (ctx) => {
+				ctx.menu.close();
+				revokeSelected(ctx, elem)
+			});
+		}
+
+		range.row();
+	});
+}).back("Go Back").text("Cancel", (ctx) => {
+	ctx.menu.close();
+	ctx.editMessageText("Authorization process cancelled.");
+});
+revokeMenu.register(revokeUserMenu);
+
+const revokeGroupMenu = new Menu<ContextWithConfig>("revokeGroupMenu").dynamic((ctx, range) => {
+	authorizedIDs.filter((elem) => elem.id < 0).forEach((elem) => {
+		if (elem.name) {
+			range.text(elem.name + " (" + elem.id + ")", (ctx) => {
+				ctx.menu.close();
+				revokeSelected(ctx, elem)
+			});
+		} else {
+			range.text(elem.id.toString(), (ctx) => {
+				ctx.menu.close();
+				revokeSelected(ctx, elem);
+			});
+		}
+
+		range.row();
+	});
+}).back("Go Back").text("Cancel", (ctx) => {
+	ctx.menu.close();
+	ctx.editMessageText("Authorization process cancel")
+});
+revokeMenu.register(revokeGroupMenu);
+
+// ---- END OF MENU DESIGN ----
+
+/**
+ * Check if the user is authorized and save the result in the context. This is a middleware.
  * @param ctx Context
  * @param next Next function
  */
@@ -112,39 +232,42 @@ export async function checkAuthentication(ctx: ContextWithConfig, next: NextFunc
 		};
 	}
 
-	// If the grouè chat is not authorized, also check for sender authorization
-	if (ctx.config.authorizationStatus != AuthorizationStatus.Authorized && (ctx.update.message?.chat.type === "group" || ctx.update.callback_query?.message?.chat.type === "group")) {
-		// Get the chat ID
-		let senderID = 0
-		// Chat ID can be in the message or in the callback query depending on the update type
-		if (ctx.update.message !== undefined) senderID = ctx.update.message.from.id;
-		else if (ctx.update.callback_query?.message?.from) senderID = ctx.update.callback_query.message.from.id;
-		else {
-			ctx.reply("Something went wrong. Please try again.");
-			return;
-		}
+	// If the grouè chat is not authorized, also check for sender authorization //TODO: Check if this is needed
+	// if (ctx.config.authorizationStatus != AuthorizationStatus.Authorized && (ctx.update.message?.chat.type === "group" || ctx.update.callback_query?.message?.chat.type === "group")) {
+	// 	// Get the chat ID
+	// 	let senderID = 0
+	// 	// Chat ID can be in the message or in the callback query depending on the update type
+	// 	if (ctx.update.message !== undefined) senderID = ctx.update.message.from.id;
+	// 	else if (ctx.update.callback_query?.message?.from) senderID = ctx.update.callback_query.message.from.id;
+	// 	else {
+	// 		ctx.reply("Something went wrong. Please try again.");
+	// 		return;
+	// 	}
 
-		// Check if the chat is already authorized
-		if (authorizedIDs.find((u) => u.id === senderID) !== undefined) {
-			ctx.config = {
-				authorizationStatus: AuthorizationStatus.Authorized
-			};
-		} else if (pendingIDs.find((u) => u.id === senderID) !== undefined) {
-			ctx.config = {
-				authorizationStatus: AuthorizationStatus.Pending
-			};
-		} else {
-			ctx.config = {
-				authorizationStatus: AuthorizationStatus.Unauthorized
-			};
-		}
-	}
+	// 	// Check if the chat is already authorized
+	// 	if (authorizedIDs.find((u) => u.id === senderID) !== undefined) {
+	// 		ctx.config = {
+	// 			authorizationStatus: AuthorizationStatus.Authorized
+	// 		};
+	// 	} else if (pendingIDs.find((u) => u.id === senderID) !== undefined) {
+	// 		ctx.config = {
+	// 			authorizationStatus: AuthorizationStatus.Pending
+	// 		};
+	// 	} else {
+	// 		ctx.config = {
+	// 			authorizationStatus: AuthorizationStatus.Unauthorized
+	// 		};
+	// 	}
+	// }
 
 	// Call the next middleware
 	await next();
 }
 
-// Handle authorization requests
+/**
+ * Handle authorization requests. Save user data to the pending auth list
+ * @param ctx Context with config
+ */
 export async function requestAuthorization(ctx: ContextWithConfig) {
 	console.log("Authorization request received");
 
@@ -222,6 +345,11 @@ export async function requestAuthorization(ctx: ContextWithConfig) {
 	}
 }
 
+/**
+ * Move selected element from pending to authorized list and notify the chat
+ * @param ctx 
+ * @param element 
+ */
 async function authorizeSelected(ctx: ContextWithConfig, element: AccessElement) {
 	console.log("Authorizing " + JSON.stringify(element));
 
@@ -246,8 +374,39 @@ async function authorizeSelected(ctx: ContextWithConfig, element: AccessElement)
 	ctx.editMessageText("You have succesfully authorized " + element.id + ".");
 }
 
-export async function authorize(ctx: ContextWithConfig) {
-	console.log("Authorization grant received");
+/**
+ * Remove selected element from authorized list and notify the chat
+ * @param ctx 
+ * @param element 
+ */
+async function revokeSelected(ctx: ContextWithConfig, element: AccessElement) {
+	console.log("Revoking " + JSON.stringify(element));
+
+	// Remove the element from the authorized list
+	authorizedIDs = authorizedIDs.filter((elem) => elem.id !== element.id);
+
+	switch (ctx.message?.chat.type || ctx.update.callback_query?.message?.chat.type) {
+		case "private":
+			ctx.api.sendMessage(element.id, "Your authorization to use this bot has been revoked.");
+			break;
+		case "group":
+			ctx.api.sendMessage(element.id, "This group authorization to use this bot has been revoked.");
+			break;
+		default:
+			console.log("Something went wrong");
+			ctx.api.sendMessage(element.id, "Your authorization to use this bot has been revoked");
+	}
+
+	ctx.editMessageText("You have successfully revoked authorization to " + element.id + ".");
+}
+
+/**
+ * Stating point for authorization management command
+ * @param ctx 
+ * @returns 
+ */
+export async function manageAuthorizations(ctx: ContextWithConfig) {
+	console.log("Authorization management request received");
 
 	// If the message is undefined, something went wrong
 	if (ctx.update.message === undefined) {
