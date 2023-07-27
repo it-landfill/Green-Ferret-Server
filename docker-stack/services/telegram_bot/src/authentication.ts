@@ -31,7 +31,10 @@ export const authCommands: BotCommand[] = [
 /**
  * Main menu
  */
-export const authMenu = new Menu<ContextWithConfig>("authMenu")
+export const authMenu = new Menu<ContextWithConfig>("authMenu", {onMenuOutdated: (ctx) => {
+	ctx.editMessageText("Authorization process time out. Please open a new menu with /manage_authorizations");
+	ctx.menu.close();
+}})
 	.submenu("List Authorizations", "listMenu").row()
 	.submenu("Grant Authorization", "grantMenu").row()
 	.submenu("Revoke Authorization", "revokeMenu").row()
