@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "green-ferret-data-populator"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "green_ferret_data_populator"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+gtfs-kit = "^5.2.7"
+matplotlib = "^3.7.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
