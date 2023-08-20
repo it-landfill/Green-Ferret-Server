@@ -12,6 +12,13 @@ let authorizedIDs: AccessElement[] = [{
 }];
 let pendingIDs: AccessElement[] = [];
 
+// Master chat ID is the owner of the bot, this ID will always be authorized
+let masterID: number;
+export function setMasterID(id: number) {
+	console.log("Setting root ID to " + id)
+	masterID = id;
+}
+
 /**
  * Commands for authorization
  */
