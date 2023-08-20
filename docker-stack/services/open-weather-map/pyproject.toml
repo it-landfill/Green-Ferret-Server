@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "open-weather-map"
+version = "0.1.0"
+description = ""
+authors = ["lorenzocrespan <lorenzo.crespan@gmail.com>"]
+readme = "README.md"
+packages = [{include = "open_weather_map"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+openmeteo-py = "^0.0.1"
+open-meteo = "^0.2.1"
+pandas = "^2.0.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
