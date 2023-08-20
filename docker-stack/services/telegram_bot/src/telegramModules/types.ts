@@ -20,7 +20,3 @@ interface ContextConfig {
 }
 
 export type ContextWithConfig = Context & ContextConfig;
-
-export interface Config {
-	authToken: string;
-}
