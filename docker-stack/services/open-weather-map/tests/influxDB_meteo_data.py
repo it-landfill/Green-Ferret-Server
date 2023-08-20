@@ -3,11 +3,11 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 import pandas as pd
 
 # Definition of the connection parameters
-bucket = "Test"
-org = "ITLandfill"
-token = "f5kH6ybaAxrhxNIADq-Vh3ZCxDFdqu_kRCQ9vVlVeLLL2WNerkNu49zcDIatBjeSBMARWN6eLHp9Xfm5zDJwpQ=="
+bucket = "Green-Ferret-OpenMeteo"
+org = "IT-Landfill"
+token = "CgR-AqFwvSCAutDZu7Wfv8StUc2Pz718kFlrI8qF7ewa4djsCx9vbxewL59Ie3SS-HoFxFv38-NeUbGSJwhAHA=="
 # Store the URL of your InfluxDB instance
-url="http://localhost:8086"
+url="http://pi3aleben:8086"
 
 # Create a connection to InfluxDB
 client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     data = df.to_dict('records')
     data_record = []
     for d in data:
-        point = influxdb_client.Point("openMeteoData").tag("latitude", d['latitude']).tag("longitude", d['longitude']).field("temperature", d['temperature']).field("humidity", d['humidity']).field("pressure", d['pressure']).time(d['time'])
+        point = influxdb_client.Point("openMeteoData").time(d['time']).tag("latitude", d['latitude']).tag("longitude", d['longitude']).field("temperature", d['temperature']).field("humidity", d['humidity']).field("pressure", d['pressure'])
         # Write the data to InfluxDB
         write_api.write(bucket=bucket, record=point)
     # Close the connection
