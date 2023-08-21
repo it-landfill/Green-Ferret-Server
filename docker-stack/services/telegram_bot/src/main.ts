@@ -88,6 +88,7 @@ if (enableMQTT) {
 		const property = split[2];
 		console.debug(`Root: ${root}, sensor ID: ${sensorId}, property: ${property}, message: ${msg}`);
 
+		// Forward message to Telegram authorized users
 		forwardLog({
 			timestamp: new Date(),
 			boardID: sensorId,

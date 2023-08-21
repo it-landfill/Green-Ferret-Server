@@ -3,8 +3,6 @@ import { ContextWithConfig, AccessElement, AuthorizationStatus } from "./types";
 import { BotCommand } from "grammy/types";
 import { Menu } from "@grammyjs/menu";
 
-//TODO: Add authorization persistence
-//TODO: Implement menu obsolescence
 let authorizedIDs: AccessElement[] = [];
 let pendingIDs: AccessElement[] = [];
 
@@ -34,6 +32,10 @@ export const authCommands: BotCommand[] = [
 	{
 		command: "authorizations",
 		description: "Grant, list, or revoke authorization to a user or a group"
+	},
+	{
+		command: "self_remove",
+		description: "Remove yourself from the authorized users list"
 	}
 ];
 
@@ -417,6 +419,19 @@ export function requestAuthorization(ctx: ContextWithConfig) {
 				ctx.reply("You already requested personal access. Please be patient, You will be notified when you are authorized.");
 		}
 	}
+}
+
+/**
+ * Remove the user from the authorized list
+ */
+export async function selfRemove(ctx: ContextWithConfig) {
+	console.log("Removing " + ctx.update.message?.chat.id + " from authorized users");
+
+	// Remove the element from the authorized list
+	authorizedIDs = authorizedIDs.filter((elem) => elem.id !== ctx.update.message?.chat.id);
+	ctx.config.authorizationStatus = AuthorizationStatus.Unauthorized;
+
+	ctx.reply("You have been removed from the authorized users list.");
 }
 
 /**

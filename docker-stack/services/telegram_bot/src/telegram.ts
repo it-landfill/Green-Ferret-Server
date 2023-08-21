@@ -7,7 +7,8 @@ import {
 	checkAuthentication,
 	setMasterID,
 	getAuthorizedIDs,
-	requestAuthorization
+	requestAuthorization,
+	selfRemove
 } from "./telegramModules/authentication";
 import {BotCommand} from "grammy/types";
 
@@ -96,8 +97,12 @@ export function telegramInitializeBot(config : TelegramConfig) {
 
 	// Handle authorization requests
 	bot.command("authorizations", manageAuthorizations);
+	bot.command("self_remove", selfRemove);
 }
 
+/**
+ * Start the Telegram bot
+ */
 export function telegramStartBot() {
 	// Start the bot!
 	console.log("Starting bot...");
@@ -105,11 +110,17 @@ export function telegramStartBot() {
 	console.log("Bot started!");
 }
 
+/**
+ * Stop the Telegram bot
+ */
 export function telegramStopBot() {
 	console.log("Stopping bot...");
 	bot.stop();
 }
 
+/**
+ * Forward a log message to the authorized users
+ */
 export function forwardLog(logMessage: LogMessage) {
 	const msg = `<b>${logMessage.level?.toUpperCase()}</b> - <code>${logMessage.boardID}</code>\n${logMessage.timestamp.getFullYear()}-${logMessage.timestamp.getMonth()+1}-${logMessage.timestamp.getDate()} ${logMessage.timestamp.getHours()}:${logMessage.timestamp.getMinutes()}:${logMessage.timestamp.getSeconds()}\n${logMessage.message}`;
 
