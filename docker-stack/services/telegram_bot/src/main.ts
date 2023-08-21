@@ -7,11 +7,10 @@ import {
 	mqttSubscribeToTopics
 } from "./mqtt";
 import {TelegramConfig, forwardLog, telegramInitializeBot, telegramStartBot, telegramStopBot} from "./telegram";
-import { DeviceConfigDict } from "./telegramModules/types";
 
 // ---- Common data ----
 
-const enableMQTT = false;
+const enableMQTT = true;
 const enableTelegram = true;
 
 // ---- Telegram Bot ----

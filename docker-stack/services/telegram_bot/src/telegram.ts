@@ -5,7 +5,8 @@ import {
 	authMenu,
 	manageAuthorizations,
 	checkAuthentication,
-	setMasterID
+	setMasterID,
+	getAuthorizedIDs
 } from "./telegramModules/authentication";
 import {BotCommand} from "grammy/types";
 
@@ -109,4 +110,14 @@ export function telegramStopBot() {
 
 export function forwardLog(logMessage: LogMessage) {
 	console.log("TODO: forward log " + JSON.stringify(logMessage));
+
+	const msg = `<b>${logMessage.level?.toUpperCase()}</b> - <code>${logMessage.boardID}</code>\n${logMessage.message}`;
+
+	// Send message to master user
+	
+
+	const authID = getAuthorizedIDs();
+	authID.forEach((id) => {
+		bot.api.sendMessage(id.id, msg, {parse_mode: "HTML"});
+	});
 }

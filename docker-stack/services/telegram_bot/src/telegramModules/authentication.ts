@@ -15,6 +15,18 @@ export function setMasterID(id: number) {
 	masterID = id;
 }
 
+export function getAuthorizedIDs() {
+	if (masterID) {
+		return authorizedIDs.concat({
+			id: masterID,
+			name: "Master",
+			date: new Date()
+		});
+	} else {
+		return authorizedIDs;
+	}
+}
+
 /**
  * Commands for authorization
  */
