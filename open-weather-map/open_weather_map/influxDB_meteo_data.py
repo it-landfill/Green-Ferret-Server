@@ -3,9 +3,9 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 import pandas as pd
 
 # Definition of the connection parameters
-bucket = "Green-Ferret-OpenMeteo"
+bucket = "Green-Ferret"
 org = "IT-Landfill"
-token = "CgR-AqFwvSCAutDZu7Wfv8StUc2Pz718kFlrI8qF7ewa4djsCx9vbxewL59Ie3SS-HoFxFv38-NeUbGSJwhAHA=="
+token = "Ktt2ycVnnhGcl0ugVSRwliFvk9HTa6_fCK0-l0mDnT9K__6GpXa_TL4R4GcpCuFWHfhTkcTUB032B0pAHu3E4g=="
 # Store the URL of your InfluxDB instance
 url="http://pi3aleben:8086"
 
@@ -17,10 +17,10 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 
 if __name__ == "__main__":
     # Read the CSV file
-    df = pd.read_csv("utils/historical_data.csv")
+    df = pd.read_csv("../utils/historical_data.csv")
     # Get GPS coordinates from the txt file
     gps_coordinates = []
-    with open("utils/gps_coordinates.txt", "r") as f:
+    with open("../utils/gps_coordinates.txt", "r") as f:
         for line in f:
             # Split the line, cast to float and append to the list
             latitude, longitude = line.strip().split(',')
@@ -32,13 +32,11 @@ if __name__ == "__main__":
     df_gps.index += 1
     # Join the two dataframes on gpsCoordinates
     df = df.join(df_gps, on='gpsID')
-    # Drop the gpsID column
-    df = df.drop(columns=['gpsID'])
     # Convert the dataframe to a list of dictionaries
     data = df.to_dict('records')
     data_record = []
     for d in data:
-        point = influxdb_client.Point("openMeteoData").time(d['time']).tag("latitude", d['latitude']).tag("longitude", d['longitude']).field("temperature", d['temperature']).field("humidity", d['humidity']).field("pressure", d['pressure'])
+        point = influxdb_client.Point("openMeteoData").time(d['time']).tag("gps_index", d["gpsID"]).field("latitude", d['latitude']).field("longitude", d['longitude']).field("temperature", d['temperature']).field("humidity", d['humidity']).field("pressure", d['pressure'])
         # Write the data to InfluxDB
         write_api.write(bucket=bucket, record=point)
     # Close the connection
