@@ -7,23 +7,29 @@ import {
 	mqttSubscribeToTopics
 } from "./mqtt";
 import {TelegramConfig, telegramInitializeBot, telegramStartBot, telegramStopBot} from "./telegram";
+import { DeviceConfigDict } from "./telegramModules/types";
 
 // ---- Common data ----
 
 const enableMQTT = false;
 const enableTelegram = true;
 
-interface DeviceConfig {
-	protocol: number;
-	trigger: number;
-	distanceMethod: number;
-	distance: number;
-	time: number;
-}
-
-let deviceConfigDict: {
-	[key: string]: DeviceConfig;
-} = {};
+let deviceConfigDict: DeviceConfigDict = {
+	"1": {
+		protocol: 1, // MQTT protocol
+		trigger: 1, // Time trigger
+		distanceMethod: 0,
+		distance: 0,
+		time: 20 * 1000 // Time in millis (20s)
+	},
+	"2": {
+		protocol: 1, // MQTT protocol
+		trigger: 0, // Time trigger
+		distanceMethod: 1,
+		distance: 20,
+		time: 20 * 1000 // Time in millis (20s)
+	}
+};
 
 // ---- MQTT ----
 if (enableMQTT) {
@@ -116,7 +122,7 @@ if (enableTelegram) {
 	};
 
 	// Initialize Telegram bot
-	telegramInitializeBot(telegramConfig);
+	telegramInitializeBot(telegramConfig, deviceConfigDict);
 
 	// Start the bot
 	telegramStartBot();

@@ -1,5 +1,5 @@
 import {Api, Bot, RawApi} from "grammy";
-import {AuthorizationStatus, ContextWithConfig} from "./telegramModules/types";
+import {AuthorizationStatus, ContextWithConfig, DeviceConfigDict} from "./telegramModules/types";
 import {
 	authCommands,
 	authMenu,
@@ -8,7 +8,7 @@ import {
 	setMasterID
 } from "./telegramModules/authentication";
 import {BotCommand} from "grammy/types";
-import { devicesCommands, devicesMenu, manageDevices } from "./telegramModules/devices";
+import { devicesCommands, devicesMenu, manageDevices, setDeviceConfigDict } from "./telegramModules/devices";
 
 export interface TelegramConfig {
 	authToken: string;
@@ -34,7 +34,7 @@ let bot: Bot<ContextWithConfig, Api<RawApi>>;
  * Initialize the Telegram bot
  * @param config Configuration object
  */
-export function telegramInitializeBot(config : TelegramConfig) {
+export function telegramInitializeBot(config : TelegramConfig, deviceConfigDict: DeviceConfigDict) {
 	bot = new Bot<ContextWithConfig>(config.authToken);
 
 	// Middleware definition
@@ -97,6 +97,8 @@ export function telegramInitializeBot(config : TelegramConfig) {
 
 	// ---- DEVICES ----
 	bot.use(devicesMenu);
+
+	setDeviceConfigDict(deviceConfigDict);
 
 	finalCommands = finalCommands.concat(devicesCommands);
 	bot.api.setMyCommands(finalCommands);

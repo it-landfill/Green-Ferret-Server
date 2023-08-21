@@ -20,3 +20,15 @@ interface ContextConfig {
 }
 
 export type ContextWithConfig = Context & ContextConfig;
+
+interface DeviceConfig {
+	protocol: number;
+	trigger: number;
+	distanceMethod: number;
+	distance: number;
+	time: number;
+}
+
+export interface DeviceConfigDict {
+	[key: string]: DeviceConfig;
+}
