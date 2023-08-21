@@ -1,5 +1,5 @@
 import {Api, Bot, RawApi} from "grammy";
-import {AuthorizationStatus, ContextWithConfig, DeviceConfigDict} from "./telegramModules/types";
+import {AuthorizationStatus, ContextWithConfig, DeviceConfigDict, LogMessage} from "./telegramModules/types";
 import {
 	authCommands,
 	authMenu,
@@ -8,7 +8,6 @@ import {
 	setMasterID
 } from "./telegramModules/authentication";
 import {BotCommand} from "grammy/types";
-import { devicesCommands, devicesMenu, manageDevices, setDeviceConfigDict } from "./telegramModules/devices";
 
 export interface TelegramConfig {
 	authToken: string;
@@ -34,7 +33,7 @@ let bot: Bot<ContextWithConfig, Api<RawApi>>;
  * Initialize the Telegram bot
  * @param config Configuration object
  */
-export function telegramInitializeBot(config : TelegramConfig, deviceConfigDict: DeviceConfigDict) {
+export function telegramInitializeBot(config : TelegramConfig) {
 	bot = new Bot<ContextWithConfig>(config.authToken);
 
 	// Middleware definition
@@ -94,16 +93,6 @@ export function telegramInitializeBot(config : TelegramConfig, deviceConfigDict:
 
 	// Handle authorization requests
 	bot.command("authorizations", manageAuthorizations);
-
-	// ---- DEVICES ----
-	bot.use(devicesMenu);
-
-	setDeviceConfigDict(deviceConfigDict);
-
-	finalCommands = finalCommands.concat(devicesCommands);
-	bot.api.setMyCommands(finalCommands);
-	
-	bot.command("devices", manageDevices);
 }
 
 export function telegramStartBot() {
@@ -116,4 +105,8 @@ export function telegramStartBot() {
 export function telegramStopBot() {
 	console.log("Stopping bot...");
 	bot.stop();
+}
+
+export function forwardLog(logMessage: LogMessage) {
+	console.log("TODO: forward log " + JSON.stringify(logMessage));
 }

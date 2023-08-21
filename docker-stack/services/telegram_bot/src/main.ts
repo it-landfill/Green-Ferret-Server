@@ -6,7 +6,7 @@ import {
 	mqttSetMessageHandler,
 	mqttSubscribeToTopics
 } from "./mqtt";
-import {TelegramConfig, telegramInitializeBot, telegramStartBot, telegramStopBot} from "./telegram";
+import {TelegramConfig, forwardLog, telegramInitializeBot, telegramStartBot, telegramStopBot} from "./telegram";
 import { DeviceConfigDict } from "./telegramModules/types";
 
 // ---- Common data ----
@@ -14,22 +14,26 @@ import { DeviceConfigDict } from "./telegramModules/types";
 const enableMQTT = false;
 const enableTelegram = true;
 
-let deviceConfigDict: DeviceConfigDict = {
-	"1": {
-		protocol: 1, // MQTT protocol
-		trigger: 1, // Time trigger
-		distanceMethod: 0,
-		distance: 0,
-		time: 20 * 1000 // Time in millis (20s)
-	},
-	"2": {
-		protocol: 1, // MQTT protocol
-		trigger: 0, // Time trigger
-		distanceMethod: 1,
-		distance: 20,
-		time: 20 * 1000 // Time in millis (20s)
+// ---- Telegram Bot ----
+if (enableTelegram) {
+	if (!process.env.TELEGRAM_API_TOKEN) {
+		console.error("TELEGRAM_API_TOKEN not set. exiting...");
+		process.exit(1);
 	}
-};
+	if (!process.env.TELEGRAM_MASTER_CHAT_ID) 
+		console.warn("TELEGRAM_MASTER_CHAT_ID not set, using default value (0)");
+	
+	const telegramConfig: TelegramConfig = {
+		authToken: process.env.TELEGRAM_API_TOKEN,
+		masterChatID: parseInt(process.env.TELEGRAM_MASTER_CHAT_ID || "0")
+	};
+
+	// Initialize Telegram bot
+	telegramInitializeBot(telegramConfig);
+
+	// Start the bot
+	telegramStartBot();
+}
 
 // ---- MQTT ----
 if (enableMQTT) {
@@ -83,49 +87,18 @@ if (enableMQTT) {
 		const root = split[0];
 		const sensorId = split[1];
 		const property = split[2];
-		console.debug(`Root: ${root}, sensor ID: ${sensorId}, property: ${property}`);
+		console.debug(`Root: ${root}, sensor ID: ${sensorId}, property: ${property}, message: ${msg}`);
 
-		if (root === "CFG" && property === "request") {
-			// Generate new config if it doesn't exist
-			if (deviceConfigDict[sensorId] === undefined) {
-				console.info(`Sensor ${sensorId} not found, generating new config`);
-				deviceConfigDict[sensorId] = {
-					protocol: 1, // MQTT protocol
-					trigger: 1, // Time trigger
-					distanceMethod: 0,
-					distance: 0,
-					time: 20 * 1000 // Time in millis (20s)
-				};
-			}
-
-			// Publish config
-			mqttPublish(`CFG/${sensorId}/Config`, JSON.stringify(deviceConfigDict[sensorId]));
-		}
+		forwardLog({
+			timestamp: new Date(),
+			boardID: sensorId,
+			level: property,
+			message: msg
+		});
 	});
 
 	// Set up MQTT subscriptions
-	mqttSubscribeToTopics(["CFG/#"]);
-}
-
-// ---- Telegram Bot ----
-if (enableTelegram) {
-	if (!process.env.TELEGRAM_API_TOKEN) {
-		console.error("TELEGRAM_API_TOKEN not set. exiting...");
-		process.exit(1);
-	}
-	if (!process.env.TELEGRAM_MASTER_CHAT_ID) 
-		console.warn("TELEGRAM_MASTER_CHAT_ID not set, using default value (0)");
-	
-	const telegramConfig: TelegramConfig = {
-		authToken: process.env.TELEGRAM_API_TOKEN,
-		masterChatID: parseInt(process.env.TELEGRAM_MASTER_CHAT_ID || "0")
-	};
-
-	// Initialize Telegram bot
-	telegramInitializeBot(telegramConfig, deviceConfigDict);
-
-	// Start the bot
-	telegramStartBot();
+	mqttSubscribeToTopics(["logging/#"]);
 }
 
 // Handle interrupt signal

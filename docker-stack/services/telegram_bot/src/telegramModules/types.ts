@@ -21,6 +21,13 @@ interface ContextConfig {
 
 export type ContextWithConfig = Context & ContextConfig;
 
+export interface LogMessage {
+	timestamp: Date;
+	boardID: string;
+	level: string | undefined;
+	message: string;
+}
+
 interface DeviceConfig {
 	protocol: number;
 	trigger: number;
