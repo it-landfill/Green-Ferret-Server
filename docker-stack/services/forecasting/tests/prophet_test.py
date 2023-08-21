@@ -45,12 +45,14 @@ if __name__ == "__main__":
     write_api, query_api = influxdb_utils.setup_influxdb_client()   # Set up the InfluxDB client
     df = query_influxdb(query_api)                                  # Query the InfluxDB database
     df_split_by_lat_lon = df.groupby(['lat', 'lon'])                # Split the DataFrame by latitude and longitude
+    i = 0
     for name, group in df_split_by_lat_lon:
         print(name)
         print(group)
         forecast = fit_prophet_model(group)                         # Fit the Prophet model
-        #lines = influxdb_utils.convert_forecast_to_list(forecast)   # Convert the forecast dataframe into a list of lines
-        #influxdb_utils.write_forecast_to_influxdb(write_api, lines) # Write the forecast predictions to InfluxDB
+        lines = influxdb_utils.convert_forecast_to_list(forecast, name, i) # Convert the forecast dataframe into a list of lines
+        i+=1
+        influxdb_utils.write_forecast_to_influxdb(write_api, lines) # Write the forecast predictions to InfluxDB
     # forecast = fit_prophet_model(df)                                # Fit the Prophet model
     # lines = influxdb_utils.convert_forecast_to_list(forecast)       # Convert the forecast dataframe into a list of lines
     # influxdb_utils.write_forecast_to_influxdb(write_api, lines)   # Write the forecast predictions to InfluxDB
