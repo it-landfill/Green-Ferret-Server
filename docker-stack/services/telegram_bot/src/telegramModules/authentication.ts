@@ -345,7 +345,7 @@ async function revokeSelected(ctx: ContextWithConfig, element: AccessElement) {
  * Handle authorization requests. Save user data to the pending auth list
  * @param ctx Context with config
  */
-export async function requestAuthorization(ctx: ContextWithConfig) {
+export function requestAuthorization(ctx: ContextWithConfig) {
 	console.log("Authorization request received");
 
 	// If the message is undefined, something went wrong
@@ -370,13 +370,10 @@ export async function requestAuthorization(ctx: ContextWithConfig) {
 	if (ctx.config.authorizationStatus === AuthorizationStatus.Authorized) {
 		switch (chat.type) {
 			case "private":
-				ctx.reply("You are already authorized.");
 				break;
 			case "group":
-				ctx.reply("This group is already authorized.");
 				break;
 			default:
-				ctx.reply("Already authorized.");
 		}
 		return;
 	}

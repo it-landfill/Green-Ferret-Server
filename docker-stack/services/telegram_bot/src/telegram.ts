@@ -6,7 +6,8 @@ import {
 	manageAuthorizations,
 	checkAuthentication,
 	setMasterID,
-	getAuthorizedIDs
+	getAuthorizedIDs,
+	requestAuthorization
 } from "./telegramModules/authentication";
 import {BotCommand} from "grammy/types";
 
@@ -57,11 +58,12 @@ export function telegramInitializeBot(config : TelegramConfig) {
 				ctx.reply("Welcome to Green Ferret Bot. Your authorization request is pending. You will be notified when you are authorized.");
 				break;
 			case AuthorizationStatus.Unauthorized:
-				ctx.reply("Welcome to Green Ferret Bot. To request authorization please use the /request_authorization command.");
+				ctx.reply("Welcome to Green Ferret Bot.");
+				requestAuthorization(ctx);
 				break;
 			default:
 				console.log("Something went wrong");
-				ctx.reply("Welcome to Green Ferret Bot. To request authorization please use the /request_authorization command.");
+				ctx.reply("Welcome to Green Ferret Bot.");
 		}
 	});
 
@@ -109,13 +111,9 @@ export function telegramStopBot() {
 }
 
 export function forwardLog(logMessage: LogMessage) {
-	console.log("TODO: forward log " + JSON.stringify(logMessage));
+	const msg = `<b>${logMessage.level?.toUpperCase()}</b> - <code>${logMessage.boardID}</code>\n${logMessage.timestamp.getFullYear()}-${logMessage.timestamp.getMonth()+1}-${logMessage.timestamp.getDate()} ${logMessage.timestamp.getHours()}:${logMessage.timestamp.getMinutes()}:${logMessage.timestamp.getSeconds()}\n${logMessage.message}`;
 
-	const msg = `<b>${logMessage.level?.toUpperCase()}</b> - <code>${logMessage.boardID}</code>\n${logMessage.message}`;
-
-	// Send message to master user
-	
-
+	// Send message to users
 	const authID = getAuthorizedIDs();
 	authID.forEach((id) => {
 		bot.api.sendMessage(id.id, msg, {parse_mode: "HTML"});
