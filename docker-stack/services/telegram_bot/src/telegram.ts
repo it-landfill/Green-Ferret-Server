@@ -1,6 +1,13 @@
 import {Api, Bot, RawApi} from "grammy";
 import {AuthorizationStatus, ContextWithConfig} from "./telegramModules/types";
-import {authCommands, authMenu, manageAuthorizations, checkAuthentication, requestAuthorization, setMasterID} from "./telegramModules/authentication";
+import {
+	authCommands,
+	authMenu,
+	manageAuthorizations,
+	checkAuthentication,
+	requestAuthorization,
+	setMasterID
+} from "./telegramModules/authentication";
 import {BotCommand} from "grammy/types";
 
 export interface TelegramConfig {
@@ -29,8 +36,9 @@ export function telegramInitializeBot(config : TelegramConfig) {
 	bot = new Bot<ContextWithConfig>(config.authToken);
 
 	// Set the master chat ID
-	setMasterID(config.masterChatID);
-
+	if (config.masterChatID !== 0) 
+		setMasterID(config.masterChatID);
+	
 	bot.use(checkAuthentication);
 	bot.use(authMenu);
 

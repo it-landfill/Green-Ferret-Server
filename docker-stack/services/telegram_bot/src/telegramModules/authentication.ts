@@ -5,15 +5,11 @@ import { Menu } from "@grammyjs/menu";
 
 //TODO: Add authorization persistence
 //TODO: Implement menu obsolescence
-let authorizedIDs: AccessElement[] = [{
-	id: 49768658,
-	name: "aleben",
-	date: new Date()
-}];
+let authorizedIDs: AccessElement[] = [];
 let pendingIDs: AccessElement[] = [];
 
 // Master chat ID is the owner of the bot, this ID will always be authorized
-let masterID: number;
+let masterID: number | undefined = undefined;
 export function setMasterID(id: number) {
 	console.log("Setting root ID to " + id)
 	masterID = id;
@@ -239,6 +235,13 @@ export async function checkAuthentication(ctx: ContextWithConfig, next: NextFunc
 	} else {
 		ctx.config = {
 			authorizationStatus: AuthorizationStatus.Unauthorized
+		};
+	}
+
+	// Check master user authorization
+	if (masterID !== undefined && masterID === chatID) {
+		ctx.config = {
+			authorizationStatus: AuthorizationStatus.Authorized
 		};
 	}
 
