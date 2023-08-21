@@ -4,11 +4,11 @@ import time
 import os
 
 
-token = os.environ.get("PROPHET_INFLUXDB_TOKEN", "")
+token = os.environ.get("FORECASTING_INFLUXDB_TOKEN", "")
 if token == "":
-	print("PROPHET_INFLUXDB_TOKEN not set, exiting...")
+	print("FORECASTING_INFLUXDB_TOKEN not set, exiting...")
 	exit(1)
-	
+
 bucket = "Green-Ferret-OpenMeteo"
 org = "IT-Landfill"
 client = InfluxDBClient(url="http://pi3aleben:8086", token=token, org=org)
