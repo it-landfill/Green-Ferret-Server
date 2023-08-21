@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "greenferret-forcasting"
+version = "0.1.0"
+description = ""
+authors = ["lorenzocrespan <lorenzo.crespan@gmail.com>"]
+readme = "README.md"
+packages = [{include = "greenferret_forcasting"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+prophet = "^1.1.4"
+influxdb-client = "^1.36.1"
+plotly = "^5.15.0"
+statsmodels = "^0.14.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

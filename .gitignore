@@ -30,3 +30,4 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 /docker-stack/services/telegram_bot/exports.md
+__pycache__
