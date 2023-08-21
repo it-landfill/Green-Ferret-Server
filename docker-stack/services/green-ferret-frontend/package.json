@@ -10,7 +10,7 @@
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.36",
     "@types/react": "^18.2.12",
-    "@types/react-dom": "^18.2.5",
+    "@types/react-dom": "^18.2.7",
     "@vgrid/react-leaflet-heatmap-layer": "^4.0.3",
     "leaflet": "^1.9.4",
     "react": "^18.2.0",
