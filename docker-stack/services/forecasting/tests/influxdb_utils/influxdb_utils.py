@@ -8,8 +8,8 @@ token = os.environ.get("FORECASTING_INFLUXDB_TOKEN", "")
 if token == "":
 	print("FORECASTING_INFLUXDB_TOKEN not set, exiting...")
 	exit(1)
-
-bucket = "Green-Ferret-OpenMeteo"
+	
+bucket = "Green-Ferret"
 org = "IT-Landfill"
 client = InfluxDBClient(url="http://pi3aleben:8086", token=token, org=org)
 
@@ -24,15 +24,13 @@ def send_query(query_api, query):
      
 # Function to convert the forecast Dataframe to Line Protocol, which is the format used by InfluxDB.
 # <measurement>[,<tag_key>=<tag_value>[,<tag_key>=<tag_value>]] <field_key>=<field_value>[,<field_key>=<field_value>] [<timestamp>]
-def convert_forecast_to_list(forecast, name, i):
+def convert_forecast_to_list(forecast, name, latitude, longitude):
     forecast['measurement'] = "prophet_forecast"
-    forecast['latitude'] = name[0]
-    forecast['longitude'] = name[1]
-    cp = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper', 'latitude', 'longitude', 'measurement']].copy()
+    cp = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper', 'measurement']].copy()
     lines = [str(cp["measurement"][d]) + ","
-         + "sensorID=" + str(i) + " "
-         + "latitude=" + str(cp["latitude"][d]) + ","
-         + "longitude=" + str(cp["longitude"][d]) + ","
+         + "sensorID=" + str(name) + " "
+         + "latitude=" + str(latitude) + ","
+         + "longitude=" + str(longitude) + ","
          + "yhat=" + str(cp["yhat"][d]) + ","
          + "yhat_lower=" + str(cp["yhat_lower"][d]) + ","
          + "yhat_upper=" + str(cp["yhat_upper"][d])
