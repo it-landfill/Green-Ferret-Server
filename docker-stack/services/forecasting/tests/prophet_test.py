@@ -19,13 +19,16 @@ def query_influxdb(query_api):
     # Iterate over the result tables and records.
     for table in result:
         for record in table.records:
+            print(record.values.get("latitude"))
             # Append the value and time of the record to the raw list.
-            raw.append((record.get_value(), record.get_time()))
+            raw.append((record.get_value(), record.get_time(), record.values.get("latitude"), record.values.get("longitude")))
     # Create a DataFrame from the result.
-    df=pd.DataFrame(raw, columns=['y','ds'], index=None)
+    df=pd.DataFrame(raw, columns=['y','ds', 'lat', 'lon'], index=None)
     # Convert the time column to datetime64[ns] and the value column to float.
     df['ds'] = df['ds'].values.astype('datetime64[ns]')
     df['y'] = df['y'].values.astype('float')
+    df['lat'] = df['lat'].values.astype('float')
+    df['lon'] = df['lon'].values.astype('float')
     df.set_index('ds')
     return df
 
@@ -41,7 +44,14 @@ def fit_prophet_model(df):
 if __name__ == "__main__":
     write_api, query_api = influxdb_utils.setup_influxdb_client()   # Set up the InfluxDB client
     df = query_influxdb(query_api)                                  # Query the InfluxDB database
-    forecast = fit_prophet_model(df)                                # Fit the Prophet model
-    lines = influxdb_utils.convert_forecast_to_list(forecast)       # Convert the forecast dataframe into a list of lines
+    df_split_by_lat_lon = df.groupby(['lat', 'lon'])                # Split the DataFrame by latitude and longitude
+    for name, group in df_split_by_lat_lon:
+        print(name)
+        print(group)
+        forecast = fit_prophet_model(group)                         # Fit the Prophet model
+        #lines = influxdb_utils.convert_forecast_to_list(forecast)   # Convert the forecast dataframe into a list of lines
+        #influxdb_utils.write_forecast_to_influxdb(write_api, lines) # Write the forecast predictions to InfluxDB
+    # forecast = fit_prophet_model(df)                                # Fit the Prophet model
+    # lines = influxdb_utils.convert_forecast_to_list(forecast)       # Convert the forecast dataframe into a list of lines
     # influxdb_utils.write_forecast_to_influxdb(write_api, lines)   # Write the forecast predictions to InfluxDB
     influxdb_utils.close_influxdb_client()                          # Close the InfluxDB client

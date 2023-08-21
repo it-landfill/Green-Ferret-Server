@@ -2,10 +2,10 @@ from influxdb_client import InfluxDBClient, Point, WriteOptions
 from influxdb_client.client.write_api import SYNCHRONOUS
 import time
 
-token = "mGXC9hh6IQXuFn6xvF41OZWesNIvfMFhVkJEm2fRXMzaDE7V56qUUS2obpmFLgI2QAkQOxHz02h0_D-y4VxqIQ=="
-bucket = "GreenFerret"
-org = "ITLandfill"
-client = InfluxDBClient(url="http://localhost:8086", token=token, org=org)
+token = "CgR-AqFwvSCAutDZu7Wfv8StUc2Pz718kFlrI8qF7ewa4djsCx9vbxewL59Ie3SS-HoFxFv38-NeUbGSJwhAHA=="
+bucket = "Green-Ferret-OpenMeteo"
+org = "IT-Landfill"
+client = InfluxDBClient(url="http://pi3aleben:8086", token=token, org=org)
 
 # Function to set up the InfluxDB client and return the write and query APIs.
 def setup_influxdb_client():
