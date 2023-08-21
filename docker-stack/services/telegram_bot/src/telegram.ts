@@ -5,7 +5,6 @@ import {
 	authMenu,
 	manageAuthorizations,
 	checkAuthentication,
-	requestAuthorization,
 	setMasterID
 } from "./telegramModules/authentication";
 import {BotCommand} from "grammy/types";
@@ -90,7 +89,6 @@ export function telegramInitializeBot(config : TelegramConfig) {
 	});
 
 	// Handle authorization requests
-	bot.command("request_authorization", requestAuthorization);
 	bot.command("manage_authorizations", manageAuthorizations);
 }
 

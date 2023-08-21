@@ -4,13 +4,6 @@ import {connect, MqttClient, IClientOptions} from "mqtt";
  * MQTT Agent
  * This agent subscribes to the MQTT broker and forwards the messages to InfluxDB
  *
- * Environment variables:
- * - MQTT_HOST: MQTT broker host (default: localhost)
- * - MQTT_PORT: MQTT broker port (default: 1883)
- * - MQTT_USERNAME: MQTT broker username (default: '')
- * - MQTT_PASSWORD: MQTT broker password (default: '')
- * - MQTT_CLIENT_ID: MQTT client ID (default: MQTTAgent)
- * - INFLUXDB_TOKEN: InfluxDB token
  */
 export interface MqttConfig {
 	host: string;
