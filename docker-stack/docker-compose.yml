@@ -130,6 +130,22 @@ services:
             - INFLUXDB_ORG=$INFLUXDB_ORG
             - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
             - INFLUXDB_TOKEN=$COAP_AGENT_INFLUXDB_TOKEN
+    telegram-bot:
+      image: "aleben/green-ferret_telegram_bot:1.0"
+      depends_on:
+          - mqttserver
+      container_name: telegram-bot
+      restart: unless-stopped
+      networks:
+          - iot_net
+      environment:
+            - MQTT_HOST=$MQTT_AGENT_HOST
+            - MQTT_PORT=$MQTT_AGENT_PORT
+            - MQTT_USERNAME=$MQTT_AGENT_USERNAME
+            - MQTT_PASSWORD=$MQTT_AGENT_PASSWORD
+            - MQTT_CLIENT_ID=$TELEGRAM_MQTT_CLIENT_ID
+            - TELEGRAM_API_TOKEN=$TELEGRAM_API_TOKEN
+            - TELEGRAM_MASTER_CHAT_ID=$TELEGRAM_MASTER_CHAT_ID
 
 volumes:
     mosquitto_data:

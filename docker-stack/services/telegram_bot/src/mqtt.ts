@@ -40,7 +40,7 @@ export function mqttSubscribeToTopics(topics : string[]) {
 	topics.forEach((topic) => {
 		mqttClient.subscribe(topic, function (err) {
 			if (err) {
-				console.error(`Error subscribing to topic ${topic}`);
+				console.error(`Error subscribing to topic ${topic}. error: ${err}`);
 			} else {
 				console.log(`Subscribed to topic ${topic}`);
 			}

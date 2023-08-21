@@ -39,30 +39,30 @@ if (enableMQTT) {
 	/**
 	 *  Generate MQTT config
 	 *  Environment variables:
-	 * - MQTT_AGENT_HOST: MQTT broker host (default: localhost)
-	 * - MQTT_AGENT_PORT: MQTT broker port (default: 1883)
-	 * - MQTT_AGENT_USERNAME: MQTT broker username (default: '')
-	 * - MQTT_AGENT_PASSWORD: MQTT broker password (default: '')
-	 * - MQTT_AGENT_CLIENT_ID: MQTT client ID (default: MQTTAgent)
+	 * - MQTT_HOST: MQTT broker host (default: localhost)
+	 * - MQTT_PORT: MQTT broker port (default: 1883)
+	 * - MQTT_USERNAME: MQTT broker username (default: '')
+	 * - MQTT_PASSWORD: MQTT broker password (default: '')
+	 * - MQTT_CLIENT_ID: MQTT client ID (default: MQTTAgent)
 	 * - INFLUXDB_TOKEN: InfluxDB token
 	 */
-	if (!process.env.MQTT_AGENT_HOST) 
-		console.warn("MQTT_AGENT_HOST not set, using default value (localhost)");
-	if (!process.env.MQTT_AGENT_PORT) 
-		console.warn("MQTT_AGENT_PORT not set, using default value (1883)");
-	if (!process.env.MQTT_AGENT_USERNAME) 
-		console.warn("MQTT_AGENT_USERNAME not set, using default value ('')");
-	if (!process.env.MQTT_AGENT_PASSWORD) 
-		console.warn("MQTT_AGENT_PASSWORD not set, using default value ('')");
-	if (!process.env.MQTT_AGENT_CLIENT_ID) 
-		console.warn("MQTT_AGENT_CLIENT_ID not set, using default value (MQTTAgent)");
+	if (!process.env.MQTT_HOST) 
+		console.warn("MQTT_HOST not set, using default value (localhost)");
+	if (!process.env.MQTT_PORT) 
+		console.warn("MQTT_PORT not set, using default value (1883)");
+	if (!process.env.MQTT_USERNAME) 
+		console.warn("MQTT_USERNAME not set, using default value ('')");
+	if (!process.env.MQTT_PASSWORD) 
+		console.warn("MQTT_PASSWORD not set, using default value ('')");
+	if (!process.env.MQTT_CLIENT_ID) 
+		console.warn("MQTT_CLIENT_ID not set, using default value (telegram-bot)");
 	
 	const mqttConfig: MqttConfig = {
-		host: process.env.MQTT_AGENT_HOST || "localhost",
-		port: process.env.MQTT_AGENT_PORT || "1883",
-		username: process.env.MQTT_AGENT_USERNAME || "",
-		password: process.env.MQTT_AGENT_PASSWORD || "",
-		clientId: process.env.MQTT_AGENT_CLIENT_ID || "MQTTAgent"
+		host: process.env.MQTT_HOST || "localhost",
+		port: process.env.MQTT_PORT || "1883",
+		username: process.env.MQTT_USERNAME || "",
+		password: process.env.MQTT_PASSWORD || "",
+		clientId: process.env.MQTT_CLIENT_ID || "telegram-bot"
 	};
 
 	// Initialize MQTT client
