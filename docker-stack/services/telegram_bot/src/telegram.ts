@@ -8,6 +8,7 @@ import {
 	setMasterID
 } from "./telegramModules/authentication";
 import {BotCommand} from "grammy/types";
+import { devicesCommands, devicesMenu, manageDevices } from "./telegramModules/devices";
 
 export interface TelegramConfig {
 	authToken: string;
@@ -24,6 +25,8 @@ const baseCommands: BotCommand[] = [
 	}
 ];
 
+let finalCommands: BotCommand[] = baseCommands;
+
 // Create an instance of the `Bot` class and pass your bot token to it.
 let bot: Bot<ContextWithConfig, Api<RawApi>>;
 
@@ -34,14 +37,8 @@ let bot: Bot<ContextWithConfig, Api<RawApi>>;
 export function telegramInitializeBot(config : TelegramConfig) {
 	bot = new Bot<ContextWithConfig>(config.authToken);
 
-	// Set the master chat ID
-	if (config.masterChatID !== 0) 
-		setMasterID(config.masterChatID);
-	
+	// Middleware definition
 	bot.use(checkAuthentication);
-	bot.use(authMenu);
-
-	bot.api.setMyCommands(baseCommands.concat(authCommands));
 
 	// Handle the /start command.
 	bot.command("start", (ctx) => {
@@ -50,9 +47,6 @@ export function telegramInitializeBot(config : TelegramConfig) {
 			ctx.reply("Something went wrong. Please try again.");
 			return;
 		}
-
-		// Get the chat ID
-		let chatID = ctx.update.message.chat.id;
 
 		// Reply with a custom message based on auth status
 		switch (ctx.config.authorizationStatus) {
@@ -88,14 +82,33 @@ export function telegramInitializeBot(config : TelegramConfig) {
 		}
 	});
 
+	// ---- AUTHENTICATION ----
+	// Set the master chat ID
+	if (config.masterChatID !== 0) 
+		setMasterID(config.masterChatID);
+
+	bot.use(authMenu);
+
+	finalCommands = baseCommands.concat(authCommands);
+	bot.api.setMyCommands(finalCommands);
+
 	// Handle authorization requests
-	bot.command("manage_authorizations", manageAuthorizations);
+	bot.command("authorizations", manageAuthorizations);
+
+	// ---- DEVICES ----
+	bot.use(devicesMenu);
+
+	finalCommands = finalCommands.concat(devicesCommands);
+	bot.api.setMyCommands(finalCommands);
+	
+	bot.command("devices", manageDevices);
 }
 
 export function telegramStartBot() {
 	// Start the bot!
 	console.log("Starting bot...");
 	bot.start();
+	console.log("Bot started!");
 }
 
 export function telegramStopBot() {
