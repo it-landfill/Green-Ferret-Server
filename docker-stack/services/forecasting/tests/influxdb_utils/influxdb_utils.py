@@ -1,8 +1,14 @@
 from influxdb_client import InfluxDBClient, Point, WriteOptions
 from influxdb_client.client.write_api import SYNCHRONOUS
 import time
+import os
 
-token = "CgR-AqFwvSCAutDZu7Wfv8StUc2Pz718kFlrI8qF7ewa4djsCx9vbxewL59Ie3SS-HoFxFv38-NeUbGSJwhAHA=="
+
+token = os.environ.get("PROPHET_INFLUXDB_TOKEN", "")
+if token == "":
+	print("PROPHET_INFLUXDB_TOKEN not set, exiting...")
+	exit(1)
+	
 bucket = "Green-Ferret-OpenMeteo"
 org = "IT-Landfill"
 client = InfluxDBClient(url="http://pi3aleben:8086", token=token, org=org)
