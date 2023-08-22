@@ -17,14 +17,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-	<body
-	  className={`${inter.className} flex h-screen max-h-screen w-screen flex-col overflow-hidden border-4 border-green-500 bg-blue-100 dark:bg-blue-900`}
-	>
-	  <MyNavbar />
-	  <div className="m-5 grow overflow-hidden border-2 border-red-500">
-		{children}
-	  </div>
-	</body>
+      <body
+        className={`${inter.className} flex h-screen max-h-screen w-screen flex-col overflow-hidden border-4 border-green-500 bg-blue-100`}
+      >
+        <MyNavbar />
+        <div className="m-5 grow overflow-hidden border-2 border-red-500">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

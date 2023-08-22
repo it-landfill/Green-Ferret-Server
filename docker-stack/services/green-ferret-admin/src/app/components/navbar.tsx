@@ -1,4 +1,3 @@
-
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -10,9 +9,7 @@ interface NavbarLink {
   label: string;
 }
 
-const navLinks: NavbarLink[] = [
-  { href: '/', label: 'Home' },
-];
+const navLinks: NavbarLink[] = [{ href: '/', label: 'Home' }];
 
 export default function MyNavbar() {
   {
