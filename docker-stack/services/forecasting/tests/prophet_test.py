@@ -49,6 +49,12 @@ if __name__ == "__main__":
         df_split_by_lat_lon = df.groupby(['gps_index'])                 # Split the DataFrame by latitude and longitude
         for name, group in df_split_by_lat_lon:
             forecast = fit_prophet_model(group)                         # Fit the Prophet model
-            lines = influxdb_utils.convert_forecast_to_list(forecast, topic, group.iloc[0].gps_index, group.iloc[0].latitude, group.iloc[0].longitude) # Convert the forecast dataframe into a list of lines
+            lines = influxdb_utils.convert_forecast_to_list(
+                forecast, 
+                topic, 
+                group.iloc[0].gps_index, 
+                group.iloc[0].latitude, 
+                group.iloc[0].longitude,
+                "prophet_forecast")                                     # Convert the forecast dataframe into a list of lines
             influxdb_utils.write_forecast_to_influxdb(write_api, lines) # Write the forecast predictions to InfluxDB
     influxdb_utils.close_influxdb_client()                              # Close the InfluxDB client

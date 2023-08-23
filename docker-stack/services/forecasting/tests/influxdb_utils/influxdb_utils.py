@@ -25,7 +25,7 @@ def send_query(query_api, query):
 # Function to convert the forecast Dataframe to Line Protocol, which is the format used by InfluxDB.
 # <measurement>[,<tag_key>=<tag_value>[,<tag_key>=<tag_value>]] <field_key>=<field_value>[,<field_key>=<field_value>] [<timestamp>]
 def convert_forecast_to_list(forecast, topic, name, latitude, longitude, measurement):
-    forecast['measurement'] = "measurement"
+    forecast['measurement'] = measurement
     cp = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper', 'measurement']].copy() 
     # Create a list of lines in Line Protocol format.
     lines = []
