@@ -4,7 +4,7 @@ import time
 import os
 
 
-token = os.environ.get("FORECASTING_INFLUXDB_TOKEN", "")
+token = os.environ.get("FORECASTING_INFLUXDB_TOKEN", "Ucfxe4XJfw2lpbK7zPqqfxhLCAzfO4EmSwrfCBCsi_JzRuVEYQSLQgkICGSEpL0o2WG2yUiqq34C4e9YYO3x9A==")
 if token == "":
 	print("FORECASTING_INFLUXDB_TOKEN not set, exiting...")
 	exit(1)
@@ -24,18 +24,23 @@ def send_query(query_api, query):
      
 # Function to convert the forecast Dataframe to Line Protocol, which is the format used by InfluxDB.
 # <measurement>[,<tag_key>=<tag_value>[,<tag_key>=<tag_value>]] <field_key>=<field_value>[,<field_key>=<field_value>] [<timestamp>]
-def convert_forecast_to_list(forecast, topic, name, latitude, longitude):
-    forecast['measurement'] = "prophet_forecast"
-    cp = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper', 'measurement']].copy()
-    lines = [str(cp["measurement"][d]) + ","
-         + "sensorId=" + str(name) + " "
-         + "latitude=" + str(latitude) + ","
-         + "longitude=" + str(longitude) + ","
-         +  str(topic) + "_hat=" + str(cp["yhat"][d]) + ","
-         +  str(topic) + "_hat_lower=" + str(cp["yhat_lower"][d]) + ","
-         +  str(topic) + "_hat_upper=" + str(cp["yhat_upper"][d])
-         + " " + str(int(time.mktime(cp['ds'][d].timetuple()))) + "000000000" for d in range(len(cp))
-    ]
+def convert_forecast_to_list(forecast, topic, name, latitude, longitude, measurement):
+    forecast['measurement'] = "measurement"
+    cp = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper', 'measurement']].copy() 
+    # Create a list of lines in Line Protocol format.
+    lines = []
+    # If measurement is "arima_forecast", then the lines will be in the format:
+    if measurement == "arima_forecast":
+        lines = [f"{measurement},sensorId={name} latitude={latitude},longitude={longitude},{topic}_hat={row['yhat']},{topic}_hat_lower={row['yhat_lower']},{topic}_hat_upper={row['yhat_upper']} {int(time.mktime(row['ds'].timetuple()))}000000000" for index, row in cp.iterrows()]
+    else:
+        lines = [str(cp["measurement"][d]) + ","
+            + "sensorId=" + str(name) + " "
+            + "latitude=" + str(latitude) + ","
+            + "longitude=" + str(longitude) + ","
+            +  str(topic) + "_hat=" + str(cp["yhat"][d]) + ","
+            +  str(topic) + "_hat_lower=" + str(cp["yhat_lower"][d]) + ","
+            +  str(topic) + "_hat_upper=" + str(cp["yhat_upper"][d])
+            + " " + str(int(time.mktime(cp['ds'][d].timetuple()))) + "000000000" for d in range(len(cp))]
     return lines
 
 # Function to write the forecast to InfluxDB.
