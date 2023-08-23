@@ -4,7 +4,7 @@ import time
 import os
 
 
-token = os.environ.get("FORECASTING_INFLUXDB_TOKEN", "Ucfxe4XJfw2lpbK7zPqqfxhLCAzfO4EmSwrfCBCsi_JzRuVEYQSLQgkICGSEpL0o2WG2yUiqq34C4e9YYO3x9A==")
+token = os.environ.get("FORECASTING_INFLUXDB_TOKEN", "")
 if token == "":
 	print("FORECASTING_INFLUXDB_TOKEN not set, exiting...")
 	exit(1)
