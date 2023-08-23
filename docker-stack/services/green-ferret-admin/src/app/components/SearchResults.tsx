@@ -9,16 +9,31 @@ interface Props {
 
 const SearchResults = ({ state, dispatch }: Props) => {
   return (
-    <div className="flex grow flex-row flex-wrap border-2 border-red-800">
+    <div className="flex grow flex-row flex-wrap mt-5">
       {state.searchText === ''
-        ? state.devices.map((device) => (
-            <SearchResult device={device} key={device.id} />
-          ))
+        ? state.devices
+            .sort((a, b) => a.id.localeCompare(b.id))
+            .map((device) => (
+              <SearchResult
+                device={device}
+				state={state}
+                dispatch={dispatch}
+                key={device.id}
+              />
+            ))
         : state.devices
             .filter((device) =>
               device.id.toLowerCase().includes(state.searchText.toLowerCase()),
             )
-            .map((device) => <SearchResult device={device} key={device.id} />)}
+            .sort((a, b) => a.id.localeCompare(b.id))
+            .map((device) => (
+              <SearchResult
+                device={device}
+				state={state}
+                dispatch={dispatch}
+                key={device.id}
+              />
+            ))}
     </div>
   );
 };

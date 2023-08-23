@@ -36,8 +36,12 @@ export function generateNewDevice(id: string) {
       protocol: CommunicationProtocol.MQTT,
       trigger: TriggerType.TIME,
       distanceMethod: DistanceMethod.LESS_THAN,
-      distance: 0,
+      distance: 1,
       time: 10, // 10 seconds
     },
   };
+}
+
+export function deepCopyDevice(device: DeviceModel): DeviceModel {
+	  return JSON.parse(JSON.stringify(device));
 }

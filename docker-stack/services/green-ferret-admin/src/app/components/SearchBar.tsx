@@ -11,7 +11,7 @@ interface Props {
 const SearchBar = ({ state, dispatch }: Props) => {
   const input = React.useRef<HTMLInputElement>(null);
   return (
-    <form className="border-2 border-blue-600">
+    <form>
       <label
         htmlFor="default-search"
         className="sr-only mb-2 text-sm font-medium text-gray-900"

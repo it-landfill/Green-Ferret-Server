@@ -3,9 +3,11 @@
 import { StateModel, StateReducer } from '@/models/StateModel';
 import SearchBar from './components/SearchBar';
 import SearchResults from './components/SearchResults';
+import { Button, Modal } from 'flowbite-react';
 
 import React from 'react';
 import { generateNewDevice } from '@/models/DeviceModel';
+import DeviceInfo from './components/DeviceInfo';
 
 const initialState: StateModel = {
   searchText: '',
@@ -16,6 +18,7 @@ const initialState: StateModel = {
     generateNewDevice('A49879286F27'),
     generateNewDevice('A49879286F28'),
   ],
+  showDevice: "",
 };
 
 export default function Home() {
