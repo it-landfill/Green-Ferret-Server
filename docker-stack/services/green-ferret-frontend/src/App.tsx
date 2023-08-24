@@ -17,6 +17,8 @@ import {
 
 import { InfluxAccess } from "./utils/InfluxAccess";
 
+import DataPointsSelectorController from "./components/dataPointsControls/DataPointsSelector";
+import DataPointsControlAnimation from "./components/dataPointsControls/DataPointsControl";
 import ErrorMessagePopup from "./components/ErrorPopup";
 
 const HeatmapLayer = HeatmapLayerFactory<[number, number, number]>();
@@ -52,7 +54,9 @@ function App() {
   const [errorMessageState, setErrorMessageState] = React.useState(false);
   // Variable for title and message of the error message popup
   const [errorMessageTitle, setErrorMessageTitle] = React.useState("Errore");
-  const [errorMessageMessage, setErrorMessageMessage] = React.useState("Si è verificato un errore generico, riprovare più tardi!");
+  const [errorMessageMessage, setErrorMessageMessage] = React.useState(
+    "Si è verificato un errore generico, riprovare più tardi!"
+  );
 
   /**********************************************************************************************************/
 
@@ -69,12 +73,18 @@ function App() {
       .value;
     // Check if the data are present (if not, show an error message).
     if (dateStart === "" || timeStart === "" || timeSpan === "") {
-      showErrorMessagePopup("Errore - Dati mancanti", "Attenzione, inserire tutti i dati richiesti. Se non presenti risulta impossibile effettuare la richiesta al server.");
+      showErrorMessagePopup(
+        "Errore - Dati mancanti",
+        "Attenzione, inserire tutti i dati richiesti. Se non presenti risulta impossibile effettuare la richiesta al server."
+      );
       return;
     }
     // Check if the time span is a number (if not, show an error message).
     if (isNaN(parseInt(timeSpan))) {
-      showErrorMessagePopup("Errore - Dati errati", "Attenzione, il dato inserito nella finestra temporale non è un numero. Inserire un numero intero.");
+      showErrorMessagePopup(
+        "Errore - Dati errati",
+        "Attenzione, il dato inserito nella finestra temporale non è un numero. Inserire un numero intero."
+      );
       return;
     }
     // Parse the data to get the start and end date.
@@ -87,13 +97,17 @@ function App() {
     const data = await InfluxAccess.getData(parsedStartDate, parsedEndDate);
     // Check if the data are present (if not, show an error message).
     if (data.length === 0) {
-      showErrorMessagePopup("Errore - Dati mancanti", "Attenzione, non sono presenti dati per il periodo selezionato.");
+      showErrorMessagePopup(
+        "Errore - Dati mancanti",
+        "Attenzione, non sono presenti dati per il periodo selezionato."
+      );
       return;
     }
     // Number of frames to aggregate the data.
     const nFrames = 20;
     // Time span of each frame (in milliseconds).
-    const timeFrame = data[data.length - 1].time.getTime() - data[0].time.getTime();
+    const timeFrame =
+      data[data.length - 1].time.getTime() - data[0].time.getTime();
     // Aggregate inside different arrays data with the same time frame.
     let dataAggregated: InfluxAccess.Measurement[][] = [];
     // The first element of the array is the first data point of the data array.
@@ -118,7 +132,8 @@ function App() {
     if (dataPointsIndexCycleState) {
       // Cycle through the data points index every second.
       indexCycleFunction = setInterval(() => {
-        if (dataPointsIndexCycle !== dataPoints.length - 1) dataPointsIndexCycle += 1;
+        if (dataPointsIndexCycle !== dataPoints.length - 1)
+          dataPointsIndexCycle += 1;
         else dataPointsIndexCycle = 0;
         // Print the data points with the new index.
         setDataPointsIndex(dataPointsIndexCycle);
@@ -378,7 +393,7 @@ function App() {
 
   /**
    * Show the error message popup.
-   * 
+   *
    * @param title Title of the popup.
    * @param message Message of the popup.
    */
@@ -417,7 +432,7 @@ function App() {
                 height: "100%",
                 zIndex: 0,
               }}
-              center={[45.64651, 12.251473]}
+              center={[44.494887, 11.3426163]}
               zoom={13}
               scrollWheelZoom={true}
             >
@@ -442,8 +457,9 @@ function App() {
                   latitudeExtractor={(m) => m[0]}
                   intensityExtractor={(m) => m[2]}
                   radius={30}
-                  gradient={{ 0.2: "blue", 0.7: "yellow", 1.0: "orange" }}
+                  gradient={{ 0.3: "blue", 0.6: "yellow", 1.1: "orange" }}
                   opacity={0.8}
+                  blur={40}
                 />
               ) : null}
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -489,141 +505,22 @@ function App() {
                   Applica
                 </button>
               </div>
-              <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
-              {/* Heatmap filter */}
-              <div className="flex flex-col gap-2 m-4">
-                <h2 className="text-2xl font-bold text-left text-green-600">
-                  Filtro heatmap
-                </h2>
-                <div className="flex items-center">
-                  <input
-                    id="default-radio-1"
-                    type="radio"
-                    value=""
-                    name="default-radio"
-                    className="w-4 h-4 accent-green-600"
-                    onChange={() => setHeatmapType(HeatmapType.TEMPERATURE)}
-                    checked={heatmapType === HeatmapType.TEMPERATURE}
+              {dataPoints.length > 0 ? (
+                <div>
+                  <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
+                  <DataPointsSelectorController
+                    heatmapType={heatmapType}
+                    setHeatmapType={setHeatmapType}
                   />
-                  <label className="ml-3 text-md font-medium text-gray-800">
-                    Visualizza temperatura{" "}
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    id="default-radio-2"
-                    type="radio"
-                    value=""
-                    name="default-radio"
-                    className="w-4 h-4 accent-green-600"
-                    onChange={() => setHeatmapType(HeatmapType.PRESSURE)}
-                    checked={heatmapType === HeatmapType.PRESSURE}
+                  <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
+                  <DataPointsControlAnimation
+                    dataPointsIndex={dataPointsIndex}
+                    dataPointsIndexCycleState={dataPointsIndexCycleState}
+                    setDataPointsIndexCycleState={setDataPointsIndexCycleState}
+                    setDataPointsIndex={setDataPointsIndex}
                   />
-                  <label className="ml-3 text-md font-medium text-gray-800">
-                    Visualizza pressione
-                  </label>
                 </div>
-                <div className="flex items-center">
-                  <input
-                    id="default-radio-3"
-                    type="radio"
-                    value=""
-                    name="default-radio"
-                    className="w-4 h-4 accent-green-600"
-                    onChange={() => setHeatmapType(HeatmapType.HUMIDITY)}
-                    checked={heatmapType === HeatmapType.HUMIDITY}
-                  />
-                  <label className="ml-3 text-md font-medium text-gray-800">
-                    Visualizza umidità
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    id="default-radio-4"
-                    type="radio"
-                    value=""
-                    name="default-radio"
-                    className="w-4 h-4 accent-green-600"
-                    onChange={() => setHeatmapType(HeatmapType.ECO2)}
-                    checked={heatmapType === HeatmapType.ECO2}
-                  />
-                  <label className="ml-3 text-md font-medium text-gray-800">
-                    Visualizza CO2
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    id="default-radio-5"
-                    type="radio"
-                    value=""
-                    name="default-radio"
-                    className="w-4 h-4 accent-green-600"
-                    onChange={() => setHeatmapType(HeatmapType.TVOC)}
-                    checked={heatmapType === HeatmapType.TVOC}
-                  />
-                  <label className="ml-3 text-md font-medium text-gray-800">
-                    Visualizza TVOC
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    id="default-radio-6"
-                    type="radio"
-                    value=""
-                    name="default-radio"
-                    className="w-4 h-4 accent-green-600"
-                    onChange={() => setHeatmapType(HeatmapType.AQI)}
-                    checked={heatmapType === HeatmapType.AQI}
-                  />
-                  <label className="ml-3 text-md font-medium text-gray-800">
-                    Visualizza qualità dell'aria
-                  </label>
-                </div>
-              </div>
-              <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
-              {/* Data points control */}
-              <div className="flex flex-col gap-2 m-4">
-                <h2 className="text-2xl font-bold text-left text-green-600">
-                  Controlli Start/Stop
-                </h2>
-                <div className="flex items-center gap-2 m-4">
-                  {!dataPointsIndexCycleState ? (
-                    <button
-                      className="w-full h-10 font-bold rounded-lg text-white bg-green-600 bg-opacity-90 hover:bg-opacity-100 ease-in-out duration-300"
-                      onClick={() => setDataPointsIndexCycleState(true)}
-                    >
-                      Start
-                    </button>
-                  ) : (
-                    <button
-                      className="w-full h-10 font-bold rounded-lg text-white bg-red-600 bg-opacity-90 hover:bg-opacity-100 ease-in-out duration-300"
-                      onClick={() => setDataPointsIndexCycleState(false)}
-                    >
-                      Stop
-                    </button>
-                  )}
-                </div>
-                <fieldset className="mx-auto space-y-1 w-11/12">
-                  <input
-                    type="range"
-                    className="w-full cursor-pointer rounded border-[1px] border-green-700 h-2 accent-green-600 appearance-none"
-                    min="1"
-                    max="20"
-                    value={dataPointsIndex + 1}
-                    onChange={(e) => { 
-                      setDataPointsIndexCycleState(false); 
-                      setDataPointsIndex(parseInt(e.target.value) - 1); 
-                    }}
-                  />
-                  <div aria-hidden="true" className="flex justify-between px-1">
-                    <span>1</span>
-                    <span>2</span>
-                    <span>3</span>
-                    <span>4</span>
-                    <span>5</span>
-                  </div>
-                </fieldset>
-              </div>
+              ) : null}
             </div>
           </div>
         </div>
