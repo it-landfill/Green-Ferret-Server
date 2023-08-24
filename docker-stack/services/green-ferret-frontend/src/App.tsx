@@ -433,7 +433,6 @@ function App() {
                         (
                           d: InfluxAccess.Measurement
                         ): [number, number, number] => {
-                          
                           // Based on the heatmap selected, the intensity will be different
                           return [d.latitude, d.longitude, d[heatmapType]];
                         }
@@ -604,6 +603,26 @@ function App() {
                     </button>
                   )}
                 </div>
+                <fieldset className="mx-auto space-y-1 w-11/12">
+                  <input
+                    type="range"
+                    className="w-full cursor-pointer rounded border-[1px] border-green-700 h-2 accent-green-600 appearance-none"
+                    min="1"
+                    max="20"
+                    value={dataPointsIndex + 1}
+                    onChange={(e) => { 
+                      setDataPointsIndexCycleState(false); 
+                      setDataPointsIndex(parseInt(e.target.value) - 1); 
+                    }}
+                  />
+                  <div aria-hidden="true" className="flex justify-between px-1">
+                    <span>1</span>
+                    <span>2</span>
+                    <span>3</span>
+                    <span>4</span>
+                    <span>5</span>
+                  </div>
+                </fieldset>
               </div>
             </div>
           </div>
