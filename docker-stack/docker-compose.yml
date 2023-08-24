@@ -146,6 +146,23 @@ services:
             - MQTT_CLIENT_ID=$TELEGRAM_MQTT_CLIENT_ID
             - TELEGRAM_API_TOKEN=$TELEGRAM_API_TOKEN
             - TELEGRAM_MASTER_CHAT_ID=$TELEGRAM_MASTER_CHAT_ID
+    db:
+      image: postgres
+      restart: always
+      environment:
+        POSTGRES_DB: Green-Ferret
+        POSTGRES_USER: greenferret
+        POSTGRES_PASSWORD: example
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      ports:
+        - 5432:5432
+  
+    adminer:
+      image: adminer
+      restart: always
+      ports:
+        - 8080:8080
 
 volumes:
     mosquitto_data:
@@ -155,6 +172,7 @@ volumes:
     influxdb_config:
     influxdb_backup:
     grafana_data:
+    postgres_data:
 
 networks:
     iot_net:
