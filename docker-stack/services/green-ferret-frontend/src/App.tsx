@@ -15,7 +15,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import { InfluxAccess } from "./InfluxAccess";
+import { InfluxAccess } from "./utils/InfluxAccess";
 
 import ErrorMessagePopup from "./components/ErrorPopup";
 
@@ -67,6 +67,16 @@ function App() {
       .value;
     const timeSpan = (document.getElementById("timeSpan") as HTMLInputElement)
       .value;
+    // Check if the data are present (if not, show an error message).
+    if (dateStart === "" || timeStart === "" || timeSpan === "") {
+      showErrorMessagePopup("Errore - Dati mancanti", "Attenzione, inserire tutti i dati richiesti. Se non presenti risulta impossibile effettuare la richiesta al server.");
+      return;
+    }
+    // Check if the time span is a number (if not, show an error message).
+    if (isNaN(parseInt(timeSpan))) {
+      showErrorMessagePopup("Errore - Dati errati", "Attenzione, il dato inserito nella finestra temporale non è un numero. Inserire un numero intero.");
+      return;
+    }
     // Parse the data to get the start and end date.
     const parsedSpan: number = parseInt(timeSpan);
     const parsedStartDate = new Date(dateStart + "T" + timeStart);
@@ -75,11 +85,15 @@ function App() {
     parsedEndDate.setMinutes(parsedEndDate.getMinutes() + parsedSpan);
     // Get data from the server.
     const data = await InfluxAccess.getData(parsedStartDate, parsedEndDate);
+    // Check if the data are present (if not, show an error message).
+    if (data.length === 0) {
+      showErrorMessagePopup("Errore - Dati mancanti", "Attenzione, non sono presenti dati per il periodo selezionato.");
+      return;
+    }
     // Number of frames to aggregate the data.
     const nFrames = 20;
     // Time span of each frame (in milliseconds).
-    const timeFrame =
-      data[data.length - 1].time.getTime() - data[0].time.getTime();
+    const timeFrame = data[data.length - 1].time.getTime() - data[0].time.getTime();
     // Aggregate inside different arrays data with the same time frame.
     let dataAggregated: InfluxAccess.Measurement[][] = [];
     // The first element of the array is the first data point of the data array.
@@ -95,10 +109,6 @@ function App() {
       if (dataAggregated[index] == null) dataAggregated[index] = [];
       dataAggregated[index].push(data[i]);
     }
-    // Merge last element with previous cell.
-    const last = dataAggregated.pop();
-    if (last && last.length > 0)
-      dataAggregated[dataAggregated.length - 1].push(last[0]);
     // Update the data points array.
     setDataPoints(dataAggregated);
   }
@@ -108,9 +118,9 @@ function App() {
     if (dataPointsIndexCycleState) {
       // Cycle through the data points index every second.
       indexCycleFunction = setInterval(() => {
-        if (dataPointsIndexCycle !== dataPoints.length - 1)
-          dataPointsIndexCycle += 1;
+        if (dataPointsIndexCycle !== dataPoints.length - 1) dataPointsIndexCycle += 1;
         else dataPointsIndexCycle = 0;
+        // Print the data points with the new index.
         setDataPointsIndex(dataPointsIndexCycle);
       }, 1000);
     } else clearInterval(indexCycleFunction);
@@ -366,13 +376,21 @@ function App() {
     );
   }
 
-
+  /**
+   * Show the error message popup.
+   * 
+   * @param title Title of the popup.
+   * @param message Message of the popup.
+   */
   function showErrorMessagePopup(title: string, message: string) {
     setErrorMessageTitle(title);
     setErrorMessageMessage(message);
     setErrorMessageState(true);
   }
 
+  /**
+   * Hide the error message popup.
+   */
   function hideErrorMessagePopup() {
     setErrorMessageState(false);
   }
@@ -415,6 +433,7 @@ function App() {
                         (
                           d: InfluxAccess.Measurement
                         ): [number, number, number] => {
+                          
                           // Based on the heatmap selected, the intensity will be different
                           return [d.latitude, d.longitude, d[heatmapType]];
                         }
