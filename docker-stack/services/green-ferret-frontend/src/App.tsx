@@ -123,14 +123,16 @@ function App() {
   // Use effect for the data points index cycle (if the state is true, the index will cycle through the data points array).
   React.useEffect(() => {
     if (dataPointsIndexCycleState) {
+      // Sync the data points index cycle with the data points index.
+      dataPointsIndexCycle = dataPointsIndex;
       // Cycle through the data points index every second.
       indexCycleFunction = setInterval(() => {
-        if (dataPointsIndexCycle !== dataPoints.length - 1)
+        if (dataPointsIndexCycle <= dataPoints.length - 1)
           dataPointsIndexCycle += 1;
         else dataPointsIndexCycle = 0;
         // Print the data points with the new index.
         setDataPointsIndex(dataPointsIndexCycle);
-      }, 1000);
+      }, 500);
     } else clearInterval(indexCycleFunction);
     // Clear the interval when the component is unmounted.
     return () => clearInterval(indexCycleFunction);

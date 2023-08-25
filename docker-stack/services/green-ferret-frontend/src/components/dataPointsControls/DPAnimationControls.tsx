@@ -6,7 +6,6 @@ interface AnimationControlsProps {
 }
 
 function AnimationControls(props: AnimationControlsProps) {
-
   return (
     <div className="flex flex-col gap-2 m-4">
       <h2 className="text-2xl font-bold text-left text-green-600">
@@ -38,6 +37,10 @@ function AnimationControls(props: AnimationControlsProps) {
           value={props.dataPointsIndex + 1}
           onChange={(e) => {
             props.setDataPointsIndexCycleState(false);
+            console.log(
+              "Cambiamento del controller component:",
+              e.target.value
+            );
             props.setDataPointsIndex(parseInt(e.target.value) - 1);
           }}
         />

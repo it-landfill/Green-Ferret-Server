@@ -63,9 +63,7 @@ export module InfluxAccess {
     start: Date,
     end: Date
   ): Promise<Measurement[]> {
-    const client = getClient(
-      "http://pi3aleben:8086"
-    );
+    const client = getClient("http://pi3aleben:8086");
 
     let queryClient = client.getQueryApi("IT-Landfill");
     // let fluxQuery = `
@@ -100,21 +98,21 @@ export module InfluxAccess {
       queryClient.queryRows(fluxQuery, {
         next: (row: string[], tableMeta: FluxTableMetaData) => {
           // For each row, create a Measurement object and add it to the result array
-            const tableObject = tableMeta.toObject(row);
+          const tableObject = tableMeta.toObject(row);
 
-            const tmp: Measurement = {
-              latitude: tableObject.latitude,
-              longitude: tableObject.longitude,
-              time: new Date(tableObject._time),
-              temperature: tableObject.temperature,
-              pressure: tableObject.pressure,
-              humidity: tableObject.humidity,
-              eco2: tableObject.equivalent_co2,
-              tvoc: tableObject.total_volatile_organic_compounds,
-              aqi: tableObject.air_quality_index,
-            };
+          const tmp: Measurement = {
+            latitude: tableObject.latitude,
+            longitude: tableObject.longitude,
+            time: new Date(tableObject._time),
+            temperature: tableObject.temperature,
+            pressure: tableObject.pressure,
+            humidity: tableObject.humidity,
+            eco2: tableObject.equivalent_co2,
+            tvoc: tableObject.total_volatile_organic_compounds,
+            aqi: tableObject.air_quality_index,
+          };
 
-            result.push(tmp);
+          result.push(tmp);
         },
         error: (error: Error) => {
           console.error("\nError", error);
