@@ -17,6 +17,7 @@ import {
 
 import { InfluxAccess } from "./utils/InfluxAccess";
 
+import MainController from "./components/dataPointsControls/DataPointsMain";
 import DataPointsSelectorController from "./components/dataPointsControls/DataPointsSelector";
 import DataPointsControlAnimation from "./components/dataPointsControls/DataPointsControl";
 import ErrorMessagePopup from "./components/ErrorPopup";
@@ -36,6 +37,7 @@ function App() {
   const [dataPoints, setDataPoints] = React.useState<
     InfluxAccess.Measurement[][]
   >([]);
+
   // Enum for the selected heatmap type.
   enum HeatmapType {
     TEMPERATURE = "temperature",
@@ -45,6 +47,7 @@ function App() {
     TVOC = "tvoc",
     AQI = "aqi",
   }
+
   // State of the heatmap type.
   const [heatmapType, setHeatmapType] = React.useState<HeatmapType>(
     HeatmapType.TEMPERATURE
@@ -468,43 +471,7 @@ function App() {
           <div className="w-1/5">
             <div className="flex flex-col h-full gap-2">
               {/* Time selection */}
-              <div className="flex flex-col gap-2 m-4">
-                <h2 className="text-2xl font-bold text-left text-green-600">
-                  Selezione temporale
-                </h2>
-                <div className="flex flex-col gap-2">
-                  <h4 className="text-lg font-bold text-left text-green-600">
-                    Data ed ora
-                  </h4>
-                  <input
-                    id="dateStart"
-                    type="date"
-                    className="w-full h-10 p-2 rounded-lg border-[1px] border-opacity-20 border-green-600 focus:border-opacity-50 focus:border-green-600 focus:outline-none"
-                  />
-                  <input
-                    id="timeStart"
-                    type="time"
-                    className="w-full h-10 p-2 rounded-lg border-[1px] border-opacity-20 border-green-600 focus:border-opacity-50 focus:border-green-600 focus:outline-none"
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h4 className="text-lg font-bold text-left text-green-600">
-                    Finestra temporale
-                  </h4>
-                  <input
-                    id="timeSpan"
-                    type="number"
-                    className="w-full h-10 p-2 rounded-lg border-[1px] border-opacity-20 border-green-600 focus:border-opacity-50 focus:border-green-600 focus:outline-none"
-                    placeholder="Durata in minuti"
-                  />
-                </div>
-                <button
-                  className="w-full h-10 font-bold rounded-lg text-white bg-green-600 bg-opacity-90  hover:bg-opacity-100 focus:outline-none"
-                  onClick={() => getDataServer()}
-                >
-                  Applica
-                </button>
-              </div>
+              <MainController getDataServer={getDataServer} />
               {dataPoints.length > 0 ? (
                 <div>
                   <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
