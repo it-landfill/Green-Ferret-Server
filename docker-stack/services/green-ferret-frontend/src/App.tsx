@@ -17,9 +17,9 @@ import {
 
 import { InfluxAccess } from "./utils/InfluxAccess";
 
-import MainController from "./components/dataPointsControls/DataPointsMain";
-import DataPointsSelectorController from "./components/dataPointsControls/DataPointsSelector";
-import DataPointsControlAnimation from "./components/dataPointsControls/DataPointsControl";
+import TemporalSelector from "./components/dataPointsControls/DPTemporalSelector";
+import HeatmapTypeSelector from "./components/dataPointsControls/DPHeatmapTypeSelector";
+import AnimationControls from "./components/dataPointsControls/DPAnimationControls";
 import ErrorMessagePopup from "./components/ErrorPopup";
 
 const HeatmapLayer = HeatmapLayerFactory<[number, number, number]>();
@@ -442,8 +442,7 @@ function App() {
               {dataPoints != null && dataPoints.length > 0 ? (
                 <HeatmapLayer
                   points={[
-                    ...// Based on the heatmap selected, filter the data points with null values
-                    dataPoints[dataPointsIndex]
+                    ...dataPoints[dataPointsIndex]
                       .filter((d: InfluxAccess.Measurement) => {
                         return d[heatmapType] != null;
                       })
@@ -471,16 +470,16 @@ function App() {
           <div className="w-1/5">
             <div className="flex flex-col h-full gap-2">
               {/* Time selection */}
-              <MainController getDataServer={getDataServer} />
-              {dataPoints.length > 0 ? (
+              <TemporalSelector getDataServer={getDataServer} />
+              {dataPoints.length === 0 ? (
                 <div>
                   <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
-                  <DataPointsSelectorController
+                  <HeatmapTypeSelector
                     heatmapType={heatmapType}
                     setHeatmapType={setHeatmapType}
                   />
                   <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
-                  <DataPointsControlAnimation
+                  <AnimationControls
                     dataPointsIndex={dataPointsIndex}
                     dataPointsIndexCycleState={dataPointsIndexCycleState}
                     setDataPointsIndexCycleState={setDataPointsIndexCycleState}

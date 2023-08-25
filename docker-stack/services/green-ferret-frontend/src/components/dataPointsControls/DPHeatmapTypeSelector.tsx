@@ -1,9 +1,9 @@
-interface DataPointsControlSelectorProps {
+interface HeatmapTypeSelectorProps {
   heatmapType: string;
   setHeatmapType: any;
 }
 
-function DataPointsSelectorController(props: DataPointsControlSelectorProps) {
+function HeatmapTypeSelector(props: HeatmapTypeSelectorProps) {
   // Enum for the selected heatmap type.
   enum HeatmapType {
     TEMPERATURE = "temperature",
@@ -107,4 +107,4 @@ function DataPointsSelectorController(props: DataPointsControlSelectorProps) {
   );
 }
 
-export default DataPointsSelectorController;
+export default HeatmapTypeSelector;

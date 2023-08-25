@@ -1,11 +1,11 @@
-interface DataPointsControlAnimationProps {
+interface AnimationControlsProps {
   dataPointsIndex: number;
   dataPointsIndexCycleState: boolean;
   setDataPointsIndexCycleState: any;
   setDataPointsIndex: any;
 }
 
-function DataPointsControlAnimation(props: DataPointsControlAnimationProps) {
+function AnimationControls(props: AnimationControlsProps) {
 
   return (
     <div className="flex flex-col gap-2 m-4">
@@ -53,4 +53,4 @@ function DataPointsControlAnimation(props: DataPointsControlAnimationProps) {
   );
 }
 
-export default DataPointsControlAnimation;
+export default AnimationControls;

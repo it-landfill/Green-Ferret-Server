@@ -1,8 +1,8 @@
-interface MainControllerProps {
+interface TemporalSelectorProps {
   getDataServer: any;
 }
 
-function MainController(props: MainControllerProps) {
+function TemporalSelector(props: TemporalSelectorProps) {
   return (
     <div className="flex flex-col gap-2 m-4">
       <h2 className="text-2xl font-bold text-left text-green-600">
@@ -44,4 +44,4 @@ function MainController(props: MainControllerProps) {
   );
 }
 
-export default MainController;
+export default TemporalSelector;
