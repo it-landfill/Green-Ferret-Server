@@ -1,4 +1,5 @@
 import { DeviceModel } from './DeviceModel';
+import { mqttPublish } from './mqtt';
 
 export interface StateModel {
   searchText: string;
@@ -7,12 +8,6 @@ export interface StateModel {
 }
 
 export type Actions =
-  | {
-      type: 'UPDATE_CONFIG';
-      payload: {
-        deviceModel: DeviceModel;
-      };
-    }
   | {
       type: 'SEARCH';
       payload: string;
@@ -34,18 +29,6 @@ export const StateReducer = (
   action: Actions,
 ): StateModel => {
   switch (action.type) {
-    case 'UPDATE_CONFIG':
-      console.log(
-        'UPDATE_CONFIG ' + JSON.stringify(action.payload.deviceModel),
-      );
-      return {
-        ...state,
-        devices: state.devices
-          .filter((dev) => {
-            dev.id !== action.payload.deviceModel.id;
-          })
-          .concat(action.payload.deviceModel),
-      };
     case 'SEARCH':
       console.log('Searching ' + action.payload);
       return {
@@ -59,18 +42,19 @@ export const StateReducer = (
         showDevice: action.payload,
       };
     case 'CLOSE_DEVICE':
-      console.log('Closing device without saving');
+      console.log('Closing device');
       return {
         ...state,
         showDevice: "",
       };
     case 'SAVE_DEVICE':
+		console.log('Saving device ' + JSON.stringify(action.payload));
+		mqttPublish("CFG/" + action.payload.id + "/Config", JSON.stringify(action.payload.config))
        return {
         ...state,
         devices: state.devices
           .filter((dev) => dev.id !== action.payload?.id)
           .concat(action.payload),
-        showDevice: "",
       };
     default:
       throw new Error("Action type doesn't exist");
