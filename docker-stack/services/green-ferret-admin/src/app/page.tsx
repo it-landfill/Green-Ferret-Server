@@ -1,16 +1,19 @@
 import SearchResults from './components/SearchResults';
 
 import React from 'react';
-import { GetServerSideProps, GetServerSidePropsResult } from 'next';
-import { dbGetAllDeviceIDs } from '@/models/Postgres';
 import SearchBar from './components/SearchBar';
 
-async function getDevices(): Promise<string[]> {
-  return dbGetAllDeviceIDs();
+async function getData() {
+  const response = await fetch('http://localhost:3000/api/getDeviceIDs');
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  return await response.json();
 }
 
 export default async function Home() {
-  const devices = await getDevices();
+  const devices = await getData();
+
   return (
     <div>
       <SearchBar />

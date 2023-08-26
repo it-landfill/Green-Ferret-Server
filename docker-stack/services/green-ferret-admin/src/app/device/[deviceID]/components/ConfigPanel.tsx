@@ -6,15 +6,40 @@ import {
   DistanceMethod,
   TriggerType,
 } from '@/models/DeviceModel';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
 interface Props {
   deviceIn: DeviceModel;
 }
 
+async function sendConfig(device: DeviceModel) {
+  var myHeaders = new Headers();
+  myHeaders.append('Content-Type', 'application/json');
+
+  var raw = JSON.stringify(device);
+
+  var requestOptions: RequestInit = {
+    method: 'POST',
+    headers: myHeaders,
+    body: raw,
+    redirect: 'follow',
+  };
+
+  const res = await fetch(
+	//TODO: Automatically Change this to the correct URL
+    'http://localhost:3000/api/saveDeviceInfo',
+    requestOptions,
+  );
+
+  if (!res.ok) {
+    throw new Error(res.statusText);
+  }
+}
+
 const ConfigPanel = ({ deviceIn }: Props) => {
   const [device, setDevice] = React.useState<DeviceModel>(deviceIn);
-
+  const router = useRouter();
   return (
     <div className="flex flex-col space-y-6 p-6">
       {/* 
@@ -200,10 +225,11 @@ const ConfigPanel = ({ deviceIn }: Props) => {
         <button
           type="button"
           className="rounded-lg bg-green-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-          onClick={() => {
+          onClick={async () => {
             console.log('Applying configuration to device: ' + device.id);
             console.log(device);
-            console.warn('TODO: Send configuration to device');
+            await sendConfig(device);
+            router.push('/');
           }}
         >
           Apply
