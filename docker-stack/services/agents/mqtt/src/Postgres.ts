@@ -1,5 +1,11 @@
-import { Config, DataTypes, InferAttributes, InferCreationAttributes, Model, Sequelize } from "sequelize";
-import { DeviceModel } from "./DeviceModel";
+import { DataTypes, InferAttributes, InferCreationAttributes, Model, Sequelize } from "sequelize";
+
+interface SQLConfig {
+	  host: string;
+	  db: string;
+	  username: string;
+	  password: string;
+}
 
 const sqlConfig = {
   host: "localhost",
@@ -82,6 +88,28 @@ const deviceConfig = DeviceConfig.init({
 	sequelize,
 	tableName: "Config",
 });
+
+function generateConfig(): SQLConfig {
+	  const host = process.env.POSTGRES_HOST || "localhost";
+  const db = process.env.POSTGRES_DB || "Green-Ferret";
+  const username = process.env.POSTGRES_USER;
+  const password = process.env.POSTGRES_PASSWORD;
+
+  if (!process.env.POSTGRES_HOST)
+    console.warn("POSTGRES_HOST not set, using default value (localhost)");
+  if (!process.env.POSTGRES_DB)
+    console.warn("POSTGRES_DB not set, using default value (Green-Ferret)");
+  if (username === undefined || password === undefined) {
+	throw new Error("Missing Postgres configuration");
+  }
+
+  return {
+	host: host,
+	db: db,
+	username: username,
+	password: password,
+  };
+}
 
 export async function dbConnect() {
   try {
