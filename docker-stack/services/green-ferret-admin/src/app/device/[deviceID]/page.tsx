@@ -4,6 +4,7 @@ import ConfigPanel from './components/ConfigPanel';
 import { BiArrowBack } from 'react-icons/bi';
 import Link from 'next/link';
 import { DeviceModel } from '@/models/DeviceModel';
+import { notFound } from 'next/navigation';
 
 interface Props {
   params: {
@@ -16,7 +17,7 @@ async function getData(deviceID: string): Promise<DeviceModel | undefined> {
     'http://localhost:3000/api/getDeviceInfo/' + deviceID,
   );
   if (!response.ok) {
-    throw new Error(response.statusText);
+	return undefined;
   }
   const respObj = await response.json();
 
@@ -28,11 +29,11 @@ async function getData(deviceID: string): Promise<DeviceModel | undefined> {
 
 const DeviceInfo = async ({ params }: Props) => {
   console.log('Info for device: ' + params.deviceID);
-  //TODO: What if the device does not exist?
   const device = await dbGetDevice(params.deviceID);
 
   if (device === undefined) {
-    throw new Error('Device not found');
+	// If device is undefined, return 404
+	notFound();
   }
 
   return (
