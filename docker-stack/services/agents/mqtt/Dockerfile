@@ -32,4 +32,4 @@ CMD ["node", "dist/main.js"]
 # Create builder to use new features (https://cloudolife.com/2022/03/05/Infrastructure-as-Code-IaC/Container/Docker/Docker-buildx-support-multiple-architectures-images/)
 # docker buildx create --name mybuilder --use
 # Build multi platform image
-# docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_mqtt-agent:latest --tag aleben/green-ferret_mqtt-agent:1.0 .
+# docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_mqtt-agent:latest --tag aleben/green-ferret_mqtt-agent:1.1 .
