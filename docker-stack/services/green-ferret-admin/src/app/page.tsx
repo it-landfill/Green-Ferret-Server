@@ -1,25 +1,20 @@
-'use client';
-
-import { StateModel, StateReducer } from '@/models/StateModel';
-import SearchBar from './components/SearchBar';
 import SearchResults from './components/SearchResults';
 
 import React from 'react';
+import { GetServerSideProps, GetServerSidePropsResult } from 'next';
+import { dbGetAllDeviceIDs } from '@/models/Postgres';
+import SearchBar from './components/SearchBar';
 
-const initialState: StateModel = {
-  searchText: '',
-  devices: [
-  ],
-  showDevice: "",
-};
+async function getDevices(): Promise<string[]> {
+  return dbGetAllDeviceIDs();
+}
 
-export default function Home() {
-  const [state, dispatch] = React.useReducer(StateReducer, initialState);
-
+export default async function Home() {
+  const devices = await getDevices();
   return (
     <div>
-      <SearchBar state={state} dispatch={dispatch} />
-      <SearchResults state={state} dispatch={dispatch} />
+      <SearchBar />
+      <SearchResults devices={devices} />
     </div>
   );
 }

@@ -18,7 +18,9 @@ interface Props {
 }
 
 const DeviceInfo = ({ dispatch, deviceIn }: Props) => {
-  const [device, setDevice] = React.useState<DeviceModel>(deepCopyDevice(deviceIn));
+  const [device, setDevice] = React.useState<DeviceModel>(
+    deepCopyDevice(deviceIn),
+  );
   return (
     <div>
       <div
@@ -35,7 +37,7 @@ const DeviceInfo = ({ dispatch, deviceIn }: Props) => {
                 className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
                 type="button"
                 onClick={() => {
-					setDevice(deepCopyDevice(deviceIn));
+                  setDevice(deepCopyDevice(deviceIn));
                   dispatch({ type: 'CLOSE_DEVICE' });
                 }}
               >
@@ -53,7 +55,13 @@ const DeviceInfo = ({ dispatch, deviceIn }: Props) => {
                   required
                   defaultValue={device.config.protocol}
                   onChange={(e) => {
-					setDevice({...device, config: {...device.config, protocol: e.target.value as CommunicationProtocol}});
+                    setDevice({
+                      ...device,
+                      config: {
+                        ...device.config,
+                        protocol: e.target.value as CommunicationProtocol,
+                      },
+                    });
                   }}
                 >
                   {Object.keys(CommunicationProtocol).map((key) => (
@@ -72,7 +80,13 @@ const DeviceInfo = ({ dispatch, deviceIn }: Props) => {
                   required
                   defaultValue={device.config.trigger}
                   onChange={(e) => {
-					setDevice({...device, config: {...device.config, trigger: e.target.value as TriggerType}});
+                    setDevice({
+                      ...device,
+                      config: {
+                        ...device.config,
+                        trigger: e.target.value as TriggerType,
+                      },
+                    });
                   }}
                 >
                   {Object.keys(TriggerType).map((key) => (
@@ -96,7 +110,13 @@ const DeviceInfo = ({ dispatch, deviceIn }: Props) => {
                       required
                       defaultValue={device.config.distanceMethod}
                       onChange={(e) => {
-						  setDevice({...device, config: {...device.config, distanceMethod: e.target.value as DistanceMethod}});
+                        setDevice({
+                          ...device,
+                          config: {
+                            ...device.config,
+                            distanceMethod: e.target.value as DistanceMethod,
+                          },
+                        });
                       }}
                     >
                       {Object.keys(DistanceMethod).map((key) => (
@@ -116,7 +136,10 @@ const DeviceInfo = ({ dispatch, deviceIn }: Props) => {
                       type="number"
                       onChange={(e) => {
                         const tmpVal = parseInt(e.target.value);
-						setDevice({...device, config: {...device.config, distance: tmpVal}});
+                        setDevice({
+                          ...device,
+                          config: { ...device.config, distance: tmpVal },
+                        });
                       }}
                     />
                   </div>
@@ -132,7 +155,10 @@ const DeviceInfo = ({ dispatch, deviceIn }: Props) => {
                     type="number"
                     onChange={(e) => {
                       const tmpVal = parseInt(e.target.value);
-					  setDevice({...device, config: {...device.config, time: tmpVal}});
+                      setDevice({
+                        ...device,
+                        config: { ...device.config, time: tmpVal },
+                      });
                     }}
                   />
                 </div>
@@ -143,7 +169,7 @@ const DeviceInfo = ({ dispatch, deviceIn }: Props) => {
                 className="rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 onClick={() => {
                   dispatch({ type: 'SAVE_DEVICE', payload: device });
-                  dispatch({ type: "CLOSE_DEVICE" });
+                  dispatch({ type: 'CLOSE_DEVICE' });
                 }}
               >
                 Apply
@@ -151,7 +177,7 @@ const DeviceInfo = ({ dispatch, deviceIn }: Props) => {
               <Button
                 className="rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:z-10 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-600"
                 onClick={() => {
-					setDevice(deepCopyDevice(deviceIn));
+                  setDevice(deepCopyDevice(deviceIn));
                   dispatch({ type: 'CLOSE_DEVICE' });
                 }}
               >

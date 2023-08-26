@@ -1,14 +1,9 @@
 'use client';
 
-import { Actions, StateModel } from '@/models/StateModel';
 import React from 'react';
 import { BsSearch } from 'react-icons/bs';
-
-interface Props {
-  state: StateModel;
-  dispatch: React.Dispatch<Actions>;
-}
-const SearchBar = ({ state, dispatch }: Props) => {
+//FIXME: This is useless right now, adapt to ssr
+const SearchBar = () => {
   const input = React.useRef<HTMLInputElement>(null);
   return (
     <form>
@@ -35,7 +30,6 @@ const SearchBar = ({ state, dispatch }: Props) => {
           onClick={(e) => {
             e.preventDefault();
             console.log('Search button clicked');
-            dispatch({ type: 'SEARCH', payload: input.current?.value ?? '' });
           }}
         >
           Search

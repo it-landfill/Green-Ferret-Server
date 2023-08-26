@@ -3,37 +3,15 @@ import SearchResult from './SearchResult';
 import { Actions, StateModel } from '@/models/StateModel';
 
 interface Props {
-  state: StateModel;
-  dispatch: React.Dispatch<Actions>;
+  devices: string[];
 }
 
-const SearchResults = ({ state, dispatch }: Props) => {
+const SearchResults = ({ devices }: Props) => {
   return (
-    <div className="flex grow flex-row flex-wrap mt-5">
-      {state.searchText === ''
-        ? state.devices
-            .sort((a, b) => a.id.localeCompare(b.id))
-            .map((device) => (
-              <SearchResult
-                device={device}
-				state={state}
-                dispatch={dispatch}
-                key={device.id}
-              />
-            ))
-        : state.devices
-            .filter((device) =>
-              device.id.toLowerCase().includes(state.searchText.toLowerCase()),
-            )
-            .sort((a, b) => a.id.localeCompare(b.id))
-            .map((device) => (
-              <SearchResult
-                device={device}
-				state={state}
-                dispatch={dispatch}
-                key={device.id}
-              />
-            ))}
+    <div className="mt-5 flex grow flex-row flex-wrap">
+      {devices.sort().map((device) => (
+        <SearchResult device={device} key={device} />
+      ))}
     </div>
   );
 };

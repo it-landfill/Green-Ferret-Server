@@ -44,11 +44,11 @@ export const StateReducer = (
       console.log('Closing device');
       return {
         ...state,
-        showDevice: "",
+        showDevice: '',
       };
     case 'SAVE_DEVICE':
-		console.log('Saving device ' + JSON.stringify(action.payload));
-       return {
+      console.log('Saving device ' + JSON.stringify(action.payload));
+      return {
         ...state,
         devices: state.devices
           .filter((dev) => dev.id !== action.payload?.id)
