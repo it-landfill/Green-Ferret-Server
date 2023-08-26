@@ -27,7 +27,7 @@ async function sendConfig(device: DeviceModel) {
   };
 
   const res = await fetch(
-	//TODO: Automatically Change this to the correct URL
+    //TODO: Automatically Change this to the correct URL
     'http://localhost:3000/api/saveDeviceInfo',
     requestOptions,
   );
