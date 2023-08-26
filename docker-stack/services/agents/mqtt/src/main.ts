@@ -5,6 +5,7 @@ import {
   dbDisconnect,
   dbGetAllEdited,
   dbGetConfig,
+  dbInitialize,
   dbSaveConfig,
   DeviceConfigAttributes,
   isDeviceConfigAttributes,
@@ -31,8 +32,12 @@ type MQTTConfig = {
   clientId: string;
 };
 
+// MQTT client
 let client: mqtt.MqttClient;
+
+// Refresh edited configs every 5 minutes
 const refreshEditedTimeout = 5 * 60 * 1000; // 5 minutes
+// Stop refreshing edited configs when the process is interrupted
 let stopRefresh: boolean = false;
 
 /**
@@ -104,7 +109,9 @@ async function messageHandler(topic: string, message: Buffer) {
   const split = topic.split("/");
 
   if (split.length > 0) {
+    // Check if this is a config message
     if (split[0] == "CFG") {
+      // Config messages always have the format CFG/<sensorId>/<request>
       if (split.length != 3) {
         console.error(`Invalid topic ${topic}`);
         return;
@@ -115,28 +122,40 @@ async function messageHandler(topic: string, message: Buffer) {
 
       switch (request) {
         case "new":
+          // This is a new config request, send the current config or generate a new one
           let cfg = await dbGetConfig(sensorId);
+          // If there is no config, generate a new one with default values
           if (cfg === undefined) {
             cfg = {
-              protocol: 1,
-              trigger: 1,
+              protocol: 1, // MQTT
+              trigger: 1, // Time
               distanceMethod: 0,
               distance: 0,
-              time: 30,
+              time: 30, // 30 seconds
             };
           }
-          client.publish(`CFG/${sensorId}/Config`, JSON.stringify(cfg));
+          // Publish the config to the device
+          client.publish(`CFG/${sensorId}/Config`, JSON.stringify(cfg), {
+            retain: true,
+          });
           break;
         case "Config":
-          console.log("Received config: " + msg);
           // This is a config, we need to save this
+          console.log("Received config: " + msg);
+          // Convert the message to an object
           const parsed = JSON.parse(msg);
+          // Check if the object is a DeviceConfigAttributes object
           if (isDeviceConfigAttributes(parsed)) {
+            // If it is, save it to the database
             await dbSaveConfig(sensorId, parsed);
+          } else {
+            // If it isn't, log an error
+            console.error("Invalid config received");
           }
           break;
       }
     } else {
+      // This is a sensor message. Sensor messages always have the format <root>/<sensorId>, where root is the category of the sensor (usually mobile-sensors)
       if (split.length != 2) {
         console.error(`Invalid topic ${topic}`);
         return;
@@ -158,14 +177,26 @@ async function messageHandler(topic: string, message: Buffer) {
   }
 }
 
+/**
+ * Refresh edited configs periodically
+ */
 async function refreshEdited() {
+  // if stopRefresh is true, stop refreshing
+  if (stopRefresh) return;
+  // Get all edited configs from the database (edited configs are configs that have been changed by the admin, see Green-Ferret-Admin) only if the refresh is not stopped
   const edited = await dbGetAllEdited();
   if (edited) {
-	console.log("Refreshing edited configs");
+    // If there are edited configs, publish them to the devices
+    console.log("Refreshing edited configs");
     edited.forEach((cfg) => {
-      client.publish(`CFG/${cfg.deviceID}/Config`, JSON.stringify(cfg as DeviceConfigAttributes));
+      client.publish(
+        `CFG/${cfg.deviceID}/Config`,
+        JSON.stringify(cfg as DeviceConfigAttributes),
+        { retain: true }
+      );
     });
   }
+  // Refresh again after the timeout has passed
   if (!stopRefresh) setTimeout(refreshEdited, refreshEditedTimeout);
 }
 
@@ -183,6 +214,7 @@ async function main() {
   InfluxWriter.initializeClient(process.env.INFLUXDB_TOKEN);
 
   // Initialize postgres
+  dbInitialize();
   await dbConnect();
 
   // Initialize MQTT client and config
@@ -204,7 +236,7 @@ async function main() {
   // Handle interrupt signal
   process.on("SIGINT", async function () {
     console.log("Caught interrupt signal");
-	stopRefresh	= true;
+    stopRefresh = true;
     client.end();
     await dbDisconnect();
   });

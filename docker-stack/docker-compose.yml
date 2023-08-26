@@ -71,10 +71,11 @@ services:
             retries: 3
             start_period: 30s
     mqtt-agent:
-        image: "aleben/green-ferret_mqtt-agent:1.0.2"
+        image: "aleben/green-ferret_mqtt-agent:1.1"
         depends_on:
             - mqttserver
             - influxdb
+            - postgres-db
         container_name: mqtt-agent
         restart: unless-stopped
         networks:
@@ -90,6 +91,10 @@ services:
             - INFLUXDB_ORG=$INFLUXDB_ORG
             - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
             - INFLUXDB_TOKEN=$MQTT_AGENT_INFLUXDB_TOKEN
+            - POSTGRES_HOST=$POSTGRES_HOST
+            - POSTGRES_DB=$POSTGRES_DB
+            - POSTGRES_USER=$POSTGRES_USER
+            - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
     http-agent:
         image: "aleben/green-ferret_http-agent:1.0"
         depends_on:
@@ -146,23 +151,27 @@ services:
             - MQTT_CLIENT_ID=$TELEGRAM_MQTT_CLIENT_ID
             - TELEGRAM_API_TOKEN=$TELEGRAM_API_TOKEN
             - TELEGRAM_MASTER_CHAT_ID=$TELEGRAM_MASTER_CHAT_ID
-    db:
+    postgres-db:
       image: postgres
-      restart: always
+      container_name: postgres
+      restart: unless-stopped
+      networks:
+        - iot_net
       environment:
-        POSTGRES_DB: Green-Ferret
-        POSTGRES_USER: greenferret
-        POSTGRES_PASSWORD: example
+        - POSTGRES_DB=$POSTGRES_DB
+        - POSTGRES_USER=$POSTGRES_USER
+        - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
       volumes:
         - postgres_data:/var/lib/postgresql/data
-      ports:
-        - 5432:5432
-  
-    adminer:
+    pg-adminer:
       image: adminer
-      restart: always
+      restart: unless-stopped
+      depends_on:
+        - postgres-db
+      networks:
+        - iot_net
       ports:
-        - 8080:8080
+        - 4321:4321
 
 volumes:
     mosquitto_data:
