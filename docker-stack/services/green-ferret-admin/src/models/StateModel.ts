@@ -1,5 +1,4 @@
 import { DeviceModel } from './DeviceModel';
-import { mqttPublish } from './mqtt';
 
 export interface StateModel {
   searchText: string;
@@ -49,7 +48,6 @@ export const StateReducer = (
       };
     case 'SAVE_DEVICE':
 		console.log('Saving device ' + JSON.stringify(action.payload));
-		mqttPublish("CFG/" + action.payload.id + "/Config", JSON.stringify(action.payload.config))
        return {
         ...state,
         devices: state.devices
