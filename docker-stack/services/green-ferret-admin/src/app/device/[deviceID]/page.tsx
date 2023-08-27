@@ -5,6 +5,7 @@ import { BiArrowBack } from 'react-icons/bi';
 import Link from 'next/link';
 import { DeviceModel } from '@/models/DeviceModel';
 import { notFound } from 'next/navigation';
+import { getDeviceInfo } from '@/models/ServerActions';
 
 interface Props {
   params: {
@@ -13,20 +14,12 @@ interface Props {
 }
 
 async function getData(deviceID: string): Promise<DeviceModel | undefined> {
-	console.log("getData specific called");
-  const response = await fetch(
-    'http://localhost:3000/api/getDeviceInfo/' + deviceID,{
-		cache: "no-store" },
-  );
-  if (!response.ok) {
-    return undefined;
-  }
-  const respObj = await response.json();
+  console.log('getData specific called');
+  const respObj = await getDeviceInfo(deviceID);
 
   console.log(respObj);
 
-  if (respObj === undefined) return undefined;
-  return respObj as DeviceModel;
+  return respObj;
 }
 
 const DeviceInfo = async ({ params }: Props) => {

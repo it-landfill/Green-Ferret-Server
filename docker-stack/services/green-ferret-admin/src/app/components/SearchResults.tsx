@@ -1,6 +1,5 @@
 import React from 'react';
 import SearchResult from './SearchResult';
-import { Actions, StateModel } from '@/models/StateModel';
 
 interface Props {
   devices: string[];

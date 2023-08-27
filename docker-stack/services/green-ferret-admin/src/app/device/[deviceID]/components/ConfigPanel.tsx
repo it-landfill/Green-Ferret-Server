@@ -6,35 +6,12 @@ import {
   DistanceMethod,
   TriggerType,
 } from '@/models/DeviceModel';
+import { saveDeviceInfo } from '@/models/ServerActions';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 
 interface Props {
   deviceIn: DeviceModel;
-}
-
-async function sendConfig(device: DeviceModel) {
-  var myHeaders = new Headers();
-  myHeaders.append('Content-Type', 'application/json');
-
-  var raw = JSON.stringify(device);
-
-  var requestOptions: RequestInit = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw,
-    redirect: 'follow',
-  };
-
-  const res = await fetch(
-    //TODO: Automatically Change this to the correct URL
-    'http://localhost:3000/api/saveDeviceInfo',
-    requestOptions,
-  );
-
-  if (!res.ok) {
-    throw new Error(res.statusText);
-  }
 }
 
 const ConfigPanel = ({ deviceIn }: Props) => {
@@ -228,9 +205,9 @@ const ConfigPanel = ({ deviceIn }: Props) => {
           onClick={async () => {
             console.log('Applying configuration to device: ' + device.id);
             console.log(device);
-            await sendConfig(device);
+            await saveDeviceInfo(device);
             router.push('/');
-			router.refresh();
+            router.refresh();
           }}
         >
           Apply

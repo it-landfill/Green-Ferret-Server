@@ -118,6 +118,7 @@ export function dbInitialize() {
   dbmsInstance = new Sequelize(config.db, config.username, config.password, {
     host: config.host,
     dialect: 'postgres',
+    logging: false,
   });
 
   // Initialize models
@@ -287,7 +288,6 @@ export async function dbGetAllDeviceIDs(): Promise<string[]> {
   const result = await deviceConfig.findAll({
     attributes: ['deviceID'],
   });
-  console.log(JSON.stringify(result));
   return result.map((value) => value.deviceID);
 }
 
@@ -311,7 +311,6 @@ export async function dbGetDevice(
 export async function dbSaveDevice(device: DeviceModel) {
   const formattedDevice: DeviceConfigAttributes =
     deviceModelToDeviceConfigAttrs(device);
-  console.log('Formatted device: ' + JSON.stringify(formattedDevice));
 
   // Check if the database is initialized
   if (dbmsInstance === undefined) dbConnect();

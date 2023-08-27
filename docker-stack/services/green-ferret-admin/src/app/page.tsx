@@ -2,21 +2,17 @@ import SearchResults from './components/SearchResults';
 
 import React from 'react';
 import SearchBar from './components/SearchBar';
+import { getDeviceIDs } from '@/models/ServerActions';
 
 interface Props {
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
 async function getData(query: string | undefined) {
-  console.log("getData called");
-  const response = await fetch('http://localhost:3000/api/getDeviceIDs', {
-     cache: "no-store" },
-  );
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
+  console.log('getData called');
 
-  let devices = await response.json();
+  let devices = await getDeviceIDs();
+  console.log('devices', devices);
   if (query !== undefined) {
     devices = devices.filter((device: string) => {
       return device.toLowerCase().includes(query.toLowerCase());
