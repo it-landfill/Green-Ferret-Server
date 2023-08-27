@@ -1,19 +1,19 @@
 export enum CommunicationProtocol {
-  NONE = 'NONE',
-  MQTT = 'MQTT',
-  HTTP = 'HTTP',
-  COAP = 'COAP',
+  NONE,
+  MQTT,
+  HTTP,
+  COAP,
 }
 
 export enum TriggerType {
-  DISTANCE = 'DISTANCE',
-  TIME = 'TIME',
+  DISTANCE,
+  TIME,
 }
 
 //TODO: Cosa devo mettere??
 export enum DistanceMethod {
-  LESS_THAN = 'LESS_THAN',
-  GREATER_THAN = 'GREATER_THAN',
+  LESS_THAN,
+  GREATER_THAN,
 }
 
 interface DeviceConfig {

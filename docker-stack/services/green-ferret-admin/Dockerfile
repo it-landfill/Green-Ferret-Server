@@ -34,4 +34,4 @@ CMD ["npm", "run", "start"]
 # docker buildx create --name mybuilder --use
 # docker buildx use mybuilder
 # Build multi platform image
-# docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_admin:latest --tag aleben/green-ferret_admin:1.0 .
+# docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_admin:latest --tag aleben/green-ferret_admin:1.0.1 .

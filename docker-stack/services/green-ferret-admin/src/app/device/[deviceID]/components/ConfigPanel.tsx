@@ -46,13 +46,13 @@ const ConfigPanel = ({ deviceIn }: Props) => {
                 ...device,
                 config: {
                   ...device.config,
-                  protocol: e.target.value as CommunicationProtocol,
+                  protocol: parseInt(e.target.value) as CommunicationProtocol,
                 },
               });
             }}
           >
-            {Object.keys(CommunicationProtocol).map((key) => (
-              <option key={key} value={key}>
+            {Object.keys(CommunicationProtocol).filter((key) => isNaN(Number(key))).map((key, index) => (
+              <option key={key} value={index}>
                 {key}
               </option>
             ))}
@@ -79,13 +79,13 @@ const ConfigPanel = ({ deviceIn }: Props) => {
                 ...device,
                 config: {
                   ...device.config,
-                  trigger: e.target.value as TriggerType,
+                  trigger: parseInt(e.target.value) as TriggerType,
                 },
               });
             }}
           >
-            {Object.keys(TriggerType).map((key) => (
-              <option key={key} value={key as TriggerType}>
+            {Object.keys(TriggerType).filter((key) => isNaN(Number(key))).map((key, index) => (
+              <option key={key} value={index}>
                 {key}
               </option>
             ))}
@@ -126,13 +126,13 @@ const ConfigPanel = ({ deviceIn }: Props) => {
                     ...device,
                     config: {
                       ...device.config,
-                      distanceMethod: e.target.value as DistanceMethod,
+                      distanceMethod: parseInt(e.target.value) as DistanceMethod,
                     },
                   });
                 }}
               >
-                {Object.keys(DistanceMethod).map((key) => (
-                  <option key={key} value={key as DistanceMethod}>
+                {Object.keys(DistanceMethod).filter((key) => isNaN(Number(key))).map((key, index) => (
+                  <option key={key} value={index}>
                     {key}
                   </option>
                 ))}

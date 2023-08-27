@@ -175,7 +175,7 @@ services:
       ports:
         - 4321:8080
     gf-admin:
-      image: aleben/green-ferret_admin:1.0
+      image: aleben/green-ferret_admin:1.0.1
       restart: unless-stopped
       depends_on:
         - postgres-db

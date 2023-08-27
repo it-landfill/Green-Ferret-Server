@@ -185,50 +185,12 @@ export async function dbDisconnect() {
 
 function deviceConfigToDeviceModel(device: DeviceConfig): DeviceModel {
   // Convert deviceConfig to DeviceModel
-
-  // Generate enum values
-  let i = 0;
-
-  let protocol: CommunicationProtocol;
-  // Default value
-  protocol = CommunicationProtocol.NONE;
-  // Try to find the correct value by index
-  for (const key in CommunicationProtocol) {
-    if (i === device.protocol) {
-      protocol = key as CommunicationProtocol;
-      break;
-    }
-    i++;
-  }
-
-  i = 0;
-  let trigger: TriggerType;
-  trigger = TriggerType.DISTANCE;
-  for (const key in TriggerType) {
-    if (i === device.trigger) {
-      trigger = key as TriggerType;
-      break;
-    }
-    i++;
-  }
-
-  i = 0;
-  let distanceMethod: DistanceMethod;
-  distanceMethod = DistanceMethod.LESS_THAN;
-  for (const key in DistanceMethod) {
-    if (i === device.distanceMethod) {
-      distanceMethod = key as DistanceMethod;
-      break;
-    }
-    i++;
-  }
-
   return {
     id: device.deviceID,
     config: {
-      protocol: protocol,
-      trigger: trigger,
-      distanceMethod: distanceMethod,
+      protocol: device.protocol,
+      trigger: device.trigger,
+      distanceMethod: device.distanceMethod,
       distance: device.distance,
       time: device.time,
     },
@@ -238,43 +200,10 @@ function deviceConfigToDeviceModel(device: DeviceConfig): DeviceModel {
 function deviceModelToDeviceConfigAttrs(
   device: DeviceModel,
 ): DeviceConfigAttributes {
-  // Generate enum values
-  let i = 0;
-
-  let protocolNum = 0;
-  // Try to find the correct value by index
-  for (const key in CommunicationProtocol) {
-    if (key === device.config.protocol) {
-      protocolNum = i;
-      break;
-    }
-    i++;
-  }
-
-  i = 0;
-  let triggerNum = 0;
-  for (const key in TriggerType) {
-    if (key === device.config.trigger) {
-      triggerNum = i;
-      break;
-    }
-    i++;
-  }
-
-  i = 0;
-  let distanceMethodNum = 0;
-  for (const key in DistanceMethod) {
-    if (key === device.config.distanceMethod) {
-      distanceMethodNum = i;
-      break;
-    }
-    i++;
-  }
-
-  return {
-    protocol: protocolNum,
-    trigger: triggerNum,
-    distanceMethod: distanceMethodNum,
+   return {
+    protocol: device.config.protocol,
+    trigger: device.config.trigger,
+    distanceMethod: device.config.distanceMethod,
     distance: device.config.distance,
     time: device.config.time,
   };
