@@ -8,6 +8,7 @@ interface Props {
 }
 
 async function getData(query: string | undefined) {
+	//TODO: do not cache
   const response = await fetch('http://localhost:3000/api/getDeviceIDs');
   if (!response.ok) {
     throw new Error(response.statusText);
