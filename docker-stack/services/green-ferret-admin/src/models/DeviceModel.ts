@@ -41,7 +41,3 @@ export function generateNewDevice(id: string) {
     },
   };
 }
-
-export function deepCopyDevice(device: DeviceModel): DeviceModel {
-	  return JSON.parse(JSON.stringify(device));
-}

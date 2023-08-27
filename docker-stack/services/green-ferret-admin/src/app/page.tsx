@@ -1,70 +1,34 @@
-'use client';
-
-import { StateModel, StateReducer } from '@/models/StateModel';
-import SearchBar from './components/SearchBar';
 import SearchResults from './components/SearchResults';
-import { Button, Modal } from 'flowbite-react';
 
-import React, { useEffect } from 'react';
-import { generateNewDevice } from '@/models/DeviceModel';
-import DeviceInfo from './components/DeviceInfo';
-import { mqttInitializeClient, mqttSetMessageHandler, mqttSubscribe } from '@/models/mqtt';
+import React from 'react';
+import SearchBar from './components/SearchBar';
+import { getDeviceIDs } from '@/models/ServerActions';
 
-const initialState: StateModel = {
-  searchText: '',
-  devices: [
-  ],
-  showDevice: "",
-};
+interface Props {
+  searchParams: { [key: string]: string | string[] | undefined };
+}
 
-export default function Home() {
-  const [state, dispatch] = React.useReducer(StateReducer, initialState);
+async function getData(query: string | undefined) {
+  console.log('getData called');
 
-  /**
-	 * Handle incoming MQTT messages
-	 * @param topic Topic the message was received on
-	 * @param message Message payload
-	 */
-	mqttSetMessageHandler((topic : string, message : Buffer) => {
-		// message is Buffer
-		const msg = message.toString();
-		console.debug(`Received message on topic ${topic}: ${msg}`);
-		const split = topic.split("/");
-		if (split.length != 3) {
-			console.error(`Invalid topic ${topic}`);
-			return;
-		}
-+
-		const root = split[0];
-		const sensorId = split[1];
-		const property = split[2];
-		console.debug(`Root: ${root}, sensor ID: ${sensorId}, property: ${property}, message: ${msg}`);
+  let devices = await getDeviceIDs();
+  console.log('devices', devices);
+  if (query !== undefined) {
+    devices = devices.filter((device: string) => {
+      return device.toLowerCase().includes(query.toLowerCase());
+    });
+  }
+  return devices;
+}
 
-		if (root == "CFG") {
-			// Device is requesting configuration
-			if (property === "new") {
-				// Try to find the device in the state
-				let dev = state.devices.find(d => d.id === sensorId);
-				// If not found, create a new device
-				if (dev === undefined) dev = generateNewDevice(sensorId);
-				// Send the device configuration to the device
-				dispatch({
-					type: "SAVE_DEVICE",
-					payload: dev
-				});
-			}
-		}
-	});
-
-	useEffect(() => {
-		mqttInitializeClient();
-		mqttSubscribe(["CFG/#"]);
-	  });
+export default async function Home({ searchParams }: Props) {
+  const query = searchParams.query as string | undefined;
+  const devices = await getData(query);
 
   return (
     <div>
-      <SearchBar state={state} dispatch={dispatch} />
-      <SearchResults state={state} dispatch={dispatch} />
+      <SearchBar searchText={query ?? ''} />
+      <SearchResults devices={devices} />
     </div>
   );
 }
