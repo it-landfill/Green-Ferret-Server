@@ -12,6 +12,7 @@ import HeatmapTypeSelector from "./components/dataPointsControls/DPHeatmapTypeSe
 import AnimationControls from "./components/dataPointsControls/DPAnimationControls";
 import ErrorMessagePopup from "./components/ErrorPopup";
 import LineChartsSection from "./components/lineChartsControls/LCLineChartsSection";
+import { match } from "assert";
 
 const HeatmapLayer = HeatmapLayerFactory<[number, number, number]>();
 
@@ -87,7 +88,29 @@ function App() {
     const parsedEndDate = new Date(dateStart + "T" + timeStart);
     parsedEndDate.setMinutes(parsedEndDate.getMinutes() + parsedSpan);
     // Get data from the server.
-    const data = await InfluxAccess.getData(parsedStartDate, parsedEndDate);
+    let data: InfluxAccess.Measurement[] = [];
+    try {
+      data = await InfluxAccess.getData(parsedStartDate, parsedEndDate);
+    } catch (error: unknown) {
+      let title = "Errore";
+      let message = "Si è verificato un errore generico, riprovare più tardi!";
+      // Case of error in the connection to the server.
+      switch ((error as Error).message) {
+        case "unauthorized access":
+          title = "Errore - Accesso non autorizzato";
+          message =
+            "Attenzione, non è stato possibile accedere al database. Riprovare più tardi.";
+          break;
+        default:
+          title = "Errore - Connessione al server";
+          message =
+            "Si è verificato un errore nella connessione al server. Riprovare più tardi.";
+          break;
+      }
+      showErrorMessagePopup(title, message);
+      return;
+    }
+
     // Check if the data are present (if not, show an error message).
     if (data.length === 0) {
       showErrorMessagePopup(
@@ -207,7 +230,7 @@ function App() {
                   latitudeExtractor={(m) => m[0]}
                   intensityExtractor={(m) => m[2]}
                   radius={30}
-                  gradient={{ 0.3: "blue", 0.6: "yellow", 1.1: "orange" }}
+                  gradient={{ 0.3: "blue", 0.6: "yellow", 1.0: "orange" }}
                   opacity={0.8}
                   blur={40}
                 />

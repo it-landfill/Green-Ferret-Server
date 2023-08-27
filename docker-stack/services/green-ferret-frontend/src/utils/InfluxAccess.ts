@@ -61,7 +61,7 @@ export module InfluxAccess {
    */
   export async function getData(
     start: Date,
-    end: Date
+    end: Date,
   ): Promise<Measurement[]> {
     const client = getClient("http://pi3aleben:8086");
 
@@ -115,11 +115,9 @@ export module InfluxAccess {
           result.push(tmp);
         },
         error: (error: Error) => {
-          console.error("\nError", error);
           reject(error);
         },
         complete: () => {
-          console.log("\nSuccess");
           resolve(result);
         },
       });
