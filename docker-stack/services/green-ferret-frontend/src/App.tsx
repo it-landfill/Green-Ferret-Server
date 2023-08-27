@@ -246,6 +246,7 @@ function App() {
                 <div>
                   <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
                   <HeatmapTypeSelector
+                    dataPoints={dataPoints}
                     heatmapType={heatmapType}
                     setHeatmapType={setHeatmapType}
                   />
