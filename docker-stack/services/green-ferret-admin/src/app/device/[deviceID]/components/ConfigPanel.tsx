@@ -230,6 +230,7 @@ const ConfigPanel = ({ deviceIn }: Props) => {
             console.log(device);
             await sendConfig(device);
             router.push('/');
+			router.refresh();
           }}
         >
           Apply

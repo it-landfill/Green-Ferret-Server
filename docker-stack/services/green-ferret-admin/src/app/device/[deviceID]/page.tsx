@@ -13,11 +13,13 @@ interface Props {
 }
 
 async function getData(deviceID: string): Promise<DeviceModel | undefined> {
+	console.log("getData specific called");
   const response = await fetch(
-    'http://localhost:3000/api/getDeviceInfo/' + deviceID,
+    'http://localhost:3000/api/getDeviceInfo/' + deviceID,{
+		cache: "no-store" },
   );
   if (!response.ok) {
-	return undefined;
+    return undefined;
   }
   const respObj = await response.json();
 
@@ -29,11 +31,11 @@ async function getData(deviceID: string): Promise<DeviceModel | undefined> {
 
 const DeviceInfo = async ({ params }: Props) => {
   console.log('Info for device: ' + params.deviceID);
-  const device = await dbGetDevice(params.deviceID);
+  const device = await getData(params.deviceID);
 
   if (device === undefined) {
-	// If device is undefined, return 404
-	notFound();
+    // If device is undefined, return 404
+    notFound();
   }
 
   return (
