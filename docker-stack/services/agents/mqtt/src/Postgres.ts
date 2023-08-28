@@ -112,6 +112,7 @@ export function dbInitialize() {
   sequelize = new Sequelize(config.db, config.username, config.password, {
     host: config.host,
     dialect: "postgres",
+    logging: false,
   });
 
   // Initialize models
@@ -182,6 +183,7 @@ export async function dbGetConfig(
   deviceID: string
 ): Promise<DeviceConfigAttributes | undefined> {
   const result = await deviceConfig.findOne({
+	attributes: ["protocol", "trigger", "distanceMethod", "distance", "time"],
     where: {
       deviceID: deviceID,
     },
@@ -195,6 +197,7 @@ export async function dbGetConfig(
  */
 export async function dbGetAllEdited(): Promise<DeviceConfig[] | undefined> {
   const result = await deviceConfig.findAll({
+	attributes: ["deviceID", "protocol", "trigger", "distanceMethod", "distance", "time"],
     where: {
       edited: true,
     },

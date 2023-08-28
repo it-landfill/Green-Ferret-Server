@@ -71,7 +71,7 @@ services:
             retries: 3
             start_period: 30s
     mqtt-agent:
-        image: "aleben/green-ferret_mqtt-agent:1.1"
+        image: "aleben/green-ferret_mqtt-agent:1.1.1"
         depends_on:
             - mqttserver
             - influxdb
