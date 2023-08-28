@@ -12,7 +12,6 @@ import HeatmapTypeSelector from "./components/dataPointsControls/DPHeatmapTypeSe
 import AnimationControls from "./components/dataPointsControls/DPAnimationControls";
 import ErrorMessagePopup from "./components/ErrorPopup";
 import LineChartsSection from "./components/lineChartsControls/LCLineChartsSection";
-import { match } from "assert";
 
 const HeatmapLayer = HeatmapLayerFactory<[number, number, number]>();
 
