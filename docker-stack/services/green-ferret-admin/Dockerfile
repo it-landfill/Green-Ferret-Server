@@ -27,6 +27,10 @@ copy --from=builder /buildDir/next.config.js .
 # Install only production dependencies
 RUN npm install --omit=dev
 
+EXPOSE 3000
+
+HEALTHCHECK --interval=5m --timeout=10s --start-period=30s --retries=3 CMD wget --quiet --tries=1 --spider http://localhost:3000 || exit 1
+
 # Start the app
 CMD ["npm", "run", "start"]
 
