@@ -41,15 +41,16 @@ export module InfluxAccess {
    * @returns InfluxDB client
    */
   function getClient(
-    url: string,
+    url: string | undefined = undefined,
     token: string | undefined = undefined
   ): InfluxDB {
     if (_client === undefined) {
       _client = new InfluxDB({
-        url,
+        url: url || process.env.REACT_APP_INFLUXDB_URL || "http://pi3aleben:8086",
         token: token || process.env.REACT_APP_INFLUXDB_TOKEN,
       });
     }
+	console.log(_client);
     return _client;
   }
 
@@ -63,7 +64,7 @@ export module InfluxAccess {
     start: Date,
     end: Date,
   ): Promise<Measurement[]> {
-    const client = getClient("http://pi3aleben:8086");
+    const client = getClient();
 
     let queryClient = client.getQueryApi("IT-Landfill");
     // let fluxQuery = `
