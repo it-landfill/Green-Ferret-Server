@@ -36,16 +36,18 @@ const DeviceInfo = async ({ params }: Props) => {
       <div className="flex flex-row">
         <Link
           href="/"
-          className="mr-3 flex flex-row rounded-lg bg-blue-700 px-5 py-3 text-sm text-white"
+          className="mr-2 flex flex-row rounded-lg bg-green-600 bg-opacity-90 px-5 font-semibold text-white hover:bg-opacity-100 focus:outline-none"
         >
-          <BiArrowBack className="mr-2 text-xl" />
-          <p className="font-medium"> Back</p>
+          <div className="flex flex-row self-center">
+            <BiArrowBack className="mr-2 text-2xl" />
+            <p className="font-medium"> Back</p>
+          </div>
         </Link>
-        <p className="grow rounded bg-white p-2 text-center text-xl">
+        <p className="grow roundede p-2 text-center text-xl">
           Device: <b>{device.id}</b>
         </p>
       </div>
-      <div className="mt-3 flex flex-col rounded bg-white">
+      <div className="mt-3 flex flex-col rounded">
         <ConfigPanel deviceIn={device} />
       </div>
     </div>

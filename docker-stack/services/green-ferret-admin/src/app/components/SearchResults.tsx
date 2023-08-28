@@ -7,7 +7,7 @@ interface Props {
 
 const SearchResults = ({ devices }: Props) => {
   return (
-    <div className="mt-5 flex grow flex-row flex-wrap">
+    <div className="my-5 flex grow flex-row flex-wrap justify-items-stretch gap-4">
       {devices.sort().map((device) => (
         <SearchResult device={device} key={device} />
       ))}
