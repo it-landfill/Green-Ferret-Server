@@ -16,8 +16,19 @@ interface Props {
 
 const ConfigPanel = ({ deviceIn }: Props) => {
   const [device, setDevice] = React.useState<DeviceModel>(deviceIn);
+  const [active, setActive] = React.useState(false);
   const router = useRouter();
-  
+
+  React.useEffect(() => {
+    setActive(
+        device.config.protocol !== deviceIn.config.protocol ||
+        device.config.trigger !== deviceIn.config.trigger ||
+        device.config.distanceMethod !== deviceIn.config.distanceMethod ||
+        device.config.distance !== deviceIn.config.distance ||
+        device.config.time !== deviceIn.config.time,
+    );
+  }, [device]);
+
   return (
     <div className="flex flex-col space-y-6 rounded-lg border-4 p-10">
       <div className="flex flex-row">
@@ -192,7 +203,8 @@ const ConfigPanel = ({ deviceIn }: Props) => {
         </button>
         <button
           type="button"
-          className="rounded-lg bg-green-600 bg-opacity-90 px-8 py-2 font-semibold text-white hover:bg-opacity-100 focus:outline-none"
+          className="rounded-lg bg-green-600 bg-opacity-90 px-8 py-2 font-semibold text-white focus:outline-none active:hover:bg-opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!active}
           onClick={async () => {
             console.log('Applying configuration to device: ' + device.id);
             console.log(device);
