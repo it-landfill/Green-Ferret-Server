@@ -96,7 +96,7 @@ services:
             - POSTGRES_USER=$POSTGRES_USER
             - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
     http-agent:
-        image: "aleben/green-ferret_http-agent:1.0"
+        image: "aleben/green-ferret_http-agent:1.1"
         depends_on:
             - influxdb
         container_name: http-agent
