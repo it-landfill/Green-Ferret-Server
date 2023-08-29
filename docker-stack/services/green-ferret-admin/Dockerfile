@@ -27,11 +27,13 @@ copy --from=builder /buildDir/next.config.js .
 # Install only production dependencies
 RUN npm install --omit=dev
 
+EXPOSE 3000
+
+HEALTHCHECK --interval=5m --timeout=10s --start-period=30s --retries=3 CMD wget --quiet --tries=1 --spider http://localhost:3000 || exit 1
+
 # Start the app
 CMD ["npm", "run", "start"]
 
-# Create builder to use new features (https://cloudolife.com/2022/03/05/Infrastructure-as-Code-IaC/Container/Docker/Docker-buildx-support-multiple-architectures-images/)
-# docker buildx create --name mybuilder --use
-# docker buildx use mybuilder
+# Enable containerd in experimental features (https://docs.docker.com/desktop/containerd/)
 # Build multi platform image
 # docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_admin:latest --tag aleben/green-ferret_admin:1.0.1 .

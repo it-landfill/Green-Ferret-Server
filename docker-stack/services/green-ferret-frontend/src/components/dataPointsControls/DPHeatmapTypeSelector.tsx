@@ -1,9 +1,15 @@
+import React from "react";
+import HeatmapTypeRadioButton from "./DPHeatmapTypeComponents/DPHeatmapTypeRadioButton";
+
 interface HeatmapTypeSelectorProps {
+  dataPoints: any;
   heatmapType: string;
   setHeatmapType: any;
 }
 
 function HeatmapTypeSelector(props: HeatmapTypeSelectorProps) {
+  const [HeatmapTypeList, setHeatmapTypeList] = React.useState<any[]>([]);
+
   // Enum for the selected heatmap type.
   enum HeatmapType {
     TEMPERATURE = "temperature",
@@ -14,95 +20,52 @@ function HeatmapTypeSelector(props: HeatmapTypeSelectorProps) {
     AQI = "aqi",
   }
 
+  /**
+   *  Checks if the dataPoints array is empty for the selected heatmap type.
+   *
+   * @param dataPoints The dataPoints array.
+   * @param heatmapType The selected heatmap type.
+   */
+  function isEmpty(dataPoints: any, heatmapType: string) {
+    // Cycle through the dataPoints array.
+    for (let i = 0; i < dataPoints.length; i++) {
+      for (let j = 0; j < dataPoints[i].length; j++) {
+        // Check if the dataPoint is not undefined
+        if (dataPoints[i][j] !== undefined) {
+          // Check if the dataPoint has the selected heatmap type and it's not undefined.
+          if (dataPoints[i][j][heatmapType] !== undefined) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  React.useEffect(() => {
+    // Create an array of HeatmapTypeRadioButton components.
+    const HeatmapTypeList = (
+      Object.keys(HeatmapType) as (keyof typeof HeatmapType)[]
+    ).map((key) =>
+      // Check if the dataPoints array is empty for the selected heatmap type.
+      isEmpty(props.dataPoints, HeatmapType[key]) ? null : (
+        <HeatmapTypeRadioButton
+          key={key}
+          heatmapType={props.heatmapType}
+          setHeatmapType={props.setHeatmapType}
+          enum={HeatmapType[key]}
+        />
+      )
+    );
+    setHeatmapTypeList(HeatmapTypeList);
+  }, [props.dataPoints, props.heatmapType]);
+
   return (
     <div className="flex flex-col gap-2 m-4">
       <h2 className="text-2xl font-bold text-left text-green-600">
         Filtro heatmap
       </h2>
-      <div className="flex items-center">
-        <input
-          id="default-radio-1"
-          type="radio"
-          value=""
-          name="default-radio"
-          className="w-4 h-4 accent-green-600"
-          onChange={() => props.setHeatmapType(HeatmapType.TEMPERATURE)}
-          checked={props.heatmapType === HeatmapType.TEMPERATURE}
-        />
-        <label className="ml-3 text-md font-medium text-gray-800">
-          Visualizza temperatura{" "}
-        </label>
-      </div>
-      <div className="flex items-center">
-        <input
-          id="default-radio-2"
-          type="radio"
-          value=""
-          name="default-radio"
-          className="w-4 h-4 accent-green-600"
-          onChange={() => props.setHeatmapType(HeatmapType.PRESSURE)}
-          checked={props.heatmapType === HeatmapType.PRESSURE}
-        />
-        <label className="ml-3 text-md font-medium text-gray-800">
-          Visualizza pressione
-        </label>
-      </div>
-      <div className="flex items-center">
-        <input
-          id="default-radio-3"
-          type="radio"
-          value=""
-          name="default-radio"
-          className="w-4 h-4 accent-green-600"
-          onChange={() => props.setHeatmapType(HeatmapType.HUMIDITY)}
-          checked={props.heatmapType === HeatmapType.HUMIDITY}
-        />
-        <label className="ml-3 text-md font-medium text-gray-800">
-          Visualizza umidità
-        </label>
-      </div>
-      <div className="flex items-center">
-        <input
-          id="default-radio-4"
-          type="radio"
-          value=""
-          name="default-radio"
-          className="w-4 h-4 accent-green-600"
-          onChange={() => props.setHeatmapType(HeatmapType.ECO2)}
-          checked={props.heatmapType === HeatmapType.ECO2}
-        />
-        <label className="ml-3 text-md font-medium text-gray-800">
-          Visualizza CO2
-        </label>
-      </div>
-      <div className="flex items-center">
-        <input
-          id="default-radio-5"
-          type="radio"
-          value=""
-          name="default-radio"
-          className="w-4 h-4 accent-green-600"
-          onChange={() => props.setHeatmapType(HeatmapType.TVOC)}
-          checked={props.heatmapType === HeatmapType.TVOC}
-        />
-        <label className="ml-3 text-md font-medium text-gray-800">
-          Visualizza TVOC
-        </label>
-      </div>
-      <div className="flex items-center">
-        <input
-          id="default-radio-6"
-          type="radio"
-          value=""
-          name="default-radio"
-          className="w-4 h-4 accent-green-600"
-          onChange={() => props.setHeatmapType(HeatmapType.AQI)}
-          checked={props.heatmapType === HeatmapType.AQI}
-        />
-        <label className="ml-3 text-md font-medium text-gray-800">
-          Visualizza qualità dell'aria
-        </label>
-      </div>
+      {HeatmapTypeList}
     </div>
   );
 }
