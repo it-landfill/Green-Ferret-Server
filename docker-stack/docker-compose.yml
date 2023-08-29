@@ -71,7 +71,7 @@ services:
             retries: 3
             start_period: 30s
     mqtt-agent:
-        image: "aleben/green-ferret_mqtt-agent:1.1.1"
+        image: "aleben/green-ferret_mqtt-agent:1.1.2"
         depends_on:
             - mqttserver
             - influxdb
@@ -112,7 +112,7 @@ services:
             - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
             - INFLUXDB_TOKEN=$HTTP_AGENT_INFLUXDB_TOKEN
     coap-agent:
-        image: "aleben/green-ferret_coap-agent:1.0"
+        image: "aleben/green-ferret_coap-agent:1.1"
         depends_on:
             - influxdb
         container_name: coap-agent
