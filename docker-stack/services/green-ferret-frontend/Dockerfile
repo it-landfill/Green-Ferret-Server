@@ -33,8 +33,6 @@ HEALTHCHECK --interval=5m --timeout=10s --start-period=30s --retries=3 CMD wget 
 # Start the app
 CMD ["npx", "serve", "-s", "build"]
 
-# Create builder to use new features (https://cloudolife.com/2022/03/05/Infrastructure-as-Code-IaC/Container/Docker/Docker-buildx-support-multiple-architectures-images/)
-# docker buildx create --name mybuilder --use
-# docker buildx use mybuilder
+# Enable containerd in experimental features (https://docs.docker.com/desktop/containerd/)
 # Build multi platform image
 # docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_frontend:latest --tag aleben/green-ferret_frontend:1.0 .
