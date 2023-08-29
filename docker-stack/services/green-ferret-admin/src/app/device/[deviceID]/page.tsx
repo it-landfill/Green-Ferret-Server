@@ -43,9 +43,14 @@ const DeviceInfo = async ({ params }: Props) => {
             <p className="font-medium"> Back</p>
           </div>
         </Link>
-        <p className="grow roundede p-2 text-center text-xl">
+        <p className="roundede grow p-2 text-center text-xl">
           Device: <b>{device.id}</b>
         </p>
+        <button className="ml-auto mr-2 flex flex-row rounded-lg bg-red-600 bg-opacity-90 px-5 font-semibold text-white hover:bg-opacity-100 focus:outline-none">
+          <div className="flex flex-row self-center">
+            <p className="font-medium"> Delete</p>
+          </div>
+        </button>
       </div>
       <div className="mt-3 flex flex-col rounded">
         <ConfigPanel deviceIn={device} />
