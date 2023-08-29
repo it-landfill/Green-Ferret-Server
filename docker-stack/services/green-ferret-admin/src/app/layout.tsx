@@ -18,10 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} flex h-screen max-h-screen w-screen flex-col overflow-hidden bg-blue-100`}
+        className={`${inter.className} flex h-screen w-screen flex-col overflow-hidden bg-slate-100`}
       >
         <MyNavbar />
-        <div className="m-5 grow overflow-hidden">{children}</div>
+        <div className="m-5 grow">{children}</div>
       </body>
     </html>
   );

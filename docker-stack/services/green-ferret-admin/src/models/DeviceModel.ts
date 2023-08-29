@@ -12,8 +12,10 @@ export enum TriggerType {
 
 //TODO: Cosa devo mettere??
 export enum DistanceMethod {
-  LESS_THAN,
-  GREATER_THAN,
+  NAIVE,
+  HAVERSINE,
+  VINCENTY,
+  SPHERICAL_LAW_OF_COSINES,
 }
 
 interface DeviceConfig {
@@ -35,7 +37,7 @@ export function generateNewDevice(id: string) {
     config: {
       protocol: CommunicationProtocol.MQTT,
       trigger: TriggerType.TIME,
-      distanceMethod: DistanceMethod.LESS_THAN,
+      distanceMethod: DistanceMethod.NAIVE,
       distance: 1,
       time: 10, // 10 seconds
     },
