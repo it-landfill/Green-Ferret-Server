@@ -3,7 +3,9 @@ import {InfluxWriter} from "./InfluxWriter";
 import {
 	DeviceConfigAttributes,
 	dbConnect,
+	dbDeleteConfig,
 	dbDisconnect,
+	dbGetAllDelete,
 	dbGetAllEdited,
 	dbGetConfig,
 	dbInitialize,
@@ -141,14 +143,18 @@ async function messageHandler(topic : string, message : Buffer) {
 				case "Config":
 					// This is a config, we need to save this
 					console.log("Received config: " + msg);
-					// Convert the message to an object
-					const parsed = JSON.parse(msg);
-					// Check if the object is a DeviceConfigAttributes object
-					if (isDeviceConfigAttributes(parsed)) {
-						// If it is, save it to the database
-						await dbSaveConfig(sensorId, parsed);
-					} else {
-						// If it isn't, log an error
+					try {
+						// Convert the message to an object
+						const parsed = JSON.parse(msg);
+						// Check if the object is a DeviceConfigAttributes object
+						if (isDeviceConfigAttributes(parsed)) {
+							// If it is, save it to the database
+							await dbSaveConfig(sensorId, parsed);
+						} else {
+							// If it isn't, log an error
+							console.error("Invalid config received");
+						}
+					} catch (e) {
 						console.error("Invalid config received");
 					}
 					break;
@@ -181,8 +187,8 @@ async function refreshEdited() {
 	if (stopRefresh) 
 		return;
 	
-	// Get all edited configs from the database (edited configs are configs that have been changed by the admin, see Green-Ferret-Admin) only if the
-	// refresh is not stopped
+	// ---- Refresh edited configs ---- Get all edited configs from the database (edited configs are configs that have been changed by the admin, see
+	// Green-Ferret-Admin) only if the refresh is not stopped
 	const edited = await dbGetAllEdited();
 	if (edited) {
 		// If there are edited configs, publish them to the devices
@@ -194,6 +200,18 @@ async function refreshEdited() {
 			}), {retain: true});
 		});
 	}
+
+	// ---- Delete deleted configs ----
+	const deleted = await dbGetAllDelete();
+	if (deleted) {
+		// If there are deleted configs, publish them to the devices
+		console.log("Deleting deleted configs");
+		deleted.forEach((cfg) => {
+			client.publish(`CFG/${cfg.deviceID}/Config`, "", {retain: true});
+			dbDeleteConfig(cfg.deviceID);
+		});
+	}
+
 	// Refresh again after the timeout has passed
 	if (!stopRefresh) 
 		setTimeout(refreshEdited, refreshEditedTimeout);
