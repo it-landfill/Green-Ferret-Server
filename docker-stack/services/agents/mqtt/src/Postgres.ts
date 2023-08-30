@@ -66,6 +66,7 @@ class DeviceConfig
   declare distance: number;
   declare time: number;
   declare edited: boolean;
+  declare delete: boolean;
 }
 
 // instance ot the DeviceConfig class, used to store device configuration. This will represent the table in the database
@@ -95,7 +96,7 @@ function generateConfig(): SQLConfig {
   if (!process.env.POSTGRES_PASSWORD)
     console.warn("POSTGRES_PASSWORD not set, exiting...");
   if (username === undefined || password === undefined) {
-    throw new Error("Missing Postgres configuration");
+    throw new Error("Missing Postgres configuration. Please set the ENV variables POSTGRES_USER and POSTGRES_PASSWORD");
   }
 
   return { host: host, db: db, username: username, password: password };
@@ -149,6 +150,11 @@ export function dbInitialize() {
         allowNull: false,
         defaultValue: false,
       },
+	  delete: {
+		type: DataTypes.BOOLEAN,
+		allowNull: false,
+		defaultValue: false,
+	  }
     },
     { sequelize, tableName: "Config" }
   );
@@ -175,7 +181,7 @@ export async function dbDisconnect() {
 }
 
 /**
- * Gets the configuration of a device
+ * Gets the configuration of a device if it exists and has the delete flag set to false
  * @param deviceID ID of the device to get the configuration of
  * @returns DeviceConfigAttributes object with the configuration of the device
  */
@@ -186,6 +192,7 @@ export async function dbGetConfig(
 	attributes: ["protocol", "trigger", "distanceMethod", "distance", "time"],
     where: {
       deviceID: deviceID,
+	  delete: false,
     },
   });
   return result != null ? result : undefined;
@@ -200,6 +207,7 @@ export async function dbGetAllEdited(): Promise<DeviceConfig[] | undefined> {
 	attributes: ["deviceID", "protocol", "trigger", "distanceMethod", "distance", "time"],
     where: {
       edited: true,
+	  delete: false,
     },
   });
   return result != null ? result : undefined;
@@ -218,5 +226,31 @@ export async function dbSaveConfig(
     ...config,
     deviceID: deviceID,
     edited: false,
+	delete: false,
   });
+}
+
+/**
+ * Gets the configuration of all the devices that have been deleted (see Green-Ferret-Admin)
+ * @returns Array of DeviceConfig objects with the configuration of all the devices with the delete flag set to true
+ */
+export async function dbGetAllDelete(): Promise<DeviceConfig[] | undefined> {
+	const result = await deviceConfig.findAll({
+		where: {
+			delete: true,
+		},
+	});
+	return result != null ? result : undefined;
+}
+
+/**
+ * Deletes the configuration of a device
+ * @param deviceID ID of the device to delete the configuration of
+ */
+export async function dbDeleteConfig(deviceID: string) {
+	await deviceConfig.destroy({
+		where: {
+			deviceID: deviceID,
+		},
+	});
 }

@@ -71,7 +71,7 @@ services:
             retries: 3
             start_period: 30s
     mqtt-agent:
-        image: "aleben/green-ferret_mqtt-agent:1.1.2"
+        image: "aleben/green-ferret_mqtt-agent:1.2.1"
         depends_on:
             - mqttserver
             - influxdb
@@ -168,7 +168,7 @@ services:
       ports:
         - 4321:8080
     gf-admin:
-      image: aleben/green-ferret_admin:1.0.2
+      image: aleben/green-ferret_admin:1.1
       restart: unless-stopped
       depends_on:
         - postgres-db

@@ -1,4 +1,3 @@
-import { dbGetDevice } from '@/models/Postgres';
 import React from 'react';
 import ConfigPanel from './components/ConfigPanel';
 import { BiArrowBack } from 'react-icons/bi';
@@ -6,6 +5,7 @@ import Link from 'next/link';
 import { DeviceModel } from '@/models/DeviceModel';
 import { notFound } from 'next/navigation';
 import { getDeviceInfo } from '@/models/ServerActions';
+import DeleteButton from './components/DeleteButton';
 
 interface Props {
   params: {
@@ -46,11 +46,7 @@ const DeviceInfo = async ({ params }: Props) => {
         <p className="roundede grow p-2 text-center text-xl">
           Device: <b>{device.id}</b>
         </p>
-        <button className="ml-auto mr-2 flex flex-row rounded-lg bg-red-600 bg-opacity-90 px-5 font-semibold text-white hover:bg-opacity-100 focus:outline-none">
-          <div className="flex flex-row self-center">
-            <p className="font-medium"> Delete</p>
-          </div>
-        </button>
+        < DeleteButton deviceID={device.id}/>
       </div>
       <div className="mt-3 flex flex-col rounded">
         <ConfigPanel deviceIn={device} />
