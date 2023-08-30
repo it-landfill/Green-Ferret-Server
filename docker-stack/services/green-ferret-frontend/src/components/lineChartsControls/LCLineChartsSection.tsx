@@ -1,6 +1,5 @@
 import React from "react";
 
-import LineMultiGraph from "./LCLineChartsComponents/LCLineMultiGraph";
 import LineMonoGraph from "./LCLineChartsComponents/LCLineMonoGraph";
 import LineControls from "./LCLineChartsComponents/LCLineControls";
 
@@ -64,19 +63,14 @@ const forcastingInformation = {
 };
 
 function LineChartsSection(props: LineChartsSectionProps) {
+  
   // State of the data points for the line chart.
-  const [dataPointsLineChart, setDataPointsLineChart] = React.useState<
-    InfluxAccess.Measurement[]
-  >([]);
+  const [dataPointsLineChart, setDataPointsLineChart] = React.useState<InfluxAccess.Measurement[]>([]);
+  
   // State checkboxes for the line chart (true if the checkbox is checked).
-  const [lineChartState, setLineChartState] =
-    React.useState<LineChartModel>(defaultLCModel);
+  const [lineChartState, setLineChartState] = React.useState<LineChartModel>(defaultLCModel);
 
-  const [forcastingInfomations, setForcastingInfomation] = React.useState<any>(
-    forcastingInformation
-  );
-  // State checkboxes for the bar chart
-  const [barChartState, setBarChartState] = React.useState(true);
+  const [forcastingInfomations, setForcastingInfomation] = React.useState<any>(forcastingInformation);
 
   /**
    * Change the data points structure to be able to use it in the line chart (each data point is a dictionary
@@ -154,65 +148,35 @@ function LineChartsSection(props: LineChartsSectionProps) {
 
   // Use effect for the line chart state (if the state changes, the line chart will be updated)
   React.useEffect(() => {
-    // flattenDataPoints(dataPoints);
     meanDataPoints(props.dataPoints);
   }, [lineChartState]);
 
   return (
     <div className="flex flex-col p-4 gap-4 text-green-600">
-      {/* Button switch chart visualization */}
-      <label className="flex mx-auto items-center gap-4 cursor-pointer text-xl font-bold">
-        {barChartState ? (
-          <span>Visualizzazione compatta</span>
-        ) : (
-          <span className="text-slate-400">Visualizzazione compatta</span>
-        )}
-        <span className="relative">
-          <input
-            id="Toggle1"
-            type="checkbox"
-            className="hidden peer"
-            onClick={() => setBarChartState(!barChartState)}
+      <div className="flex flex-row h-full items-center justify-center gap-2">
+        <div className="w-4/5 m-4 aspect-[6/3]">
+          <LineMonoGraph
+            dataPointsLineChart={dataPointsLineChart}
+            lineChartState={lineChartState}
           />
-          <div className="w-12 h-6 rounded-full shadow-inner bg-green-600"></div>
-          <div className="absolute inset-y-0 left-0 w-4 h-4 m-1 rounded-full shadow peer-checked:right-0 peer-checked:left-auto bg-white"></div>
-        </span>
-        {!barChartState ? (
-          <span>Visualizzazione estesa</span>
-        ) : (
-          <span className="text-slate-400">Visualizzazione estesa</span>
-        )}
-      </label>
-      {barChartState ? (
-        <div className="flex flex-row h-full items-center justify-center gap-2">
-          <div className="w-4/5 m-4 aspect-[6/3]">
-            <LineMonoGraph
-              dataPointsLineChart={dataPointsLineChart}
-              lineChartState={lineChartState}
-            />
-          </div>
-          <div className="w-1/5 h-full gap-2">
-            <LineControls
-              lineChartState={lineChartState}
-              setLineChartState={setLineChartState}
-            />
-            <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
-            <LineForecastinTypeControls
-              forcastingInformation={forcastingInformation}
-              setForcastingInfomation={setForcastingInfomation}
-            />
-            <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
-            <ForecastingControls
-              lineChartState={lineChartState}
-              setLineChartState={setLineChartState}
-            />
-          </div>
         </div>
-      ) : (
-        <div className="flex flex-row h-full items-center justify-center gap-2">
-          <LineMultiGraph dataPointsLineChart={dataPointsLineChart} />
+        <div className="w-1/5 h-full gap-2">
+          <LineControls
+            lineChartState={lineChartState}
+            setLineChartState={setLineChartState}
+          />
+          <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
+          <LineForecastinTypeControls
+            forcastingInformation={forcastingInformation}
+            setForcastingInfomation={setForcastingInfomation}
+          />
+          <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
+          <ForecastingControls
+            lineChartState={lineChartState}
+            setLineChartState={setLineChartState}
+          />
         </div>
-      )}
+      </div>
     </div>
   );
 }
