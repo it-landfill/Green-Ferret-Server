@@ -63,7 +63,10 @@ export module InfluxAccess {
     start: Date,
     end: Date,
   ): Promise<Measurement[]> {
-    const client = getClient("http://pi3aleben:8086");
+    const client = getClient(
+      "http://pi3aleben:8086",
+      "5EwQ_ipsZPpc-rr9rvVYFTEAj4d1RKOGfTVUkAnUnd1c5F-IMCVs2IovHMwkBA_-0mz-JJpa5gmF38EhCjcpDA=="
+    );
 
     let queryClient = client.getQueryApi("IT-Landfill");
     // let fluxQuery = `
@@ -88,7 +91,7 @@ export module InfluxAccess {
     )})
 			|> filter(fn: (r) => r["_measurement"] == "openMeteoData")
 			|> drop(columns: ["_start", "_stop"])  
-			|> filter(fn: (r) => r["_field"] == "humidity" or r["_field"] == "latitude" or r["_field"] == "longitude")   
+			|> filter(fn: (r) => r["_field"] == "humidity" or r["_field"] == "pressure" or r["_field"] == "temperature" or r["_field"] == "latitude" or r["_field"] == "longitude")   
 			|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
 		`;
 

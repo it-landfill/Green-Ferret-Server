@@ -16,9 +16,44 @@ import LineControls from "./LCLineChartsComponents/LCLineControls";
 
 import { InfluxAccess } from "../../utils/InfluxAccess";
 
+import { LineChartModel } from "../../utils/LineChartModel";
+
 interface LineChartsSectionProps {
   dataPoints: InfluxAccess.Measurement[][];
 }
+
+const defaultLCModel: LineChartModel = {
+  temperature: {
+    checked: true,
+    exists: false,
+    color: "#8884d8",
+  },
+  humidity: {
+    checked: true,
+    exists: false,
+    color: "#CA829D",
+  },
+  pressure: {
+    checked: true,
+    exists: false,
+    color: "#82ca9d",
+  },
+  eco2: {
+    checked: true,
+    exists: false,
+    color: "#9D82CA",
+  },
+  tvoc: {
+    checked: true,
+    exists: false,
+    color: "#CA9D82",
+  },
+  aqi: {
+    checked: true,
+    exists: false,
+    color: "#6342FC",
+  },
+};
 
 function LineChartsSection(props: LineChartsSectionProps) {
   // State of the data points for the line chart.
@@ -26,14 +61,7 @@ function LineChartsSection(props: LineChartsSectionProps) {
     InfluxAccess.Measurement[]
   >([]);
   // State checkboxes for the line chart (true if the checkbox is checked).
-  const [lineChartState, setLineChartState] = React.useState({
-    temperature: true,
-    pressure: true,
-    humidity: true,
-    eco: true,
-    tvoc: true,
-    aqi: true,
-  });
+  const [lineChartState, setLineChartState] = React.useState<LineChartModel>(defaultLCModel);
   // State checkboxes for the bar chart
   const [barChartState, setBarChartState] = React.useState(true);
 
@@ -67,7 +95,7 @@ function LineChartsSection(props: LineChartsSectionProps) {
     // For each data point, add it to the flattened array.
     dataPoints.forEach((dataPoint) => {
       // Calculate the mean of the data points.
-      let meanMeasurement: InfluxAccess.Measurement = {
+      let meanMeasurement: {[key: string]: any} = {
         latitude: 0,
         longitude: 0,
         time: dataPoint[0].time,
@@ -78,21 +106,44 @@ function LineChartsSection(props: LineChartsSectionProps) {
         tvoc: 0,
         aqi: 0,
       };
+
+      let countMeasurement: {[key: string]: any} = {
+        temperature: 0,
+        pressure: 0,
+        humidity: 0,
+        eco2: 0,
+        tvoc: 0,
+        aqi: 0,
+      };
+
       dataPoint.forEach((measurement) => {
-        meanMeasurement.temperature += measurement.temperature;
-        meanMeasurement.pressure += measurement.pressure;
-        meanMeasurement.humidity += measurement.humidity;
-        meanMeasurement.eco2 += measurement.eco2;
-        meanMeasurement.tvoc += measurement.tvoc;
-        meanMeasurement.aqi += measurement.aqi;
+
+
+        Object.keys(measurement).forEach((key) => {
+          // If the key is in the line chart state, set exist to true.
+          // This will show and hide measurements that have no value 
+          if ((measurement as {[key: string]: any})[key] !== undefined && key in lineChartState && !lineChartState[key].exists) {
+            setLineChartState({
+              ...lineChartState,
+              [key]: { ...lineChartState[key], exists: true },
+            });
+          }
+
+          // If the key is in the line chart state and the checkbox is checked, add the value to the mean.
+          if ((measurement as {[key: string]: any})[key] !== undefined && key in countMeasurement && key in meanMeasurement) {
+            countMeasurement[key] ++;
+            meanMeasurement[key] += (measurement as {[key: string]: any})[key];
+          }
+        });
+
       });
-      meanMeasurement.temperature /= dataPoint.length;
-      meanMeasurement.pressure /= dataPoint.length;
-      meanMeasurement.humidity /= dataPoint.length;
-      meanMeasurement.eco2 /= dataPoint.length;
-      meanMeasurement.tvoc /= dataPoint.length;
-      meanMeasurement.aqi /= dataPoint.length;
-      meanDataPoints.push(meanMeasurement);
+
+      Object.keys(countMeasurement).forEach((key) => {
+        if (key in meanMeasurement) {
+          meanMeasurement[key] /= countMeasurement[key];
+        }
+      });
+      meanDataPoints.push(meanMeasurement as InfluxAccess.Measurement);
     });
 
     // Update the data points state.
@@ -103,144 +154,10 @@ function LineChartsSection(props: LineChartsSectionProps) {
   React.useEffect(() => {
     // flattenDataPoints(dataPoints);
     meanDataPoints(props.dataPoints);
-    renderLineChart();
   }, [lineChartState]);
-
-  function renderLineChart() {
-    return (
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={dataPointsLineChart}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="time" tick={{ fontSize: 12 }} dy={10} />
-
-          {lineChartState.temperature && (
-            <YAxis
-              dataKey="temperature"
-              yAxisId="temperature"
-              stroke="#8884d8"
-              orientation="left"
-              tick={{ fontSize: 12 }}
-            />
-          )}
-          {lineChartState.pressure && (
-            <YAxis
-              dataKey="pressure"
-              yAxisId="pressure"
-              stroke="#82ca9d"
-              orientation="left"
-              tick={{ fontSize: 12 }}
-            />
-          )}
-          {lineChartState.humidity && (
-            <YAxis
-              dataKey="humidity"
-              yAxisId="humidity"
-              stroke="#CA829D"
-              orientation="left"
-              tick={{ fontSize: 12 }}
-            />
-          )}
-          {lineChartState.eco && (
-            <YAxis
-              dataKey="eco2"
-              yAxisId="eco"
-              stroke="#9D82CA"
-              orientation="right"
-              tick={{ fontSize: 12 }}
-            />
-          )}
-          {lineChartState.tvoc && (
-            <YAxis
-              dataKey="tvoc"
-              yAxisId="tvoc"
-              stroke="#CA9D82"
-              orientation="right"
-              tick={{ fontSize: 12 }}
-            />
-          )}
-          {lineChartState.aqi && (
-            <YAxis
-              dataKey="aqi"
-              yAxisId="aqi"
-              stroke="#6342FC"
-              orientation="right"
-              tick={{ fontSize: 12 }}
-            />
-          )}
-
-          <Tooltip />
-          <Legend />
-          {lineChartState.temperature && (
-            <Line
-              type="monotone"
-              dataKey="temperature"
-              yAxisId="temperature"
-              stroke="#8884d8"
-              activeDot={{ r: 6 }}
-            />
-          )}
-          {lineChartState.pressure && (
-            <Line
-              type="monotone"
-              dataKey="pressure"
-              yAxisId="pressure"
-              stroke="#82ca9d"
-              activeDot={{ r: 6 }}
-            />
-          )}
-          {lineChartState.humidity && (
-            <Line
-              type="monotone"
-              dataKey="humidity"
-              yAxisId="humidity"
-              stroke="#CA829D"
-              activeDot={{ r: 6 }}
-            />
-          )}
-          {lineChartState.eco && (
-            <Line
-              type="monotone"
-              dataKey="eco2"
-              yAxisId="eco"
-              stroke="#9D82CA"
-              activeDot={{ r: 6 }}
-            />
-          )}
-          {lineChartState.tvoc && (
-            <Line
-              type="monotone"
-              dataKey="tvoc"
-              yAxisId="tvoc"
-              stroke="#CA9D82"
-              activeDot={{ r: 6 }}
-            />
-          )}
-          {lineChartState.aqi && (
-            <Line
-              type="monotone"
-              dataKey="aqi"
-              yAxisId="aqi"
-              stroke="#6342FC"
-              activeDot={{ r: 6 }}
-            />
-          )}
-        </LineChart>
-      </ResponsiveContainer>
-    );
-  }
-
 
   return (
     <div className="flex flex-col p-4 gap-4 text-green-600">
-      <h1 className="text-4xl font-bold text-left">Green Ferrett</h1>
       {/* Button switch chart visualization */}
       <label className="flex mx-auto items-center gap-4 cursor-pointer text-xl font-bold">
         {barChartState ? (

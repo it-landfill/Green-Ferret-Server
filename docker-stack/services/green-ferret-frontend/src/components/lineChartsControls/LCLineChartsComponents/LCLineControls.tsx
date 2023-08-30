@@ -1,10 +1,11 @@
 import React from "react";
 
 import LineCheckbox from "./LCLineControlsComponents/LCLineCheckbox";
+import { LineChartModel } from "../../../utils/LineChartModel";
 
 interface LineControlsProps {
-  setLineChartState: any;
-  lineChartState: any;
+  setLineChartState: React.Dispatch<React.SetStateAction<LineChartModel>>;
+  lineChartState: LineChartModel;
 }
 
 function LineControls(props: LineControlsProps) {
@@ -13,7 +14,9 @@ function LineControls(props: LineControlsProps) {
 
   React.useEffect(() => {
     // For each props.lineChartState key, create a LineCheckbox component.
-    const LineCheckboxList = Object.keys(props.lineChartState).map((key) => (
+    const LineCheckboxList = Object.keys(props.lineChartState)
+    .filter((key) => props.lineChartState[key].exists)
+    .map((key) => (
       <LineCheckbox
         key={key}
         lineChartState={props.lineChartState}

@@ -17,6 +17,7 @@ interface LineMultiGraphProps {
 }
 
 function LineMultiGraph(props: LineMultiGraphProps) {
+  
   function renderLineChartSync(id: [string, string]) {
     return (
       <ResponsiveContainer width="100%" height="100%">

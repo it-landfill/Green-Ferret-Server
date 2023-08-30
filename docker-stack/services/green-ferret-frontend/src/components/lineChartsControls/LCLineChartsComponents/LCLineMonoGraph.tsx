@@ -1,5 +1,3 @@
-import React from "react";
-
 import {
   LineChart,
   XAxis,
@@ -9,13 +7,15 @@ import {
   Legend,
   ResponsiveContainer,
   Line,
+  Customized,
 } from "recharts";
 
 import { InfluxAccess } from "../../../utils/InfluxAccess";
+import { LineChartModel } from "../../../utils/LineChartModel";
 
 interface LineMonoGraphProps {
   dataPointsLineChart: InfluxAccess.Measurement[];
-  lineChartState: { [key: string]: boolean };
+  lineChartState: LineChartModel;
 }
 
 function LineMonoGraph(props: LineMonoGraphProps) {
@@ -47,39 +47,46 @@ function LineMonoGraph(props: LineMonoGraphProps) {
           dy={10}
         />
 
-        {Object.keys(props.lineChartState).map((key) =>
-          props.lineChartState[key] ? (
-            <>
+        {Object.keys(props.lineChartState)
+          .filter((key) => props.lineChartState[key].exists)
+          .map((key) =>
+            props.lineChartState[key].checked ? (
               <YAxis
-                key={key + "YAxis"}
+                key={key + "YAxisS"}
                 dataKey={key}
                 yAxisId={key}
-                stroke="#8884d8"
+                stroke={props.lineChartState[key].color}
                 orientation="left"
                 tick={{ fontSize: 12 }}
               />
+            ) : (
+                <YAxis
+                  key={key + "YAxisH"}
+                  dataKey={key}
+                  yAxisId={key}
+                  stroke="#D1D5DB"
+                  orientation="left"
+                  tick={{ fontSize: 12 }}
+                />
+            )
+          )}
+
+        {Object.keys(props.lineChartState)
+          .filter((key) => props.lineChartState[key].exists)
+          .map((key) =>
+            props.lineChartState[key].checked ? (
               <Line
-                key={key + "Line"}
+                key={key + "LineS"}
                 dataKey={key}
                 type="monotone"
                 yAxisId={key}
-                stroke="#8884d8"
+                stroke={props.lineChartState[key].color}
                 dot={false}
                 activeDot={{ r: 6 }}
               />
-            </>
-          ) : (
-            <>
-              <YAxis
-                key={key + "YAxis"}
-                dataKey={key}
-                yAxisId={key}
-                stroke="#D1D5DB"
-                orientation="left"
-                tick={{ fontSize: 12 }}
-              />
+            ) : (
               <Line
-                key={key + "Line"}
+                key={key + "LineH"}
                 dataKey={key}
                 type="monotone"
                 yAxisId={key}
@@ -87,9 +94,8 @@ function LineMonoGraph(props: LineMonoGraphProps) {
                 activeDot={{ r: 6 }}
                 hide={true}
               />
-            </>
-          )
-        )}
+            )
+          )}
 
         <Tooltip />
         <Legend />
