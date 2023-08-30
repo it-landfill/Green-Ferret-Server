@@ -72,6 +72,7 @@ class DeviceConfig
   declare distance: number;
   declare time: number;
   declare edited: boolean;
+  declare delete: boolean;
 }
 
 // instance ot the DeviceConfig class, used to store device configuration. This will represent the table in the database
@@ -101,7 +102,9 @@ function generateConfig(): SQLConfig {
   if (!process.env.POSTGRES_PASSWORD)
     console.warn('POSTGRES_PASSWORD not set, exiting...');
   if (username === undefined || password === undefined) {
-    throw new Error('Missing Postgres configuration. Please set the ENV variables POSTGRES_USER and POSTGRES_PASSWORD');
+    throw new Error(
+      'Missing Postgres configuration. Please set the ENV variables POSTGRES_USER and POSTGRES_PASSWORD',
+    );
   }
 
   return { host: host, db: db, username: username, password: password };
@@ -155,6 +158,11 @@ export function dbInitialize() {
         allowNull: false,
         defaultValue: false,
       },
+      delete: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
     },
     { sequelize: dbmsInstance, tableName: 'Config' },
   );
@@ -164,12 +172,12 @@ export function dbInitialize() {
  * Connects to the database
  */
 export async function dbConnect() {
-    if (dbmsInstance === undefined) dbInitialize();
-    if (dbmsInstance) {
-      await dbmsInstance.authenticate();
-      deviceConfig.sync({ alter: true });
-    } else throw new Error('dbmsInstance is undefined');
-    console.log('Connection has been established successfully.');
+  if (dbmsInstance === undefined) dbInitialize();
+  if (dbmsInstance) {
+    await dbmsInstance.authenticate();
+    deviceConfig.sync({ alter: true });
+  } else throw new Error('dbmsInstance is undefined');
+  console.log('Connection has been established successfully.');
 }
 
 /**
@@ -179,6 +187,11 @@ export async function dbDisconnect() {
   if (dbmsInstance) await dbmsInstance.close();
 }
 
+/**
+ * Converts a DeviceConfig object to a DeviceModel object
+ * @param device DeviceConfig object to convert
+ * @returns DeviceModel object
+ */
 function deviceConfigToDeviceModel(device: DeviceConfig): DeviceModel {
   // Convert deviceConfig to DeviceModel
   return {
@@ -193,6 +206,11 @@ function deviceConfigToDeviceModel(device: DeviceConfig): DeviceModel {
   };
 }
 
+/**
+ * Converts a DeviceModel object to a DeviceConfigAttributes object
+ * @param device DeviceModel object to convert
+ * @returns DeviceConfigAttributes object
+ */
 function deviceModelToDeviceConfigAttrs(
   device: DeviceModel,
 ): DeviceConfigAttributes {
@@ -205,6 +223,10 @@ function deviceModelToDeviceConfigAttrs(
   };
 }
 
+/**
+ * Gets all device IDs from the database
+ * @returns Array of all device IDs (strings)
+ */
 export async function dbGetAllDeviceIDs(): Promise<string[]> {
   // Check if the database is initialized
   if (dbmsInstance === undefined) await dbConnect();
@@ -218,6 +240,11 @@ export async function dbGetAllDeviceIDs(): Promise<string[]> {
   } else return [];
 }
 
+/**
+ * Gets a specific device from the database
+ * @param id ID of the device to get
+ * @returns DeviceModel object if the device exists, undefined otherwise
+ */
 export async function dbGetDevice(
   id: string,
 ): Promise<DeviceModel | undefined> {
@@ -235,6 +262,12 @@ export async function dbGetDevice(
   return deviceConfigToDeviceModel(result);
 }
 
+/**
+ * Saves a device to the database. If the device already exists, it will be updated.
+ * The device will be marked as edited.
+ *
+ * @param device DeviceModel object to save
+ */
 export async function dbSaveDevice(device: DeviceModel) {
   const formattedDevice: DeviceConfigAttributes =
     deviceModelToDeviceConfigAttrs(device);
@@ -247,5 +280,18 @@ export async function dbSaveDevice(device: DeviceModel) {
     ...formattedDevice,
     deviceID: device.id,
     edited: true,
+    delete: false,
   });
+}
+
+/**
+ * Deletes a device from the database (sets the delete flag to true)
+ * @param id ID of the device to delete
+ */
+export async function dbDeleteDevice(id: string) {
+  // Check if the database is initialized
+  if (dbmsInstance === undefined) dbConnect();
+
+  // Delete the device
+  await deviceConfig.update({ delete: true }, { where: { deviceID: id } });
 }
