@@ -181,7 +181,7 @@ export async function dbDisconnect() {
 }
 
 /**
- * Gets the configuration of a device
+ * Gets the configuration of a device if it exists and has the delete flag set to false
  * @param deviceID ID of the device to get the configuration of
  * @returns DeviceConfigAttributes object with the configuration of the device
  */
@@ -192,6 +192,7 @@ export async function dbGetConfig(
 	attributes: ["protocol", "trigger", "distanceMethod", "distance", "time"],
     where: {
       deviceID: deviceID,
+	  delete: false,
     },
   });
   return result != null ? result : undefined;

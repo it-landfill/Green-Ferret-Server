@@ -125,6 +125,9 @@ async function messageHandler(topic : string, message : Buffer) {
 			switch (request) {
 				case "new":
 					// This is a new config request, send the current config or generate a new one
+
+					// Get the current config from the database, if there is one.
+					// Special case: if the config is flag for deletion, generate a new one
 					let cfg = await dbGetConfig(sensorId);
 					// If there is no config, generate a new one with default values
 					if (cfg === undefined) {
