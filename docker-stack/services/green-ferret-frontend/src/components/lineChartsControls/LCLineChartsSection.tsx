@@ -1,14 +1,4 @@
 import React from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 
 import LineMultiGraph from "./LCLineChartsComponents/LCLineMultiGraph";
 import LineMonoGraph from "./LCLineChartsComponents/LCLineMonoGraph";
@@ -17,6 +7,8 @@ import LineControls from "./LCLineChartsComponents/LCLineControls";
 import { InfluxAccess } from "../../utils/InfluxAccess";
 
 import { LineChartModel } from "../../utils/LineChartModel";
+import ForecastingControls from "./LCLineChartsComponents/LCLineForecastinControls";
+import LineForecastinTypeControls from "./LCLineChartsComponents/LCLineForecastinTypeControls";
 
 interface LineChartsSectionProps {
   dataPoints: InfluxAccess.Measurement[][];
@@ -55,6 +47,22 @@ const defaultLCModel: LineChartModel = {
   },
 };
 
+const forcastingInformation = {
+  type: {
+    none: true,
+    ARIMA: false,
+    PROPHET: false,
+  },
+  target: {
+    temperature: false,
+    humidity: false,
+    pressure: false,
+    eco2: false,
+    tvoc: false,
+    aqi: false,
+  },
+};
+
 function LineChartsSection(props: LineChartsSectionProps) {
   // State of the data points for the line chart.
   const [dataPointsLineChart, setDataPointsLineChart] = React.useState<
@@ -63,26 +71,12 @@ function LineChartsSection(props: LineChartsSectionProps) {
   // State checkboxes for the line chart (true if the checkbox is checked).
   const [lineChartState, setLineChartState] =
     React.useState<LineChartModel>(defaultLCModel);
+
+  const [forcastingInfomations, setForcastingInfomation] = React.useState<any>(
+    forcastingInformation
+  );
   // State checkboxes for the bar chart
   const [barChartState, setBarChartState] = React.useState(true);
-
-  /**
-   * Change the data points structure to be able to use it in the line chart (each data point is a dictionary).
-   *
-   * @param dataPoints Array of data points.
-   */
-  function flattenDataPoints(dataPoints: InfluxAccess.Measurement[][]) {
-    // Flatten the data points array.
-    let flattenedDataPoints: InfluxAccess.Measurement[] = [];
-    // For each data point, add it to the flattened array.
-    dataPoints.forEach((dataPoint) => {
-      dataPoint.forEach((measurement) => {
-        flattenedDataPoints.push(measurement);
-      });
-    });
-    // Update the data points state.
-    setDataPointsLineChart(flattenedDataPoints);
-  }
 
   /**
    * Change the data points structure to be able to use it in the line chart (each data point is a dictionary
@@ -191,14 +185,24 @@ function LineChartsSection(props: LineChartsSectionProps) {
       </label>
       {barChartState ? (
         <div className="flex flex-row h-full items-center justify-center gap-2">
-          <div className="w-5/6 m-4 aspect-[6/3]">
+          <div className="w-4/5 m-4 aspect-[6/3]">
             <LineMonoGraph
               dataPointsLineChart={dataPointsLineChart}
               lineChartState={lineChartState}
             />
           </div>
-          <div className="w-1/6 h-full">
+          <div className="w-1/5 h-full gap-2">
             <LineControls
+              lineChartState={lineChartState}
+              setLineChartState={setLineChartState}
+            />
+            <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
+            <LineForecastinTypeControls
+              forcastingInformation={forcastingInformation}
+              setForcastingInfomation={setForcastingInfomation}
+            />
+            <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
+            <ForecastingControls
               lineChartState={lineChartState}
               setLineChartState={setLineChartState}
             />
