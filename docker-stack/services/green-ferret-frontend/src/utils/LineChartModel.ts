@@ -1,9 +1,9 @@
 interface LineChartElementModel {
-	checked: boolean;
-	exists: boolean;
-	color: string;
+  checked: boolean;
+  exists: boolean;
+  color: string;
 }
 
 export interface LineChartModel {
-	[key: string]: LineChartElementModel;
+  [key: string]: LineChartElementModel;
 }

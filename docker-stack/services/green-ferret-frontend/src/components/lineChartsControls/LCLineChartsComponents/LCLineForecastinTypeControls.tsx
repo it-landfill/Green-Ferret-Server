@@ -1,15 +1,43 @@
-interface LineForecastingTypeProps {
-  forcastingInformation: any;
+import { ForcastingTypeModel } from "../../../utils/ForcastingTypeModel";
+
+interface ForecastinTypeControlsProps {
+  forcastingInfomations: ForcastingTypeModel;
   setForcastingInfomation: any;
 }
 
-function LineForecastingTypeControls(props: LineForecastingTypeProps) {
+function ForecastinTypeControls(props: ForecastinTypeControlsProps) {
   function changeForcastingType(type: string) {
-    for (let key in props.forcastingInformation.type) {
-      props.forcastingInformation.type[key] = false;
+    let newForcastingModel: ForcastingTypeModel = {
+      type: {
+        none: false,
+        ARIMA: false,
+        PROPHET: false,
+      },
+      target: {
+        temperature: false,
+        humidity: false,
+        pressure: false,
+        eco2: false,
+        tvoc: false,
+        aqi: false,
+      },
+    };
+
+    switch (type) {
+      case "none":
+        newForcastingModel.type.none = true;
+        break;
+      case "arima":
+        newForcastingModel.type.ARIMA = true;
+        break;
+      case "prophet":
+        newForcastingModel.type.PROPHET = true;
+        break;
+      default:
+        break;
     }
-    props.forcastingInformation.type[type] = true;
-    props.setForcastingInfomation(props.forcastingInformation);
+
+    props.setForcastingInfomation(newForcastingModel);
   }
 
   return (
@@ -24,7 +52,7 @@ function LineForecastingTypeControls(props: LineForecastingTypeProps) {
           value=""
           name="default-radio-forcasting"
           className="w-4 h-4 accent-green-600"
-          checked={props.forcastingInformation.type.none === true}
+          checked={props.forcastingInfomations.type.none === true}
           onChange={() => {
             changeForcastingType("none");
           }}
@@ -40,7 +68,7 @@ function LineForecastingTypeControls(props: LineForecastingTypeProps) {
           value=""
           name="default-radio-forcasting"
           className="w-4 h-4 accent-green-600"
-          checked={props.forcastingInformation.type.arima === true}
+          checked={props.forcastingInfomations.type.ARIMA === true}
           onChange={() => {
             changeForcastingType("arima");
           }}
@@ -56,7 +84,7 @@ function LineForecastingTypeControls(props: LineForecastingTypeProps) {
           value=""
           name="default-radio-forcasting"
           className="w-4 h-4 accent-green-600"
-          checked={props.forcastingInformation.type.prophet === true}
+          checked={props.forcastingInfomations.type.PROPHET === true}
           onChange={() => {
             changeForcastingType("prophet");
           }}
@@ -69,4 +97,4 @@ function LineForecastingTypeControls(props: LineForecastingTypeProps) {
   );
 }
 
-export default LineForecastingTypeControls;
+export default ForecastinTypeControls;
