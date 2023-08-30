@@ -3,24 +3,22 @@ import React from "react";
 import {
   LineChart,
   XAxis,
+  YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Line,
 } from "recharts";
 
 import { InfluxAccess } from "../../../utils/InfluxAccess";
 
-import LineYAxis from "./LCLineMonoGraphComponents/LCLineYAxis";
-
 interface LineMonoGraphProps {
   dataPointsLineChart: InfluxAccess.Measurement[];
-  lineChartState: any;
+  lineChartState: { [key: string]: boolean };
 }
 
 function LineMonoGraph(props: LineMonoGraphProps) {
-  const [LineList, setLineList] = React.useState<any[]>([]);
-
   // Simplified date format (DD/MM HH:MM).
   const dateFormat = (date: Date) => {
     return `${date.getDate()}/${date.getMonth() + 1} ${date
@@ -28,20 +26,6 @@ function LineMonoGraph(props: LineMonoGraphProps) {
       .toString()
       .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
-
-  React.useEffect(() => {
-    // For each props.lineChartState key, create a Line component.
-    const LineList = Object.keys(props.lineChartState).map((key) => (
-      <LineYAxis
-        key={key}
-        lineChartState={props.lineChartState}
-        lineChartTopic={key}
-        lineColor="#8884d8"
-        lineOrientation="left"
-      />
-    ));
-    setLineList(LineList);
-  }, [props.lineChartState]);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -63,13 +47,49 @@ function LineMonoGraph(props: LineMonoGraphProps) {
           dy={10}
         />
 
-        <LineYAxis
-          key="humidity"
-          lineChartState={props.lineChartState}
-          lineChartTopic="humidity"
-          lineColor="#8884d8"
-          lineOrientation="left"
-        />
+        {Object.keys(props.lineChartState).map((key) =>
+          props.lineChartState[key] ? (
+            <>
+              <YAxis
+                key={key + "YAxis"}
+                dataKey={key}
+                yAxisId={key}
+                stroke="#8884d8"
+                orientation="left"
+                tick={{ fontSize: 12 }}
+              />
+              <Line
+                key={key + "Line"}
+                dataKey={key}
+                type="monotone"
+                yAxisId={key}
+                stroke="#8884d8"
+                dot={false}
+                activeDot={{ r: 6 }}
+              />
+            </>
+          ) : (
+            <>
+              <YAxis
+                key={key + "YAxis"}
+                dataKey={key}
+                yAxisId={key}
+                stroke="#D1D5DB"
+                orientation="left"
+                tick={{ fontSize: 12 }}
+              />
+              <Line
+                key={key + "Line"}
+                dataKey={key}
+                type="monotone"
+                yAxisId={key}
+                stroke="#D1D5DB"
+                activeDot={{ r: 6 }}
+                hide={true}
+              />
+            </>
+          )
+        )}
 
         <Tooltip />
         <Legend />
