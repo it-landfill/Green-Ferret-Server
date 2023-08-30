@@ -101,7 +101,7 @@ function generateConfig(): SQLConfig {
   if (!process.env.POSTGRES_PASSWORD)
     console.warn('POSTGRES_PASSWORD not set, exiting...');
   if (username === undefined || password === undefined) {
-    throw new Error('Missing Postgres configuration');
+    throw new Error('Missing Postgres configuration. Please set the ENV variables POSTGRES_USER and POSTGRES_PASSWORD');
   }
 
   return { host: host, db: db, username: username, password: password };
@@ -164,16 +164,12 @@ export function dbInitialize() {
  * Connects to the database
  */
 export async function dbConnect() {
-  try {
     if (dbmsInstance === undefined) dbInitialize();
     if (dbmsInstance) {
       await dbmsInstance.authenticate();
       deviceConfig.sync({ alter: true });
     } else throw new Error('dbmsInstance is undefined');
     console.log('Connection has been established successfully.');
-  } catch (error) {
-    console.error('Unable to connect to the database:', error);
-  }
 }
 
 /**
@@ -200,7 +196,7 @@ function deviceConfigToDeviceModel(device: DeviceConfig): DeviceModel {
 function deviceModelToDeviceConfigAttrs(
   device: DeviceModel,
 ): DeviceConfigAttributes {
-   return {
+  return {
     protocol: device.config.protocol,
     trigger: device.config.trigger,
     distanceMethod: device.config.distanceMethod,
@@ -211,13 +207,15 @@ function deviceModelToDeviceConfigAttrs(
 
 export async function dbGetAllDeviceIDs(): Promise<string[]> {
   // Check if the database is initialized
-  if (dbmsInstance === undefined) dbConnect();
+  if (dbmsInstance === undefined) await dbConnect();
 
   // Get all device IDs
-  const result = await deviceConfig.findAll({
-    attributes: ['deviceID'],
-  });
-  return result.map((value) => value.deviceID);
+  if (deviceConfig) {
+    const result = await deviceConfig.findAll({
+      attributes: ['deviceID'],
+    });
+    return result.map((value) => value.deviceID);
+  } else return [];
 }
 
 export async function dbGetDevice(
