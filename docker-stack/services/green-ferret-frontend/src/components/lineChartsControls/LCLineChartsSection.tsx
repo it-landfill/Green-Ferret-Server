@@ -61,7 +61,8 @@ function LineChartsSection(props: LineChartsSectionProps) {
     InfluxAccess.Measurement[]
   >([]);
   // State checkboxes for the line chart (true if the checkbox is checked).
-  const [lineChartState, setLineChartState] = React.useState<LineChartModel>(defaultLCModel);
+  const [lineChartState, setLineChartState] =
+    React.useState<LineChartModel>(defaultLCModel);
   // State checkboxes for the bar chart
   const [barChartState, setBarChartState] = React.useState(true);
 
@@ -95,7 +96,7 @@ function LineChartsSection(props: LineChartsSectionProps) {
     // For each data point, add it to the flattened array.
     dataPoints.forEach((dataPoint) => {
       // Calculate the mean of the data points.
-      let meanMeasurement: {[key: string]: any} = {
+      let meanMeasurement: { [key: string]: any } = {
         latitude: 0,
         longitude: 0,
         time: dataPoint[0].time,
@@ -107,7 +108,7 @@ function LineChartsSection(props: LineChartsSectionProps) {
         aqi: 0,
       };
 
-      let countMeasurement: {[key: string]: any} = {
+      let countMeasurement: { [key: string]: any } = {
         temperature: 0,
         pressure: 0,
         humidity: 0,
@@ -117,12 +118,14 @@ function LineChartsSection(props: LineChartsSectionProps) {
       };
 
       dataPoint.forEach((measurement) => {
-
-
         Object.keys(measurement).forEach((key) => {
           // If the key is in the line chart state, set exist to true.
-          // This will show and hide measurements that have no value 
-          if ((measurement as {[key: string]: any})[key] !== undefined && key in lineChartState && !lineChartState[key].exists) {
+          // This will show and hide measurements that have no value
+          if (
+            (measurement as { [key: string]: any })[key] !== undefined &&
+            key in lineChartState &&
+            !lineChartState[key].exists
+          ) {
             setLineChartState({
               ...lineChartState,
               [key]: { ...lineChartState[key], exists: true },
@@ -130,12 +133,17 @@ function LineChartsSection(props: LineChartsSectionProps) {
           }
 
           // If the key is in the line chart state and the checkbox is checked, add the value to the mean.
-          if ((measurement as {[key: string]: any})[key] !== undefined && key in countMeasurement && key in meanMeasurement) {
-            countMeasurement[key] ++;
-            meanMeasurement[key] += (measurement as {[key: string]: any})[key];
+          if (
+            (measurement as { [key: string]: any })[key] !== undefined &&
+            key in countMeasurement &&
+            key in meanMeasurement
+          ) {
+            countMeasurement[key]++;
+            meanMeasurement[key] += (measurement as { [key: string]: any })[
+              key
+            ];
           }
         });
-
       });
 
       Object.keys(countMeasurement).forEach((key) => {
