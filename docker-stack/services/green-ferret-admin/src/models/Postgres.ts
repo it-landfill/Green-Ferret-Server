@@ -235,6 +235,7 @@ export async function dbGetAllDeviceIDs(): Promise<string[]> {
   if (deviceConfig) {
     const result = await deviceConfig.findAll({
       attributes: ['deviceID'],
+	  where: { delete: false },
     });
     return result.map((value) => value.deviceID);
   } else return [];
