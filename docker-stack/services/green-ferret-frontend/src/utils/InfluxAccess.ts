@@ -83,14 +83,23 @@ export module InfluxAccess {
 		import "influxdata/influxdb/schema"
 
 		from(bucket: "Green-Ferret")
-			|> range(start: ${Math.trunc(start.getTime() / 1000)}, stop: ${Math.trunc(
-      end.getTime() / 1000
-    )})
+			|> range(start: ${Math.trunc(start.getTime() / 1000)}, stop: ${Math.trunc(end.getTime() / 1000)})
 			|> filter(fn: (r) => r["_measurement"] == "openMeteoData")
 			|> drop(columns: ["_start", "_stop"])  
 			|> filter(fn: (r) => r["_field"] == "humidity" or r["_field"] == "pressure" or r["_field"] == "temperature" or r["_field"] == "latitude" or r["_field"] == "longitude")   
 			|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
 		`;
+
+    let fluxQueryGraph = `
+    from(bucket: "Green-Ferret")
+      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+      |> filter(fn: (r) => r["_measurement"] == "prophet_forecast")
+      |> drop(columns: ["_start", "_stop", "sensorId"])  
+      |> filter(fn: (r) => r["_field"] == "humidity_hat" or r["_field"] == "humidity_hat_lower" or r["_field"] == "humidity_hat_upper")
+      |> group(columns: ["_time", "_field"], mode:"by")
+      |> mean(column: "_value") 
+      |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+    `;
 
     let result: Measurement[] = [];
 
