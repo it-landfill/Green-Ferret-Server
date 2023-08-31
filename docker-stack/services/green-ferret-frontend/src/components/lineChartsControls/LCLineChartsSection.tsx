@@ -6,9 +6,8 @@ import { ForcastingTypeModel } from "../../utils/ForcastingTypeModel";
 
 import LineControls from "./LCLineChartsComponents/LCLineControls";
 import LineMonoGraph from "./LCLineChartsComponents/LCLineMonoGraph";
-
-import ForecastinTypeControls from "./LCLineChartsComponents/LCLineForecastinTypeControls";
-import ForecastingControls from "./LCLineChartsComponents/LCLineForecastinControls";
+import ForecastinTypeControls from "./LCLineChartsComponents/LCLineForecastingTypeControls";
+import ForecastingControls from "./LCLineChartsComponents/LCLineForecastingTargetControls";
 
 interface LineChartsSectionProps {
   dataPoints: InfluxAccess.Measurement[][];
@@ -64,14 +63,18 @@ const defaultForcatingModel: ForcastingTypeModel = {
 };
 
 function LineChartsSection(props: LineChartsSectionProps) {
-  
   // State of the data points for the line chart.
-  const [dataPointsLineChart, setDataPointsLineChart] = React.useState<InfluxAccess.Measurement[]>([]);
-  
-  // State checkboxes for the line chart (true if the checkbox is checked).
-  const [lineChartState, setLineChartState] = React.useState<LineChartModel>(defaultLCModel);
+  const [dataPointsLineChart, setDataPointsLineChart] = React.useState<
+    InfluxAccess.Measurement[]
+  >([]);
 
-  const [forcastingInfomations, setForcastingInfomation] = React.useState<any>(defaultForcatingModel);
+  // State checkboxes for the line chart (true if the checkbox is checked).
+  const [lineChartState, setLineChartState] =
+    React.useState<LineChartModel>(defaultLCModel);
+
+  const [forcastingInfomations, setForcastingInfomations] = React.useState<any>(
+    defaultForcatingModel
+  );
 
   /**
    * Change the data points structure to be able to use it in the line chart (each data point is a dictionary
@@ -169,12 +172,13 @@ function LineChartsSection(props: LineChartsSectionProps) {
           <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
           <ForecastinTypeControls
             forcastingInfomations={forcastingInfomations}
-            setForcastingInfomation={setForcastingInfomation}
+            setForcastingInfomations={setForcastingInfomations}
           />
           <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
           <ForecastingControls
             lineChartState={lineChartState}
-            setLineChartState={setLineChartState}
+            forcastingInfomations={forcastingInfomations}
+            setForcastingInfomations={setForcastingInfomations}
           />
         </div>
       </div>

@@ -6,8 +6,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Line,
-  Customized,
+  Line
 } from "recharts";
 
 import { InfluxAccess } from "../../../utils/InfluxAccess";

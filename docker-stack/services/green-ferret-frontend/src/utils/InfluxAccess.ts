@@ -61,12 +61,9 @@ export module InfluxAccess {
    */
   export async function getData(
     start: Date,
-    end: Date,
+    end: Date
   ): Promise<Measurement[]> {
-    const client = getClient(
-      "http://pi3aleben:8086",
-      "5EwQ_ipsZPpc-rr9rvVYFTEAj4d1RKOGfTVUkAnUnd1c5F-IMCVs2IovHMwkBA_-0mz-JJpa5gmF38EhCjcpDA=="
-    );
+    const client = getClient("http://pi3aleben:8086");
 
     let queryClient = client.getQueryApi("IT-Landfill");
     // let fluxQuery = `

@@ -1,10 +1,10 @@
-interface typeForcastingModel {
+export interface typeForcastingModel {
   none: boolean;
   ARIMA: boolean;
   PROPHET: boolean;
 }
 
-interface targetForcastingModel {
+export interface targetForcastingModel {
   temperature: boolean;
   humidity: boolean;
   pressure: boolean;
@@ -14,6 +14,6 @@ interface targetForcastingModel {
 }
 
 export interface ForcastingTypeModel {
-  type: typeForcastingModel;
+  type: typeForcastingModel,
   target: targetForcastingModel;
 }
