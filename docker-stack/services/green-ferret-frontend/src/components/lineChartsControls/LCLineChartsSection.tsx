@@ -8,6 +8,7 @@ import LineControls from "./LCLineChartsComponents/LCLineControls";
 import LineMonoGraph from "./LCLineChartsComponents/LCLineMonoGraph";
 import ForecastinTypeControls from "./LCLineChartsComponents/LCLineForecastingTypeControls";
 import ForecastingControls from "./LCLineChartsComponents/LCLineForecastingTargetControls";
+import { get } from "http";
 
 interface LineChartsSectionProps {
   dataPoints: InfluxAccess.Measurement[][];
@@ -155,6 +156,40 @@ function LineChartsSection(props: LineChartsSectionProps) {
     meanDataPoints(props.dataPoints);
   }, [lineChartState]);
 
+  // Array with data points (each element is a dictionary with the data of a specific source).
+  const [dataForcastingPoints, setDataForcastingPoints] = React.useState<
+    InfluxAccess.ForecastingMeasurement[]
+  >([]);
+
+  /**
+   *  Function to get the data from the server and aggregate it in the dataPoints array.
+   */
+  async function getDataServer() {
+    // Get data from the server.
+    let data: InfluxAccess.ForecastingMeasurement[] = [];
+    try {
+      data = await InfluxAccess.getForcastingData(props.dataPoints, forcastingInfomations);
+    } catch (error: unknown) {
+      console.log(error);
+      return;
+    }
+
+    console.log("data");
+    console.log(data);
+    // Update the data points forecasting state.
+    setDataForcastingPoints(data);
+  }
+
+  function changeForcastingInformations(newForcastingInformations: any) {
+    setForcastingInfomations(newForcastingInformations);
+    getDataServer();
+    console.log("data to graph");
+    console.log(dataForcastingPoints);
+    console.log("data to graph");
+    console.log(dataPointsLineChart);
+
+  }
+
   return (
     <div className="flex flex-col p-4 gap-4 text-green-600">
       <div className="flex flex-row h-full items-center justify-center gap-2">
@@ -162,6 +197,7 @@ function LineChartsSection(props: LineChartsSectionProps) {
           <LineMonoGraph
             dataPointsLineChart={dataPointsLineChart}
             lineChartState={lineChartState}
+            dataForcastingPoints={dataForcastingPoints}
           />
         </div>
         <div className="w-1/5 h-full gap-2">
@@ -172,13 +208,13 @@ function LineChartsSection(props: LineChartsSectionProps) {
           <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
           <ForecastinTypeControls
             forcastingInfomations={forcastingInfomations}
-            setForcastingInfomations={setForcastingInfomations}
+            setForcastingInfomations={changeForcastingInformations}
           />
           <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
           <ForecastingControls
             lineChartState={lineChartState}
             forcastingInfomations={forcastingInfomations}
-            setForcastingInfomations={setForcastingInfomations}
+            setForcastingInfomations={changeForcastingInformations}
           />
         </div>
       </div>

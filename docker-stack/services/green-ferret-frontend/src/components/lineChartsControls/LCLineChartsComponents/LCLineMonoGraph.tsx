@@ -6,7 +6,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Line
+  Line,
 } from "recharts";
 
 import { InfluxAccess } from "../../../utils/InfluxAccess";
@@ -15,6 +15,7 @@ import { LineChartModel } from "../../../utils/LineChartModel";
 interface LineMonoGraphProps {
   dataPointsLineChart: InfluxAccess.Measurement[];
   lineChartState: LineChartModel;
+  dataForcastingPoints: InfluxAccess.ForecastingMeasurement[];
 }
 
 function LineMonoGraph(props: LineMonoGraphProps) {
@@ -44,6 +45,7 @@ function LineMonoGraph(props: LineMonoGraphProps) {
           tickFormatter={dateFormat}
           tick={{ fontSize: 12 }}
           dy={10}
+          allowDuplicatedCategory={false}
         />
 
         {Object.keys(props.lineChartState)
@@ -59,14 +61,14 @@ function LineMonoGraph(props: LineMonoGraphProps) {
                 tick={{ fontSize: 12 }}
               />
             ) : (
-                <YAxis
-                  key={key + "YAxisH"}
-                  dataKey={key}
-                  yAxisId={key}
-                  stroke="#D1D5DB"
-                  orientation="left"
-                  tick={{ fontSize: 12 }}
-                />
+              <YAxis
+                key={key + "YAxisH"}
+                dataKey={key}
+                yAxisId={key}
+                stroke="#D1D5DB"
+                orientation="left"
+                tick={{ fontSize: 12 }}
+              />
             )
           )}
 
@@ -95,6 +97,67 @@ function LineMonoGraph(props: LineMonoGraphProps) {
               />
             )
           )}
+
+        <Line
+          key="hatLine"
+          dataKey="hatValue"
+          yAxisId="hatValue"
+          strokeDasharray="5 5"
+          type="monotone"
+          data={props.dataForcastingPoints}
+          stroke="#D1D5DB"
+          dot={false}
+          activeDot={{ r: 6 }}
+        />
+        <Line
+          key="lowerLine"
+          dataKey="lowerValue"
+          yAxisId="lowerValue"
+          strokeDasharray="5 5"
+          type="monotone"
+          data={props.dataForcastingPoints}
+          stroke="#D1D5DB"
+          dot={false}
+          activeDot={{ r: 6 }}
+        />
+        <Line
+          key="upperValue"
+          dataKey="upperValue"
+          yAxisId="upperValue"
+          strokeDasharray="5 5"
+          type="monotone"
+          data={props.dataForcastingPoints}
+          stroke="#D1D5DB"
+          dot={false}
+          activeDot={{ r: 6 }}
+        />
+        <YAxis
+          key="hatYAxis"
+          dataKey="hatValue"
+          yAxisId="hatValue"
+          stroke="#D1D5DB"
+          orientation="left"
+          tick={{ fontSize: 12 }}
+          hide={true}
+        />
+        <YAxis
+          key="upperYAxis"
+          dataKey="upperValue"
+          yAxisId="upperValue"
+          stroke="#D1D5DB"
+          orientation="left"
+          tick={{ fontSize: 12 }}
+          hide={true}
+        />
+        <YAxis
+          key="lowerYAxis"
+          dataKey="lowerValue"
+          yAxisId="lowerValue"
+          stroke="#D1D5DB"
+          orientation="left"
+          tick={{ fontSize: 12 }}
+          hide={true}
+        />
 
         <Tooltip />
         <Legend />
