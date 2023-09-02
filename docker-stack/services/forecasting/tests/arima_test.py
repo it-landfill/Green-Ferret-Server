@@ -40,7 +40,7 @@ def query_influxdb(query_api, topic):
     return df
 
 # Split the dataset into train and test sets.
-def split_dataset(data, split_point = 0.80):
+def split_dataset(data, split_point = 0.99):
     # Calculate the split point.
     splitPoint = int(len(data.values) * split_point)
     # Split the dataset into train and test sets.
@@ -94,11 +94,11 @@ def auto_arima_model(train, test, data):
     history = [x for x in train['y']]
     # Fit the model and make a prediction.
     model = pmdarima.auto_arima(history, 
-                            start_p=1, start_q=1,   # initial p and q
-                            max_p=15, max_q=15,     # maximum p and q
-                            start_P=0,              # initial P
-                            D=0,                    # initial D
+                            test='adf',
+                            seasonal=True,
                             trace=True,             # print results when fitting the model
+                            m=12,
+                            error_action='ignore',  
                             suppress_warnings=True, # do not print warnings
                             stepwise=True)
     # Generate a dataframe with the predictions and confidence interval.
