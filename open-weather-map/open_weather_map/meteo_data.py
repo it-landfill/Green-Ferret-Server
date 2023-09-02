@@ -3,7 +3,7 @@ import json
 import pandas as pd
 
 # define file name
-file_name = "utils/gps_coordinates.txt"
+file_name = "../utils/gps_coordinates.txt"
 
 # Generate a list of GPS coordinates from a file
 def generate_list_gps_from_file(file_name):
@@ -18,7 +18,7 @@ def generate_list_gps_from_file(file_name):
 
 # define start date and end date
 start_date = "2023-06-01"
-end_date = "2023-06-07"
+end_date = "2023-06-30"
 
 # define fields to get
 fields_historical_data = "temperature_2m,relativehumidity_2m,surface_pressure"
@@ -86,4 +86,4 @@ if __name__ == "__main__":
     get_historical_data(list_gps)
     get_air_quality_data(list_gps)
     # Save pandas dataframe to csv file
-    pandas_dataframe.to_csv('utils/historical_data.csv', index=False)
+    pandas_dataframe.to_csv('../utils/historical_data.csv', index=False)
