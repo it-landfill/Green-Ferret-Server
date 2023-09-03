@@ -28,6 +28,8 @@ function App() {
   const [dataPoints, setDataPoints] = React.useState<
     InfluxAccess.Measurement[][]
   >([]);
+  
+  const [isOpenMeteoData, setIsOpenMeteoData] = React.useState(true);
 
   // Enum for the selected heatmap type.
   enum HeatmapType {
@@ -56,7 +58,8 @@ function App() {
   /**
    *  Function to get the data from the server and aggregate it in the dataPoints array.
    */
-  async function getDataServer() {
+  async function getDataServer(isOpenMeteo: boolean) {
+	setIsOpenMeteoData(isOpenMeteo);
     // Get data from time slot form data.
     const dateStart = (document.getElementById("dateStart") as HTMLInputElement)
       .value;
@@ -89,7 +92,7 @@ function App() {
     // Get data from the server.
     let data: InfluxAccess.Measurement[] = [];
     try {
-      data = await InfluxAccess.getData(parsedStartDate, parsedEndDate);
+      data = await InfluxAccess.getData(parsedStartDate, parsedEndDate, isOpenMeteo);
     } catch (error: unknown) {
       let title = "Errore";
       let message = "Si è verificato un errore generico, riprovare più tardi!";
@@ -138,6 +141,8 @@ function App() {
       if (dataAggregated[index] == null) dataAggregated[index] = [];
       dataAggregated[index].push(data[i]);
     }
+    // Sanitize the data (remove the null/empty array cell)
+    dataAggregated = dataAggregated.filter((d) => d != null);
     // Update the data points array.
     setDataPoints(dataAggregated);
   }
@@ -149,9 +154,11 @@ function App() {
       dataPointsIndexCycle = dataPointsIndex;
       // Cycle through the data points index every second.
       indexCycleFunction = setInterval(() => {
-        if (dataPointsIndexCycle <= dataPoints.length - 1)
+        if (dataPointsIndexCycle < dataPoints.length - 1)
           dataPointsIndexCycle += 1;
         else dataPointsIndexCycle = 0;
+        console.log("dataPointsIndexCycle:", dataPointsIndexCycle);
+        console.log("dataPoints:", dataPoints[dataPointsIndexCycle]);
         // Print the data points with the new index.
         setDataPointsIndex(dataPointsIndexCycle);
       }, 500);
@@ -209,22 +216,23 @@ function App() {
               zoom={13}
               scrollWheelZoom={true}
             >
-              {dataPoints != null && dataPoints.length > 0 ? (
+              {dataPoints != null &&
+              dataPoints != undefined &&
+              dataPoints.length > 0 &&
+              dataPoints[dataPointsIndex] != undefined ? (
                 <HeatmapLayer
-                  points={[
-                    ...dataPoints[dataPointsIndex]
-                      .filter((d: InfluxAccess.Measurement) => {
-                        return d[heatmapType] != null;
-                      })
-                      .map(
-                        (
-                          d: InfluxAccess.Measurement
-                        ): [number, number, number] => {
-                          // Based on the heatmap selected, the intensity will be different
-                          return [d.latitude, d.longitude, d[heatmapType]];
-                        }
-                      ),
-                  ]}
+                  points={dataPoints[dataPointsIndex]
+                    .filter(
+                      (d: InfluxAccess.Measurement) => d[heatmapType] != null
+                    )
+                    .map(
+                      (
+                        d: InfluxAccess.Measurement
+                      ): [number, number, number] => {
+                        // Based on the heatmap selected, the intensity will be different
+                        return [d.latitude, d.longitude, d[heatmapType]];
+                      }
+                    )}
                   longitudeExtractor={(m) => m[1]}
                   latitudeExtractor={(m) => m[0]}
                   intensityExtractor={(m) => m[2]}
@@ -253,6 +261,7 @@ function App() {
                   <AnimationControls
                     dataPointsIndex={dataPointsIndex}
                     dataPointsIndexCycleState={dataPointsIndexCycleState}
+                    maxNumFrames={dataPoints.length}
                     setDataPointsIndexCycleState={setDataPointsIndexCycleState}
                     setDataPointsIndex={setDataPointsIndex}
                   />
@@ -264,7 +273,7 @@ function App() {
       </div>
       {/* Second section */}
       {dataPoints.length !== 0 ? (
-        <LineChartsSection dataPoints={dataPoints} />
+        <LineChartsSection dataPoints={dataPoints} enableForcasting={isOpenMeteoData} />
       ) : null}
     </div>
   );

@@ -1,10 +1,14 @@
+import React from "react";
+
 interface TemporalSelectorProps {
   getDataServer: any;
 }
 
 function TemporalSelector(props: TemporalSelectorProps) {
+  const [isOpenMeteoData, setIsOpenMeteoData] = React.useState(true);
+
   return (
-    <div className="flex flex-col gap-2 m-4">
+    <div className="flex flex-col gap-6 m-4">
       <h2 className="text-2xl font-bold text-left text-green-600">
         Selezione temporale
       </h2>
@@ -34,9 +38,34 @@ function TemporalSelector(props: TemporalSelectorProps) {
           placeholder="Durata in minuti"
         />
       </div>
+      <div className="flex flex-col gap-2">
+        <h4 className="text-lg font-bold text-left text-green-600">
+          Fonte dati
+        </h4>
+        <label className="flex mx-auto items-center gap-4 cursor-pointer text-xl font-bold">
+		   <span className={`text-lg font-medium ${isOpenMeteoData ? "text-gray-400" : "text-gray-700"} `}>
+              Green Ferrett
+            </span>
+          <span className="relative">
+            <input
+              id="Toggle1"
+              type="checkbox"
+			  checked={isOpenMeteoData}
+              className="hidden peer"
+              onClick={() => setIsOpenMeteoData(!isOpenMeteoData)}
+            ></input>
+            <div className="w-12 h-6 rounded-full shadow-inner bg-green-600"></div>
+            <div className="absolute inset-y-0 left-0 w-4 h-4 m-1 rounded-full shadow peer-checked:right-0 peer-checked:left-auto bg-white" />
+          </span>
+		  <span className={`text-lg font-medium ${isOpenMeteoData ? "text-gray-700" : "text-gray-400"} `}>
+		  OpenMeteo Data
+            </span>
+        </label>
+      </div>
+
       <button
         className="w-full h-10 font-bold rounded-lg text-white bg-green-600 bg-opacity-90  hover:bg-opacity-100 focus:outline-none"
-        onClick={() => props.getDataServer()}
+        onClick={() => props.getDataServer(isOpenMeteoData)}
       >
         Applica
       </button>
