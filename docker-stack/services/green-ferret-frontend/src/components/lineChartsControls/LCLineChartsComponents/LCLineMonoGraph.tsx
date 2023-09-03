@@ -21,6 +21,7 @@ interface LineMonoGraphProps {
   lineChartState: LineChartModel;
   forcastingInfomations: ForcastingTypeModel;
   dataForcastingPoints: InfluxAccess.ForecastingMeasurement[];
+  enableForcasting: boolean;
 }
 
 function LineMonoGraph(props: LineMonoGraphProps) {
@@ -134,42 +135,46 @@ function LineMonoGraph(props: LineMonoGraphProps) {
             )
           )}
 
-        <Line
-          key="hatLine"
-          name={colorChangeKeyBased()[0] + " forcasting"}
-          dataKey="hatValue"
-          yAxisId="hatValue"
-          strokeDasharray="5 5"
-          type="monotone"
-          data={props.dataForcastingPoints}
-          stroke={colorChangeKeyBased()[1]}
-          dot={false}
-          activeDot={{ r: 6 }}
-        />
-        <Line
-          key="lowerLine"
-          name={colorChangeKeyBased()[0] + " lower bound"}
-          dataKey="lowerValue"
-          yAxisId="lowerValue"
-          strokeDasharray="5 5"
-          type="monotone"
-          data={props.dataForcastingPoints}
-          stroke={colorChangeKeyBased(true)[1]}
-          dot={false}
-          activeDot={{ r: 6 }}
-        />
-        <Line
-          key="upperValue"
-          name={colorChangeKeyBased()[0] + " upper bound"}
-          dataKey="upperValue"
-          yAxisId="upperValue"
-          strokeDasharray="5 5"
-          type="monotone"
-          data={props.dataForcastingPoints}
-          stroke={colorChangeKeyBased(true)[1]}
-          dot={false}
-          activeDot={{ r: 6 }}
-        />
+        {props.enableForcasting ? (
+          <>
+            <Line
+              key="hatLine"
+              name={colorChangeKeyBased()[0] + " forcasting"}
+              dataKey="hatValue"
+              yAxisId="hatValue"
+              strokeDasharray="5 5"
+              type="monotone"
+              data={props.dataForcastingPoints}
+              stroke={colorChangeKeyBased()[1]}
+              dot={false}
+              activeDot={{ r: 6 }}
+            />
+            <Line
+              key="lowerLine"
+              name={colorChangeKeyBased()[0] + " lower bound"}
+              dataKey="lowerValue"
+              yAxisId="lowerValue"
+              strokeDasharray="5 5"
+              type="monotone"
+              data={props.dataForcastingPoints}
+              stroke={colorChangeKeyBased(true)[1]}
+              dot={false}
+              activeDot={{ r: 6 }}
+            />
+            <Line
+              key="upperValue"
+              name={colorChangeKeyBased()[0] + " upper bound"}
+              dataKey="upperValue"
+              yAxisId="upperValue"
+              strokeDasharray="5 5"
+              type="monotone"
+              data={props.dataForcastingPoints}
+              stroke={colorChangeKeyBased(true)[1]}
+              dot={false}
+              activeDot={{ r: 6 }}
+            />
+          </>
+        ) : null}
         <YAxis
           key="hatYAxis"
           dataKey="hatValue"

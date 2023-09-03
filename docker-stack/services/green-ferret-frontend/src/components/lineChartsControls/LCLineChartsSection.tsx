@@ -11,6 +11,7 @@ import ForecastingControls from "./LCLineChartsComponents/LCLineForecastingTarge
 
 interface LineChartsSectionProps {
   dataPoints: InfluxAccess.Measurement[][];
+  enableForcasting: boolean;
 }
 
 const defaultLCModel: LineChartModel = {
@@ -194,6 +195,7 @@ function LineChartsSection(props: LineChartsSectionProps) {
             lineChartState={lineChartState}
             forcastingInfomations={forcastingInfomations}
             dataForcastingPoints={dataForcastingPoints}
+			enableForcasting={props.enableForcasting}
           />
         </div>
         <div className="w-1/5 h-full gap-2">
@@ -201,17 +203,21 @@ function LineChartsSection(props: LineChartsSectionProps) {
             lineChartState={lineChartState}
             setLineChartState={setLineChartState}
           />
-          <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
-          <ForecastinTypeControls
-            forcastingInfomations={forcastingInfomations}
-            setForcastingInfomations={changeForcastingInformations}
-          />
-          <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
-          <ForecastingControls
-            lineChartState={lineChartState}
-            forcastingInfomations={forcastingInfomations}
-            setForcastingInfomations={changeForcastingInformations}
-          />
+          {props.enableForcasting ? (
+            <div>
+              <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
+              <ForecastinTypeControls
+                forcastingInfomations={forcastingInfomations}
+                setForcastingInfomations={changeForcastingInformations}
+              />
+              <div className="w-2/3 border-t-[1px]  border-green-600 mx-auto"></div>
+              <ForecastingControls
+                lineChartState={lineChartState}
+                forcastingInfomations={forcastingInfomations}
+                setForcastingInfomations={changeForcastingInformations}
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
