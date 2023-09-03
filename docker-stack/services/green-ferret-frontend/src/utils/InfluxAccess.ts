@@ -75,7 +75,8 @@ export module InfluxAccess {
    */
   export async function getData(
     start: Date,
-    end: Date
+    end: Date,
+	isOpenMeteoData: boolean
   ): Promise<Measurement[]> {
     const client = getClient(
       "http://pi3aleben:8086");
@@ -89,9 +90,9 @@ export module InfluxAccess {
 			|> range(start: ${Math.trunc(start.getTime() / 1000)}, stop: ${Math.trunc(
       end.getTime() / 1000
     )})
-			|> filter(fn: (r) => r["_measurement"] == "openMeteoData")
+			|> filter(fn: (r) => r["_measurement"] == "${isOpenMeteoData ? "openMeteoData" : "mobile-sensors"}")
 			|> drop(columns: ["_start", "_stop"])  
-			|> filter(fn: (r) => r["_field"] == "humidity" or r["_field"] == "pressure" or r["_field"] == "temperature" or r["_field"] == "latitude" or r["_field"] == "longitude")   
+			|> filter(fn: (r) => r["_field"] == "humidity" or r["_field"] == "pressure" or r["_field"] == "temperature" or  r["_field"] == "air_quality_index" or r["_field"] == "equivalent_co2" or r["_field"] == "total_volatile_organic_compounds" or r["_field"] == "latitude" or r["_field"] == "longitude")   
 			|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
 		`;
 

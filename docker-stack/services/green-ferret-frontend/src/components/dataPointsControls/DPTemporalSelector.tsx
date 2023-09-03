@@ -5,7 +5,7 @@ interface TemporalSelectorProps {
 }
 
 function TemporalSelector(props: TemporalSelectorProps) {
-  const [isOpenMeteoData, setIsOpenMeteoData] = React.useState(false);
+  const [isOpenMeteoData, setIsOpenMeteoData] = React.useState(true);
 
   return (
     <div className="flex flex-col gap-6 m-4">
@@ -43,40 +43,29 @@ function TemporalSelector(props: TemporalSelectorProps) {
           Fonte dati
         </h4>
         <label className="flex mx-auto items-center gap-4 cursor-pointer text-xl font-bold">
-          {isOpenMeteoData ? (
-            <span className="text-lg font-medium text-gray-400">
+		   <span className={`text-lg font-medium ${isOpenMeteoData ? "text-gray-400" : "text-gray-700"} `}>
               Green Ferrett
             </span>
-          ) : (
-            <span className="text-lg font-medium text-gray-700">
-              Green Ferrett
-            </span>
-          )}
           <span className="relative">
             <input
               id="Toggle1"
               type="checkbox"
+			  checked={isOpenMeteoData}
               className="hidden peer"
               onClick={() => setIsOpenMeteoData(!isOpenMeteoData)}
             ></input>
             <div className="w-12 h-6 rounded-full shadow-inner bg-green-600"></div>
             <div className="absolute inset-y-0 left-0 w-4 h-4 m-1 rounded-full shadow peer-checked:right-0 peer-checked:left-auto bg-white" />
           </span>
-          {!isOpenMeteoData ? (
-            <span className="text-lg font-medium text-gray-400">
-              OpenMeteo Data
+		  <span className={`text-lg font-medium ${isOpenMeteoData ? "text-gray-700" : "text-gray-400"} `}>
+		  OpenMeteo Data
             </span>
-          ) : (
-            <span className="text-lg font-medium text-gray-700">
-              OpenMeteo Data
-            </span>
-          )}
         </label>
       </div>
 
       <button
         className="w-full h-10 font-bold rounded-lg text-white bg-green-600 bg-opacity-90  hover:bg-opacity-100 focus:outline-none"
-        onClick={() => props.getDataServer()}
+        onClick={() => props.getDataServer(isOpenMeteoData)}
       >
         Applica
       </button>
