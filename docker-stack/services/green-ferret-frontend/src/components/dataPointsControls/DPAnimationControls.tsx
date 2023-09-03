@@ -1,9 +1,12 @@
 interface AnimationControlsProps {
   dataPointsIndex: number;
+  maxNumFrames: number;
   dataPointsIndexCycleState: boolean;
   setDataPointsIndexCycleState: any;
   setDataPointsIndex: any;
 }
+
+
 
 function AnimationControls(props: AnimationControlsProps) {
   return (
@@ -33,7 +36,7 @@ function AnimationControls(props: AnimationControlsProps) {
           type="range"
           className="w-full cursor-pointer rounded border-[1px] border-green-700 h-2 accent-green-600 appearance-none"
           min="1"
-          max="20"
+          max={props.maxNumFrames}
           value={props.dataPointsIndex + 1}
           onChange={(e) => {
             props.setDataPointsIndexCycleState(false);
@@ -45,11 +48,15 @@ function AnimationControls(props: AnimationControlsProps) {
           }}
         />
         <div aria-hidden="true" className="flex justify-between px-1">
-          <span>1</span>
-          <span>2</span>
-          <span>3</span>
-          <span>4</span>
-          <span>5</span>
+          {
+            // Generator for span elements for the slider
+            [...Array(props.maxNumFrames)].map((_, i) => (
+              <span
+                key={i}
+                className={`w-1 h-1 text-xs`}
+              > {i + 1} </span>
+            ))
+          }
         </div>
       </fieldset>
     </div>
