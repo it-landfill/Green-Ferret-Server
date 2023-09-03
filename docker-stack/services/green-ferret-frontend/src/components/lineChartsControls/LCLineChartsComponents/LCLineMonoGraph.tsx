@@ -11,10 +11,15 @@ import {
 
 import { InfluxAccess } from "../../../utils/InfluxAccess";
 import { LineChartModel } from "../../../utils/LineChartModel";
+import {
+  ForcastingTypeModel,
+  targetForcastingModel,
+} from "../../../utils/ForcastingTypeModel";
 
 interface LineMonoGraphProps {
   dataPointsLineChart: InfluxAccess.Measurement[];
   lineChartState: LineChartModel;
+  forcastingInfomations: ForcastingTypeModel;
   dataForcastingPoints: InfluxAccess.ForecastingMeasurement[];
 }
 
@@ -26,6 +31,37 @@ function LineMonoGraph(props: LineMonoGraphProps) {
       .toString()
       .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
+
+  function colorChangeKeyBased(isBound: boolean = false) {
+    let key = Object.keys(props.forcastingInfomations.target).find(
+      (key) =>
+        props.forcastingInfomations.target[
+          key as keyof targetForcastingModel
+        ] === true
+    );
+    switch (key) {
+      case "temperature":
+        if (isBound) return [key, "#8884A0"];
+        return [key, "#8884D8"];
+      case "humidity":
+        if (isBound) return [key, "#A0829D"];
+        return [key, "#CA829D"];
+      case "pressure":
+        if (isBound) return [key, "#82A09D"];
+        return [key, "#82CA9D"];
+      case "eco2":
+        if (isBound) return [key, "#9D82A0"];
+        return [key, "#9D82CA"];
+      case "tvoc":
+        if (isBound) return [key, "#A09D82"];
+        return [key, "#CA9D82"];
+      case "aqi":
+        if (isBound) return [key, "#6342A0"];
+        return [key, "#6342FC"];
+      default:
+        return [key, "#000000"];
+    }
+  }
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -100,34 +136,37 @@ function LineMonoGraph(props: LineMonoGraphProps) {
 
         <Line
           key="hatLine"
+          name={colorChangeKeyBased()[0] + " forcasting"}
           dataKey="hatValue"
           yAxisId="hatValue"
           strokeDasharray="5 5"
           type="monotone"
           data={props.dataForcastingPoints}
-          stroke="#D1D5DB"
+          stroke={colorChangeKeyBased()[1]}
           dot={false}
           activeDot={{ r: 6 }}
         />
         <Line
           key="lowerLine"
+          name={colorChangeKeyBased()[0] + " lower bound"}
           dataKey="lowerValue"
           yAxisId="lowerValue"
           strokeDasharray="5 5"
           type="monotone"
           data={props.dataForcastingPoints}
-          stroke="#D1D5DB"
+          stroke={colorChangeKeyBased(true)[1]}
           dot={false}
           activeDot={{ r: 6 }}
         />
         <Line
           key="upperValue"
+          name={colorChangeKeyBased()[0] + " upper bound"}
           dataKey="upperValue"
           yAxisId="upperValue"
           strokeDasharray="5 5"
           type="monotone"
           data={props.dataForcastingPoints}
-          stroke="#D1D5DB"
+          stroke={colorChangeKeyBased(true)[1]}
           dot={false}
           activeDot={{ r: 6 }}
         />
@@ -135,7 +174,7 @@ function LineMonoGraph(props: LineMonoGraphProps) {
           key="hatYAxis"
           dataKey="hatValue"
           yAxisId="hatValue"
-          stroke="#D1D5DB"
+          stroke={colorChangeKeyBased()[1]}
           orientation="left"
           tick={{ fontSize: 12 }}
           hide={true}
@@ -144,7 +183,7 @@ function LineMonoGraph(props: LineMonoGraphProps) {
           key="upperYAxis"
           dataKey="upperValue"
           yAxisId="upperValue"
-          stroke="#D1D5DB"
+          stroke={colorChangeKeyBased(true)[1]}
           orientation="left"
           tick={{ fontSize: 12 }}
           hide={true}
@@ -153,14 +192,13 @@ function LineMonoGraph(props: LineMonoGraphProps) {
           key="lowerYAxis"
           dataKey="lowerValue"
           yAxisId="lowerValue"
-          stroke="#D1D5DB"
+          stroke={colorChangeKeyBased(true)[1]}
           orientation="left"
           tick={{ fontSize: 12 }}
           hide={true}
         />
-
         <Tooltip />
-        <Legend />
+        <Legend wrapperStyle={{ bottom: -5, fontSize: 15 }} />
       </LineChart>
     </ResponsiveContainer>
   );

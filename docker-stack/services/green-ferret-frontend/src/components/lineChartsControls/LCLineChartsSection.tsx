@@ -8,7 +8,6 @@ import LineControls from "./LCLineChartsComponents/LCLineControls";
 import LineMonoGraph from "./LCLineChartsComponents/LCLineMonoGraph";
 import ForecastinTypeControls from "./LCLineChartsComponents/LCLineForecastingTypeControls";
 import ForecastingControls from "./LCLineChartsComponents/LCLineForecastingTargetControls";
-import { get } from "http";
 
 interface LineChartsSectionProps {
   dataPoints: InfluxAccess.Measurement[][];
@@ -54,6 +53,7 @@ const defaultForcatingModel: ForcastingTypeModel = {
     PROPHET: false,
   },
   target: {
+    none: true,
     temperature: false,
     humidity: false,
     pressure: false,
@@ -73,9 +73,8 @@ function LineChartsSection(props: LineChartsSectionProps) {
   const [lineChartState, setLineChartState] =
     React.useState<LineChartModel>(defaultLCModel);
 
-  const [forcastingInfomations, setForcastingInfomations] = React.useState<any>(
-    defaultForcatingModel
-  );
+  const [forcastingInfomations, setForcastingInfomations] =
+    React.useState<ForcastingTypeModel>(defaultForcatingModel);
 
   /**
    * Change the data points structure to be able to use it in the line chart (each data point is a dictionary
@@ -154,7 +153,7 @@ function LineChartsSection(props: LineChartsSectionProps) {
   // Use effect for the line chart state (if the state changes, the line chart will be updated)
   React.useEffect(() => {
     meanDataPoints(props.dataPoints);
-  }, [lineChartState]);
+  }, [lineChartState, props.dataPoints]);
 
   // Array with data points (each element is a dictionary with the data of a specific source).
   const [dataForcastingPoints, setDataForcastingPoints] = React.useState<
@@ -168,13 +167,14 @@ function LineChartsSection(props: LineChartsSectionProps) {
     // Get data from the server.
     let data: InfluxAccess.ForecastingMeasurement[] = [];
     try {
-      data = await InfluxAccess.getForcastingData(props.dataPoints, forcastingInfomations);
+      data = await InfluxAccess.getForcastingData(
+        props.dataPoints,
+        forcastingInfomations
+      );
     } catch (error: unknown) {
       console.log(error);
       return;
     }
-
-    console.log("data");
     console.log(data);
     // Update the data points forecasting state.
     setDataForcastingPoints(data);
@@ -183,11 +183,6 @@ function LineChartsSection(props: LineChartsSectionProps) {
   function changeForcastingInformations(newForcastingInformations: any) {
     setForcastingInfomations(newForcastingInformations);
     getDataServer();
-    console.log("data to graph");
-    console.log(dataForcastingPoints);
-    console.log("data to graph");
-    console.log(dataPointsLineChart);
-
   }
 
   return (
@@ -197,6 +192,7 @@ function LineChartsSection(props: LineChartsSectionProps) {
           <LineMonoGraph
             dataPointsLineChart={dataPointsLineChart}
             lineChartState={lineChartState}
+            forcastingInfomations={forcastingInfomations}
             dataForcastingPoints={dataForcastingPoints}
           />
         </div>

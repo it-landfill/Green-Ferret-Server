@@ -1,3 +1,4 @@
+import React from "react";
 import {
   ForcastingTypeModel,
   typeForcastingModel,
@@ -5,10 +6,12 @@ import {
 
 interface ForecastinTypeControlsProps {
   forcastingInfomations: ForcastingTypeModel;
-  setForcastingInfomations: any;
+  setForcastingInfomations: React.Dispatch<React.SetStateAction<ForcastingTypeModel>>;
 }
 
 function ForecastinTypeControls(props: ForecastinTypeControlsProps) {
+ const [forcastingType, setForcastingType] = React.useState<string>("none");
+
   /**
    * Change the forcasting type.
    *
@@ -34,11 +37,13 @@ function ForecastinTypeControls(props: ForecastinTypeControlsProps) {
         <input
           id="default-radio-type-none"
           type="radio"
-          value=""
+          value="1"
+          checked={forcastingType === "none"}
           name="default-radio-type-forcasting"
           className="w-4 h-4 accent-green-600"
           onChange={() => {
             changeForcastingType("none");
+            setForcastingType("none");
           }}
         />
         <label
@@ -52,11 +57,13 @@ function ForecastinTypeControls(props: ForecastinTypeControlsProps) {
         <input
           id="default-radio-type-arima"
           type="radio"
-          value=""
+          value="2"
+          checked={forcastingType === "ARIMA"}
           name="default-radio-type-forcasting"
           className="w-4 h-4 accent-green-600"
           onChange={() => {
             changeForcastingType("ARIMA");
+            setForcastingType("ARIMA");
           }}
         />
         <label
@@ -70,11 +77,13 @@ function ForecastinTypeControls(props: ForecastinTypeControlsProps) {
         <input
           id="default-radio-type-prophet"
           type="radio"
-          value=""
+          value="3"
+          checked={forcastingType === "PROPHET"}
           name="default-radio-type-forcasting"
           className="w-4 h-4 accent-green-600"
           onChange={() => {
             changeForcastingType("PROPHET");
+            setForcastingType("PROPHET");
           }}
         />
         <label

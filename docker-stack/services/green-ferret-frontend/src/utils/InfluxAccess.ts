@@ -3,6 +3,7 @@ import { FluxTableMetaData, InfluxDB } from "@influxdata/influxdb-client";
 import {
   ForcastingTypeModel,
   targetForcastingModel,
+  typeForcastingModel,
 } from "../utils/ForcastingTypeModel";
 
 /**
@@ -76,8 +77,7 @@ export module InfluxAccess {
     end: Date
   ): Promise<Measurement[]> {
     const client = getClient(
-      "http://pi3aleben:8086"
-    );
+      "http://pi3aleben:8086");
 
     let queryClient = client.getQueryApi("IT-Landfill");
 
@@ -141,23 +141,32 @@ export module InfluxAccess {
 
     // Set timeRangeStart and timeRangeStop to get last time from dataPoints and add 24 hour
     let timeRangeStart = dataPoints[dataPoints.length - 1][0].time;
+    console.log("Data start: ",dataPoints[dataPoints.length - 1][0]);
     let timeRangeStop = new Date(
       timeRangeStart.getTime() + 24 * 60 * 60 * 1000
     );
 
-    let target: keyof targetForcastingModel = "temperature";
+    let type: String = "none";
+    // Get only the type with the true value
+    // Get the value associated to the key
+    for (const key in forcastingInfomations.type)
+      if (forcastingInfomations.type[key as keyof typeForcastingModel])
+        type = (key as keyof typeForcastingModel).toString().toLowerCase();
+    
+
+    let target: keyof targetForcastingModel = "none";
     // Get only the target with the true value
     // Get the value associated to the key
     for (const key in forcastingInfomations.target)
       if (forcastingInfomations.target[key as keyof targetForcastingModel])
         target = key as keyof targetForcastingModel;
-
+    
     let fluxQueryGraph = `
     from(bucket: "Green-Ferret")
       |> range(start:  ${Math.trunc(
         timeRangeStart.getTime() / 1000
       )}, stop: ${Math.trunc(timeRangeStop.getTime() / 1000)})
-      |> filter(fn: (r) => r["_measurement"] == "prophet_forecast")
+      |> filter(fn: (r) => r["_measurement"] == "${type}_forecast")
       |> drop(columns: ["_start", "_stop", "sensorId"])  
       |> filter(fn: (r) => r["_field"] == "${target}_hat" or r["_field"] == "${target}_hat_lower" or r["_field"] == "${target}_hat_upper")
       |> group(columns: ["_time", "_field"], mode:"by")

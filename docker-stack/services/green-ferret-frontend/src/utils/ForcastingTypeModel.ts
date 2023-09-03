@@ -5,6 +5,7 @@ export interface typeForcastingModel {
 }
 
 export interface targetForcastingModel {
+  none: boolean;
   temperature: boolean;
   humidity: boolean;
   pressure: boolean;
