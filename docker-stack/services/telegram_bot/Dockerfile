@@ -33,4 +33,4 @@ CMD ["node", "dist/main.js"]
 # docker buildx create --name mybuilder --use
 # docker buildx use mybuilder
 # Build multi platform image
-# docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_telegram_bot:latest --tag aleben/green-ferret_telegram_bot:1.0 .
+# docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_telegram_bot:latest --tag aleben/green-ferret_telegram_bot:1.0.1 .

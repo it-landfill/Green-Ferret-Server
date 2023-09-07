@@ -129,7 +129,7 @@ services:
             - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
             - INFLUXDB_TOKEN=$COAP_AGENT_INFLUXDB_TOKEN
     telegram-bot:
-      image: "aleben/green-ferret_telegram_bot:1.0"
+      image: "aleben/green-ferret_telegram_bot:1.0.1"
       depends_on:
           - mqttserver
       container_name: telegram-bot
@@ -168,7 +168,7 @@ services:
       ports:
         - 4321:8080
     gf-admin:
-      image: aleben/green-ferret_admin:1.1
+      image: aleben/green-ferret_admin:1.1.1
       restart: unless-stopped
       depends_on:
         - postgres-db
