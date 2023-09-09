@@ -1,4 +1,4 @@
-FROM node:20.2
+FROM node:20.5.1 AS builder
 
 # Create a working directory
 RUN mkdir /buildDir
@@ -12,7 +12,7 @@ RUN npm install
 RUN npm run build
 
 # Create the production image
-FROM node:20.2-alpine
+FROM node:20.5.1-alpine AS production
 
 # Create a working directory
 RUN mkdir /app
@@ -20,8 +20,8 @@ RUN mkdir /app/dist
 WORKDIR /app
 
 # Copy the built app
-COPY --from=0 /buildDir/package.json .
-COPY --from=0 /buildDir/dist ./dist
+COPY --from=builder /buildDir/package.json .
+COPY --from=builder /buildDir/dist ./dist
 
 # Install only production dependencies
 RUN npm install --omit=dev
@@ -29,7 +29,6 @@ RUN npm install --omit=dev
 # Start the app
 CMD ["node", "dist/main.js"]
 
-# Create builder to use new features (https://cloudolife.com/2022/03/05/Infrastructure-as-Code-IaC/Container/Docker/Docker-buildx-support-multiple-architectures-images/)
-# docker buildx create --name mybuilder --use
+# Enable containerd in experimental features (https://docs.docker.com/desktop/containerd/)
 # Build multi platform image
-# docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_mqtt-agent:latest --tag aleben/green-ferret_mqtt-agent:1.0 .
+# docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_mqtt-agent:latest --tag aleben/green-ferret_mqtt-agent:1.2.2 .

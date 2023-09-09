@@ -52,11 +52,30 @@ services:
             timeout: 10s
             retries: 3
             start_period: 30s
+    grafana:
+        image: "grafana/grafana-oss:9.5.2"
+        container_name: grafana
+        restart: unless-stopped
+        ports:
+            - "3000:3000"
+        depends_on:
+            - influxdb
+        networks:
+            - iot_net
+        volumes:
+            - grafana_data:/var/lib/grafana
+        healthcheck:
+            test: ["CMD", "wget", "--spider", "http://localhost:3000/api/health"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 30s
     mqtt-agent:
-        image: "aleben/green-ferret_mqtt-agent:1.0.2"
+        image: "aleben/green-ferret_mqtt-agent:1.2.2"
         depends_on:
             - mqttserver
             - influxdb
+            - postgres-db
         container_name: mqtt-agent
         restart: unless-stopped
         networks:
@@ -72,6 +91,105 @@ services:
             - INFLUXDB_ORG=$INFLUXDB_ORG
             - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
             - INFLUXDB_TOKEN=$MQTT_AGENT_INFLUXDB_TOKEN
+            - POSTGRES_HOST=$POSTGRES_HOST
+            - POSTGRES_DB=$POSTGRES_DB
+            - POSTGRES_USER=$POSTGRES_USER
+            - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+    http-agent:
+        image: "aleben/green-ferret_http-agent:1.1.1"
+        depends_on:
+            - influxdb
+        container_name: http-agent
+        restart: unless-stopped
+        networks:
+            - iot_net
+        ports:
+            - "$HTTP_AGENT_PORT:8080"
+        environment:
+            - INFLUXDB_HOST=$INFLUXDB_HOST
+            - INFLUXDB_PORT=$INFLUXDB_PORT
+            - INFLUXDB_ORG=$INFLUXDB_ORG
+            - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
+            - INFLUXDB_TOKEN=$HTTP_AGENT_INFLUXDB_TOKEN
+    coap-agent:
+        image: "aleben/green-ferret_coap-agent:1.1.1"
+        depends_on:
+            - influxdb
+        container_name: coap-agent
+        restart: unless-stopped
+        networks:
+            - iot_net
+        ports:
+            - "5683:5683/udp"
+        environment:
+            - COAP_PORT=$COAP_AGENT_PORT
+            - INFLUXDB_HOST=$INFLUXDB_HOST
+            - INFLUXDB_PORT=$INFLUXDB_PORT
+            - INFLUXDB_ORG=$INFLUXDB_ORG
+            - INFLUXDB_BUCKET=$INFLUXDB_BUCKET
+            - INFLUXDB_TOKEN=$COAP_AGENT_INFLUXDB_TOKEN
+    telegram-bot:
+      image: "aleben/green-ferret_telegram_bot:1.0.1"
+      depends_on:
+          - mqttserver
+      container_name: telegram-bot
+      restart: unless-stopped
+      networks:
+          - iot_net
+      environment:
+            - MQTT_HOST=$MQTT_AGENT_HOST
+            - MQTT_PORT=$MQTT_AGENT_PORT
+            - MQTT_USERNAME=$MQTT_AGENT_USERNAME
+            - MQTT_PASSWORD=$MQTT_AGENT_PASSWORD
+            - MQTT_CLIENT_ID=$TELEGRAM_MQTT_CLIENT_ID
+            - TELEGRAM_API_TOKEN=$TELEGRAM_API_TOKEN
+            - TELEGRAM_MASTER_CHAT_ID=$TELEGRAM_MASTER_CHAT_ID
+    postgres-db:
+      image: postgres
+      container_name: postgres
+      restart: unless-stopped
+      networks:
+        - iot_net
+      environment:
+        - POSTGRES_DB=$POSTGRES_DB
+        - POSTGRES_USER=$POSTGRES_USER
+        - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      ports:
+        - 5432:5432
+    pg-adminer:
+      image: adminer
+      restart: unless-stopped
+      depends_on:
+        - postgres-db
+      networks:
+        - iot_net
+      ports:
+        - 4321:8080
+    gf-admin:
+      image: aleben/green-ferret_admin:1.1.1
+      restart: unless-stopped
+      depends_on:
+        - postgres-db
+      networks:
+        - iot_net
+      ports:
+        - 4322:3000
+      environment:
+        - POSTGRES_DB=$POSTGRES_DB
+        - POSTGRES_USER=$POSTGRES_USER
+        - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+        - POSTGRES_HOST=postgres
+    gf-frontend:
+      image: aleben/green-ferret_frontend:1.0.1
+      restart: unless-stopped
+      depends_on:
+        - influxdb
+      networks:
+        - iot_net
+      ports:
+        - 4323:3000
 
 volumes:
     mosquitto_data:
@@ -80,6 +198,8 @@ volumes:
     influxdb_data:
     influxdb_config:
     influxdb_backup:
+    grafana_data:
+    postgres_data:
 
 networks:
     iot_net:

@@ -23,3 +23,7 @@
 - aqi -> air_quality_index
 - tvo -> tvoc
 - eco -> eco2
+
+# Drop data
+
+influx delete --bucket Green-Ferret --start '1970-01-01T00:00:00Z' --stop '2023-12-10T00:00:00Z' --predicate 'source="http-agent"'

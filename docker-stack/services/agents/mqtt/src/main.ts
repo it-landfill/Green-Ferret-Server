@@ -1,9 +1,21 @@
 import mqtt from "mqtt";
 import {InfluxWriter} from "./InfluxWriter";
+import {
+	DeviceConfigAttributes,
+	dbConnect,
+	dbDeleteConfig,
+	dbDisconnect,
+	dbGetAllDelete,
+	dbGetAllEdited,
+	dbGetConfig,
+	dbInitialize,
+	dbSaveConfig,
+	isDeviceConfigAttributes
+} from "./Postgres";
 
 /**
  * MQTT Agent
- * This agent subscribes to the MQTT broker and forwards the messages to the
+ * This agent subscribes to the MQTT broker and forwards the messages to InfluxDB
  *
  * Environment variables:
  * - MQTT_HOST: MQTT broker host (default: localhost)
@@ -21,6 +33,14 @@ type MQTTConfig = {
 	password: string;
 	clientId: string;
 };
+
+// MQTT client
+let client: mqtt.MqttClient;
+
+// Refresh edited configs every 5 minutes
+const refreshEditedTimeout = 5 * 60 * 1000; // 5 minutes
+// Stop refreshing edited configs when the process is interrupted
+let stopRefresh: boolean = false;
 
 /**
  * Generate MQTTConfig from environment variables
@@ -80,69 +100,130 @@ function subscribeToTopics(client : mqtt.MqttClient, topics : string[]) {
 }
 
 /**
- * Parse the body of the message replacing known keys with their full name
- * @param body Message body
- * @returns InfluxWriter.DataType. Parsed message body
- */
-function parseBody(body : Buffer | string): InfluxWriter.DataType {
-	const keyTranslation: InfluxWriter.TagType = {
-		tem: "temperature",
-		hum: "humidity",
-		lat: "latitude",
-		lon: "longitude",
-		pre: "pressure",
-		aqi: "air_quality_index",
-		tvo: "total_volatile_organic_compounds",
-		eco: "equivalent_co2"
-	};
-	// Parse the body. If it's a Buffer, convert it to a string first
-	const parsed = JSON.parse(
-		typeof body == "string"
-			? body
-			: body.toString()
-	);
-
-	let data: InfluxWriter.DataType = {};
-	for (const key in parsed) {
-		if (key in keyTranslation) {
-			data[keyTranslation[key]] = parsed[key];
-		} else {
-			data[key] = parsed[key];
-		}
-	}
-
-	return data;
-}
-
-/**
  * Handle incoming messages
  * @param topic Topic the message was received on
  * @param message Message payload
  */
-function messageHandler(topic : string, message : Buffer) {
+async function messageHandler(topic : string, message : Buffer) {
 	// message is Buffer
 	const msg = message.toString();
 	console.debug(`Received message on topic ${topic}: ${msg}`);
 	const split = topic.split("/");
-	if (split.length != 2) {
-		console.error(`Invalid topic ${topic}`);
+
+	if (split.length > 0) {
+		// Check if this is a config message
+		if (split[0] == "CFG") {
+			// Config messages always have the format CFG/<sensorId>/<request>
+			if (split.length != 3) {
+				console.error(`Invalid topic ${topic}`);
+				return;
+			}
+
+			const sensorId = split[1];
+			const request = split[2];
+
+			switch (request) {
+				case "new":
+					// This is a new config request, send the current config or generate a new one
+
+					// Get the current config from the database, if there is one.
+					// Special case: if the config is flag for deletion, generate a new one
+					let cfg = await dbGetConfig(sensorId);
+					// If there is no config, generate a new one with default values
+					if (cfg === undefined) {
+						cfg = {
+							protocol: 1, // MQTT
+							trigger: 1, // Time
+							distanceMethod: 0,
+							distance: 0,
+							time: 30 // 30 seconds
+						};
+					}
+
+					// Publish the config to the device
+					client.publish(`CFG/${sensorId}/Config`, JSON.stringify(cfg), {retain: true});
+					break;
+				case "Config":
+					// This is a config, we need to save this
+					console.log("Received config: " + msg);
+					try {
+						// Convert the message to an object
+						const parsed = JSON.parse(msg);
+						// Check if the object is a DeviceConfigAttributes object
+						if (isDeviceConfigAttributes(parsed)) {
+							// If it is, save it to the database
+							await dbSaveConfig(sensorId, parsed);
+						} else {
+							// If it isn't, log an error
+							console.error("Invalid config received");
+						}
+					} catch (e) {
+						console.error("Invalid config received");
+					}
+					break;
+			}
+		} else {
+			// This is a sensor message. Sensor messages always have the format <root>/<sensorId>, where root is the category of the sensor (usually
+			// mobile-sensors)
+			if (split.length != 2) {
+				console.error(`Invalid topic ${topic}`);
+				return;
+			}
+
+			const root = split[0];
+			const sensorId = split[1];
+
+			// Write the data to InfluxDB
+			InfluxWriter.writeData(InfluxWriter.parseBody(msg), {
+				source: "mqtt-agent",
+				sensorId: sensorId
+			}, root);
+		}
+	}
+}
+
+/**
+ * Refresh edited configs periodically
+ */
+async function refreshEdited() {
+	// if stopRefresh is true, stop refreshing
+	if (stopRefresh) 
 		return;
+	
+	// ---- Refresh edited configs ---- Get all edited configs from the database (edited configs are configs that have been changed by the admin, see
+	// Green-Ferret-Admin) only if the refresh is not stopped
+	const edited = await dbGetAllEdited();
+	if (edited) {
+		// If there are edited configs, publish them to the devices
+		console.log("Refreshing edited configs");
+		edited.forEach((cfg) => {
+			client.publish(`CFG/${cfg.deviceID}/Config`, JSON.stringify({
+				...cfg.dataValues,
+				deviceID: undefined
+			}), {retain: true});
+		});
 	}
 
-	const root = split[0];
-	const sensorId = split[1];
+	// ---- Delete deleted configs ----
+	const deleted = await dbGetAllDelete();
+	if (deleted) {
+		// If there are deleted configs, publish them to the devices
+		console.log("Deleting deleted configs");
+		deleted.forEach((cfg) => {
+			client.publish(`CFG/${cfg.deviceID}/Config`, "", {retain: true});
+			dbDeleteConfig(cfg.deviceID);
+		});
+	}
 
-	// Write the data to InfluxDB
-	InfluxWriter.writeData(parseBody(msg), {
-		source: "mqtt-agent",
-		sensorId: sensorId
-	}, root);
-}
+	// Refresh again after the timeout has passed
+	if (!stopRefresh) 
+		setTimeout(refreshEdited, refreshEditedTimeout);
+	}
 
 /**
  * Main function
  */
-function main() {
+async function main() {
 	// Initialize InfluxDB writer
 	if (!process.env.INFLUXDB_TOKEN) {
 		console.error("INFLUXDB_TOKEN not set");
@@ -152,23 +233,37 @@ function main() {
 	// Initialize InfluxDB writer
 	InfluxWriter.initializeClient(process.env.INFLUXDB_TOKEN);
 
+	// Initialize postgres
+	dbInitialize();
+	await dbConnect();
+
 	// Initialize MQTT client and config
 	const config = generateConfig();
-	const client = initializeClient(config);
+	client = initializeClient(config);
 
 	// Subscribe to topics when the client connects
 	client.on("connect", function () {
 		console.log("Connected to MQTT broker");
-		subscribeToTopics(client, ["mobile-sensors/#"]);
+		subscribeToTopics(client, ["mobile-sensors/#", "CFG/#"]);
 	});
 
 	// Handle incoming messages
 	client.on("message", messageHandler);
 
+	// Refresh edited configs
+	if (!stopRefresh) 
+		refreshEdited();
+	
 	// Handle interrupt signal
-	process.on("SIGINT", function () {
+	process.on("SIGINT", async function () {
 		console.log("Caught interrupt signal");
+		stopRefresh = true;
+		console.log("Closing mqtt client");
 		client.end();
+		console.log("Disconnecting from database");
+		await dbDisconnect();
+		console.log("Exiting");
+		process.exit();
 	});
 }
 
