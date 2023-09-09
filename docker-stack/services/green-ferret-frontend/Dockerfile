@@ -35,4 +35,4 @@ CMD ["npx", "serve", "-s", "build"]
 
 # Enable containerd in experimental features (https://docs.docker.com/desktop/containerd/)
 # Build multi platform image
-# docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_frontend:latest --tag aleben/green-ferret_frontend:1.0 .
+# docker buildx build --push --platform linux/arm64,linux/amd64 --tag aleben/green-ferret_frontend:latest --tag aleben/green-ferret_frontend:1.0.1 .

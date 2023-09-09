@@ -182,7 +182,7 @@ services:
         - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
         - POSTGRES_HOST=postgres
     gf-frontend:
-      image: aleben/green-ferret_frontend:1.0
+      image: aleben/green-ferret_frontend:1.0.1
       restart: unless-stopped
       depends_on:
         - influxdb
